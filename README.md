@@ -54,4 +54,4 @@ npm run build    # production build (all pages are prerendered)
 
 ## Deploy
 
-See [`docs/PANDUAN-DEPLOY.md`](docs/PANDUAN-DEPLOY.md) for the step-by-step guide (in Indonesian). In short: push to GitHub, then import the repository in Vercel from your personal account.
+Push to GitHub, then import the repository in Vercel from your personal account.

@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# personal notes and AI-agent files: they stay on disk, just not in git
+/docs/
+/AGENTS.md
+/CLAUDE.md
+/.claude/
