@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+/* Design tokens. Navy + serif headings match the CV and the PDF portfolio. */
+:root {
+  --bg: #ffffff;
+  --fg: #18202f;
+  --muted: #5b6474;
+  --line: #e2e7ef;
+  --card: #f6f8fc;
+  --brand: #001f5f;          /* text/icons in brand colour */
+  --brand-solid: #001f5f;    /* solid surfaces with white text */
+  --brand-soft: #e9eef8;     /* tinted chips and highlights */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b1020;
+    --fg: #e6eaf2;
+    --muted: #9aa4b8;
+    --line: #222c44;
+    --card: #111831;
+    --brand: #a9c1ff;
+    --brand-solid: #1b3a8a;
+    --brand-soft: #18244a;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-card: var(--card);
+  --color-brand: var(--brand);
+  --color-brand-solid: var(--brand-solid);
+  --color-brand-soft: var(--brand-soft);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-source-serif), ui-serif, Georgia, serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+}
+
+::selection {
+  background: var(--brand-soft);
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
