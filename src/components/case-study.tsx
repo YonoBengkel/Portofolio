@@ -6,15 +6,22 @@ import { Rich } from "./rich";
 // Case-study building blocks. Every block is a direct child of .article-grid, so it can
 // choose its width: the 42rem text column (default) or the 64rem "wide" column.
 
+/** Each picture links to its original file, so it can be opened at full size without any script. */
 function Img({ figure, preload = false }: { figure: Figure; preload?: boolean }) {
   return (
-    <Image
-      src={figure.src}
-      alt={figure.alt}
-      preload={preload}
-      sizes={figure.narrow ? "(min-width: 640px) 28rem, 100vw" : "(min-width: 1080px) 1024px, 100vw"}
-      className={`h-auto w-full rounded-[10px] border border-rule bg-paper ${figure.narrow ? "mx-auto max-w-[28rem]" : ""}`}
-    />
+    <a
+      href={figure.src.src}
+      className={`block cursor-zoom-in rounded-[10px] ${figure.narrow ? "mx-auto max-w-[28rem]" : ""}`}
+    >
+      <Image
+        src={figure.src}
+        alt={figure.alt}
+        preload={preload}
+        sizes={figure.narrow ? "(min-width: 640px) 28rem, 100vw" : "(min-width: 1080px) 1024px, 100vw"}
+        className="h-auto w-full rounded-[10px] border border-rule bg-paper"
+      />
+      <span className="sr-only"> (opens the full-size image)</span>
+    </a>
   );
 }
 
