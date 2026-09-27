@@ -43,12 +43,12 @@ export const otherWork = [
   {
     title: "Retail BI for a multi-branch minimart",
     body: "A sales dashboard tracking revenue, costs, profit, and margin by branch, fed by a star-schema warehouse.",
-    meta: "Individual · Data Visualization & Data Warehousing courses",
+    meta: "Individual, Data Visualization & Data Warehousing courses",
   },
   {
     title: "Data-quality engine",
     body: "Checks a dataset across six quality dimensions, watches for unusual changes in volume and structure, and repairs invalid records.",
-    meta: "Individual · Data Processing Workflow course",
+    meta: "Individual, Data Processing Workflow course",
     href: "https://github.com/YonoBengkel/Data-Quality",
   },
   {

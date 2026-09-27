@@ -38,8 +38,10 @@ export type Project = {
   role: string;
   tools: string[];
   links: { label: string; href: string }[];
+  /** The project's own colour: its home tile, the band at the top of its page, and the "next case study" link. */
+  color: { tile: string; ink: "light" | "dark" };
   cover: Figure;
-  /** Show a diagram instead of the cover image at the top of the case study (the cover still appears on the home card). */
+  /** Show a diagram instead of the cover image at the top of the case study and on the home tile. */
   heroDiagram?: { diagram: "pipeline" | "star-schema"; caption: string };
   sections: Section[];
 };
@@ -57,11 +59,12 @@ export const projects: Project[] = [
       "Inventory and purchasing for small food & beverage businesses, designed around their existing cashier app.",
     type: "Team",
     teamLabel: "Team of 4",
-    context: "Data Analytics Project course · supply-chain project",
+    context: "Data Analytics Project course, supply-chain project",
     period: "Sep 2026 – ongoing",
     role: "Our team had no fixed job split; I mainly worked on the logic: the rules that connect sales, stock, forecasts, orders, and goods receipt.",
     tools: ["React", "TypeScript", "Process flowcharts", "SWOT"],
     links: [{ label: "GitHub repository", href: "https://github.com/YonoBengkel/Warungku" }],
+    color: { tile: "#0C726C", ink: "light" }, // the teal of the Warungku app itself
     cover: {
       src: warungkuOwner,
       alt: "Warungku business-owner screens: daily to-do list, stock forecast with reasons, and goods receipt",
@@ -165,6 +168,7 @@ export const projects: Project[] = [
     role: "I designed the scoring approach and its underlying math, and wrote the first version of the app; a teammate later upgraded it.",
     tools: ["Python", "pandas", "Streamlit", "Plotly", "SAW & TOPSIS scoring"],
     links: [{ label: "Live app", href: "https://supplier-procurement-analysis.streamlit.app/" }],
+    color: { tile: "#F2CFC6", ink: "dark" }, // pink, like the purchase-order copy
     cover: {
       src: supplierActive,
       alt: "Supplier recommendation per product with criteria weights set in the sidebar",
@@ -219,11 +223,12 @@ export const projects: Project[] = [
     summary: "One trusted view of sales from two systems that did not agree with each other.",
     type: "Individual",
     teamLabel: "Individual",
-    context: "Data Warehousing course · final project",
+    context: "Data Warehousing course, final project",
     period: "Jun 2026",
     role: "Designed and built the whole pipeline on my own, from raw files to data marts.",
     tools: ["Python", "pandas", "SQL", "SQLite", "Apache Airflow", "Docker"],
     links: [{ label: "GitHub repository", href: "https://github.com/YonoBengkel/Medallion" }],
+    color: { tile: "#E8B94A", ink: "dark" }, // the gold layer of the medallion pipeline
     cover: {
       src: dwTopProducts,
       alt: "Bar chart of the top five product subcategories by profit",
@@ -283,11 +288,12 @@ export const projects: Project[] = [
     summary: "Warning plant operators about impure output before it reaches the lab, with advice on what to adjust.",
     type: "Individual",
     teamLabel: "Individual",
-    context: "Recommender Systems course · final project",
+    context: "Recommender Systems course, final project",
     period: "Jun 2026",
     role: "Built it end to end on my own: data preparation, model, advice rules, API, and dashboard.",
     tools: ["Python", "scikit-learn", "FastAPI", "React"],
     links: [{ label: "GitHub repository", href: "https://github.com/YonoBengkel/Tambang" }],
+    color: { tile: "#7A2E25", ink: "light" }, // hematite, the iron ore itself
     cover: {
       src: ewsEvaluation,
       alt: "Dashboard flags a likely high-silica batch and recommends an action for the operator",

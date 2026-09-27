@@ -1,114 +1,150 @@
 import Image from "next/image";
-import type { ReactNode } from "react";
 import type { Figure, Project, Section } from "@/content/projects";
 import { PipelineDiagram, StarSchemaDiagram } from "./diagrams";
-import { ExternalIcon } from "./icons";
 import { Rich } from "./rich";
 
-function Heading({ children }: { children: ReactNode }) {
-  return <h2 className="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-brand">{children}</h2>;
+// Case-study building blocks. Every block is a direct child of .article-grid, so it can
+// choose its width: the 42rem text column (default) or the 64rem "wide" column.
+
+function Img({ figure, preload = false }: { figure: Figure; preload?: boolean }) {
+  return (
+    <Image
+      src={figure.src}
+      alt={figure.alt}
+      preload={preload}
+      sizes={figure.narrow ? "(min-width: 640px) 28rem, 100vw" : "(min-width: 1080px) 1024px, 100vw"}
+      className={`h-auto w-full rounded-[10px] border border-rule bg-paper ${figure.narrow ? "mx-auto max-w-[28rem]" : ""}`}
+    />
+  );
 }
 
-export function FigureBlock({ figure, preload = false }: { figure: Figure; preload?: boolean }) {
+/** On phones the wide pipeline keeps a readable size and scrolls sideways. */
+function Diagram({ kind }: { kind: "pipeline" | "star-schema" }) {
+  if (kind === "star-schema") return <StarSchemaDiagram />;
   return (
-    <figure className={figure.narrow ? "mx-auto max-w-md" : undefined}>
-      <Image
-        src={figure.src}
-        alt={figure.alt}
-        preload={preload}
-        sizes="(min-width: 1024px) 1100px, 100vw"
-        className="h-auto w-full rounded-xl border border-line bg-card"
-      />
-      <figcaption className="mt-2 text-sm text-muted">{figure.caption}</figcaption>
+    <div className="-mx-5 overflow-x-auto px-5 sm:mx-0 sm:px-0">
+      <div className="min-w-[34rem]">
+        <PipelineDiagram />
+      </div>
+    </div>
+  );
+}
+
+function Caption({ children }: { children: string }) {
+  return <figcaption className="mt-4 text-[0.95rem] leading-relaxed text-graphite">{children}</figcaption>;
+}
+
+/** The first picture on the page. It overlaps the bottom of the coloured band. */
+export function CoverFigure({ project }: { project: Project }) {
+  if (project.heroDiagram) {
+    return (
+      <figure className="wide panel relative z-10 -mt-[clamp(5rem,12vw,9rem)] p-5 sm:p-10">
+        <Diagram kind={project.heroDiagram.diagram} />
+        <Caption>{project.heroDiagram.caption}</Caption>
+      </figure>
+    );
+  }
+  return (
+    <figure className="wide relative z-10 -mt-[clamp(5rem,12vw,9rem)]">
+      <Img figure={project.cover} preload />
+      <Caption>{project.cover.caption}</Caption>
     </figure>
   );
 }
 
-export function DiagramFigure({ diagram, caption }: { diagram: "pipeline" | "star-schema"; caption: string }) {
-  return (
-    <figure className="rounded-xl border border-line bg-bg p-4 sm:p-6">
-      {diagram === "pipeline" ? <PipelineDiagram /> : <StarSchemaDiagram />}
-      <figcaption className="mt-3 text-sm text-muted">{caption}</figcaption>
-    </figure>
-  );
-}
-
-function SectionBlock({ section }: { section: Section }) {
+function SectionBlocks({ section }: { section: Section }) {
   switch (section.kind) {
     case "text":
       return (
-        <section>
-          <Heading>{section.heading}</Heading>
-          <div className="space-y-3 leading-relaxed">
-            {section.body.map((p) => (
-              <p key={p}>
-                <Rich text={p} />
-              </p>
-            ))}
-          </div>
-        </section>
+        <>
+          <h2>{section.heading}</h2>
+          {section.body.map((p) => (
+            <p key={p} className="mt-4">
+              <Rich text={p} />
+            </p>
+          ))}
+        </>
       );
     case "steps":
       return (
-        <section>
-          <Heading>{section.heading}</Heading>
-          <ol className="space-y-3">
+        <>
+          <h2>{section.heading}</h2>
+          <ol className="mt-2 space-y-3">
             {section.items.map((item, i) => (
-              <li key={item} className="flex gap-4">
-                <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-soft text-sm font-bold text-brand">
-                  {i + 1}
-                </span>
-                <span className="leading-relaxed">
-                  <Rich text={item} />
-                </span>
-              </li>
-            ))}
-          </ol>
-        </section>
-      );
-    case "list":
-      return (
-        <section>
-          <Heading>{section.heading}</Heading>
-          <ul className="space-y-2.5">
-            {section.items.map((item) => (
-              <li key={item} className="flex gap-3 leading-relaxed">
-                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand" aria-hidden />
+              <li key={item} className="grid grid-cols-[2rem_minmax(0,1fr)] gap-2">
+                <span className="font-extrabold tabular-nums">{i + 1}</span>
                 <span>
                   <Rich text={item} />
                 </span>
               </li>
             ))}
+          </ol>
+        </>
+      );
+    case "list":
+      return (
+        <>
+          <h2>{section.heading}</h2>
+          <ul className="mt-2 list-disc space-y-3 pl-6 marker:text-graphite">
+            {section.items.map((item) => (
+              <li key={item} className="pl-1">
+                <Rich text={item} />
+              </li>
+            ))}
           </ul>
-        </section>
+        </>
       );
     case "decisions":
       return (
-        <section>
-          <Heading>{section.heading}</Heading>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {section.items.map((d) => (
-              <div key={d.title} className="rounded-xl border border-line border-l-4 border-l-brand bg-card p-4">
-                <p className="font-semibold text-brand">{d.title}</p>
-                <p className="mt-1 text-[0.95rem] leading-relaxed text-muted">{d.body}</p>
-              </div>
-            ))}
+        <>
+          <h2>{section.heading}</h2>
+          <div className="mt-6 overflow-x-auto">
+            <table className="w-full border-collapse text-left text-[1.05rem] leading-relaxed">
+              <thead>
+                <tr className="border-b-2 border-ink">
+                  <th scope="col" className="w-[38%] py-3 pr-6 text-[0.95rem] font-bold">
+                    Decision
+                  </th>
+                  <th scope="col" className="py-3 text-[0.95rem] font-bold">
+                    Why
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {section.items.map((d) => (
+                  <tr key={d.title} className="border-b border-rule align-top">
+                    <th scope="row" className="py-4 pr-6 font-bold">
+                      {d.title}
+                    </th>
+                    <td className="py-4 text-graphite">{d.body}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </section>
+        </>
       );
     case "figures":
       return (
-        <div className={`grid gap-6 ${section.columns === 2 ? "sm:grid-cols-2" : ""}`}>
+        <div className={`wide panel mt-12 grid gap-8 p-5 sm:p-10 ${section.columns === 2 ? "sm:grid-cols-2" : ""}`}>
           {section.figures.map((f) => (
-            <FigureBlock key={f.alt} figure={f} />
+            <figure key={f.alt}>
+              <Img figure={f} />
+              <Caption>{f.caption}</Caption>
+            </figure>
           ))}
         </div>
       );
     case "diagram":
-      return <DiagramFigure diagram={section.diagram} caption={section.caption} />;
+      return (
+        <figure className="wide panel mt-12 p-5 sm:p-10">
+          <Diagram kind={section.diagram} />
+          <Caption>{section.caption}</Caption>
+        </figure>
+      );
     case "note":
       return (
-        <p className="text-sm text-muted">
+        <p className="mt-12 border-t border-rule pt-5 text-[0.95rem] text-graphite">
           <Rich text={section.body} />
         </p>
       );
@@ -117,53 +153,49 @@ function SectionBlock({ section }: { section: Section }) {
 
 export function CaseStudyBody({ project }: { project: Project }) {
   return (
-    <div className="space-y-10">
+    <>
       {project.sections.map((s, i) => (
-        <SectionBlock key={i} section={s} />
+        <SectionBlocks key={i} section={s} />
       ))}
-    </div>
+    </>
   );
 }
 
+/** Role, team, timeline and the rest, shown in the coloured band at the top of the page. */
 export function ProjectFacts({ project }: { project: Project }) {
   const facts = [
-    { label: "Type", value: project.teamLabel },
-    { label: "Context", value: project.context },
-    { label: "Timeline", value: project.period },
-    { label: "My role", value: project.role },
+    { label: "Project type", value: project.teamLabel, long: false },
+    { label: "Timeline", value: project.period, long: false },
+    { label: "Context", value: project.context, long: true },
+    { label: "Field", value: project.category, long: true },
   ];
   return (
-    <aside className="rounded-xl border border-line bg-card p-6 lg:sticky lg:top-24">
-      <h2 className="mb-4 text-xs font-bold uppercase tracking-[0.14em] text-brand">Project facts</h2>
-      <dl className="space-y-4 text-[0.95rem]">
+    <div className="mx-auto mt-14 max-w-[64rem] text-left">
+      <dl className="grid grid-cols-2 gap-x-6 gap-y-6 sm:gap-x-10 lg:grid-cols-4">
+        <div className="col-span-2 lg:col-span-4">
+          <dt className="text-[0.95rem] font-bold">My role</dt>
+          <dd className="mt-1 max-w-[48rem] text-lg leading-relaxed sm:text-xl">{project.role}</dd>
+        </div>
         {facts.map((f) => (
-          <div key={f.label}>
-            <dt className="text-xs font-semibold uppercase tracking-wider text-muted">{f.label}</dt>
-            <dd className="mt-1 leading-relaxed">{f.value}</dd>
+          <div key={f.label} className={f.long ? "col-span-2 sm:col-span-1" : undefined}>
+            <dt className="text-[0.95rem] font-bold">{f.label}</dt>
+            <dd className="mt-1 leading-snug">{f.value}</dd>
           </div>
         ))}
-        <div>
-          <dt className="text-xs font-semibold uppercase tracking-wider text-muted">Tools</dt>
-          <dd className="mt-2 flex flex-wrap gap-1.5">
-            {project.tools.map((t) => (
-              <span key={t} className="rounded-full border border-line bg-bg px-2.5 py-0.5 text-sm">
-                {t}
-              </span>
-            ))}
-          </dd>
+        <div className="col-span-2 lg:col-span-4">
+          <dt className="text-[0.95rem] font-bold">Tools</dt>
+          <dd className="mt-1 leading-snug">{project.tools.join(", ")}</dd>
         </div>
       </dl>
-      <div className="mt-6 flex flex-col gap-2">
-        {project.links.map((l) => (
-          <a
-            key={l.href}
-            href={l.href}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-solid px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-          >
-            {l.label} <ExternalIcon width={16} height={16} />
-          </a>
-        ))}
-      </div>
-    </aside>
+      {project.links.length > 0 && (
+        <div className="mt-10 flex flex-wrap gap-3">
+          {project.links.map((l) => (
+            <a key={l.href} href={l.href} className="btn btn-tile">
+              {l.label}
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

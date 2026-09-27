@@ -1,44 +1,30 @@
 import Link from "next/link";
 import { profile } from "@/content/site";
-import { GitHubIcon, LinkedInIcon } from "./icons";
 
 const nav = [
-  { href: "/#work", label: "Work" },
+  { href: "/#work", label: "Case studies" },
   { href: "/#experience", label: "Experience" },
   { href: "/#contact", label: "Contact" },
 ];
 
+// Sits on top of each page's first band, so it has no background of its own.
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-bg/85 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5 sm:px-8">
-        <Link href="/" className="font-serif text-lg font-semibold tracking-tight text-brand">
+    <header className="site-header absolute inset-x-0 top-0 z-30">
+      <div className="frame flex flex-col gap-2 pt-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:pt-7">
+        <Link href="/" className="w-fit text-[0.95rem] font-extrabold tracking-[-0.01em]">
           {profile.name}
         </Link>
-        <nav aria-label="Main" className="flex items-center gap-1 text-sm sm:gap-2">
-          {nav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="hidden rounded-md px-3 py-2 text-muted transition-colors hover:bg-card hover:text-fg sm:inline-block"
-            >
-              {item.label}
-            </Link>
-          ))}
-          <a
-            href={profile.links.github}
-            className="rounded-md p-2 text-muted transition-colors hover:bg-card hover:text-fg"
-            aria-label="GitHub"
-          >
-            <GitHubIcon />
-          </a>
-          <a
-            href={profile.links.linkedin}
-            className="rounded-md p-2 text-muted transition-colors hover:bg-card hover:text-fg"
-            aria-label="LinkedIn"
-          >
-            <LinkedInIcon />
-          </a>
+        <nav aria-label="Main">
+          <ul className="flex flex-wrap gap-x-6 gap-y-1 text-[0.95rem] font-semibold">
+            {nav.map((item) => (
+              <li key={item.href}>
+                <Link href={item.href} className="link-quiet">
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </nav>
       </div>
     </header>

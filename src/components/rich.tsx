@@ -6,7 +6,7 @@ export function Rich({ text }: { text: string }) {
     <>
       {text.split("**").map((part, i) =>
         i % 2 === 1 ? (
-          <strong key={i} className="font-semibold text-fg">
+          <strong key={i} className="font-bold">
             {part}
           </strong>
         ) : (

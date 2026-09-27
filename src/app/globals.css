@@ -1,58 +1,332 @@
 @import "tailwindcss";
 
-/* Design tokens. Navy + serif headings match the CV and the PDF portfolio. */
+/*
+  Design tokens.
+  Five core colours (paper, mist, ink, graphite, rule) plus cobalt for the personal blocks.
+  Ink is the navy from the CV. Each case study also owns one colour (see src/content/projects.ts).
+*/
 :root {
-  --bg: #ffffff;
-  --fg: #18202f;
-  --muted: #5b6474;
-  --line: #e2e7ef;
-  --card: #f6f8fc;
-  --brand: #001f5f;          /* text/icons in brand colour */
-  --brand-solid: #001f5f;    /* solid surfaces with white text */
-  --brand-soft: #e9eef8;     /* tinted chips and highlights */
+  --paper: #ffffff;
+  --mist: #f3f5fa;
+  --ink: #001f5f;
+  --graphite: #4f5b73;
+  --rule: #dce2ec;
+  --cobalt: #2449c4;
+  --on-cobalt: #ffffff;
+  --route: #2449c4; /* hero drawing */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0b1020;
-    --fg: #e6eaf2;
-    --muted: #9aa4b8;
-    --line: #222c44;
-    --card: #111831;
-    --brand: #a9c1ff;
-    --brand-solid: #1b3a8a;
-    --brand-soft: #18244a;
+    --paper: #0a0f1e;
+    --mist: #111a31;
+    --ink: #e6ecf8;
+    --graphite: #a3aec4;
+    --rule: #26314d;
+    --cobalt: #2449c4;
+    --on-cobalt: #ffffff;
+    --route: #8ea6f0;
   }
 }
 
 @theme inline {
-  --color-bg: var(--bg);
-  --color-fg: var(--fg);
-  --color-muted: var(--muted);
-  --color-line: var(--line);
-  --color-card: var(--card);
-  --color-brand: var(--brand);
-  --color-brand-solid: var(--brand-solid);
-  --color-brand-soft: var(--brand-soft);
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-source-serif), ui-serif, Georgia, serif;
+  --color-paper: var(--paper);
+  --color-mist: var(--mist);
+  --color-ink: var(--ink);
+  --color-graphite: var(--graphite);
+  --color-rule: var(--rule);
+  --color-cobalt: var(--cobalt);
+  --color-on-cobalt: var(--on-cobalt);
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
 }
 
-html {
-  scroll-behavior: smooth;
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  ::selection {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  /* Focus ring in ink on the page; inside coloured blocks it takes the block's text colour. */
+  :focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: 3px;
+  }
+  .tile :focus-visible,
+  .bg-cobalt :focus-visible {
+    outline-color: currentColor;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p,
+  li,
+  dd {
+    text-wrap: pretty;
+  }
 }
 
-body {
-  background: var(--bg);
-  color: var(--fg);
-}
+@layer components {
+  /* Page frame: 16px gutters on phones, 40px on desktop, capped at 1440px. */
+  .frame {
+    width: 100%;
+    max-width: 1440px;
+    margin-inline: auto;
+    padding-inline: 16px;
+  }
+  @media (min-width: 640px) {
+    .frame {
+      padding-inline: 24px;
+    }
+  }
+  @media (min-width: 1024px) {
+    .frame {
+      padding-inline: 40px;
+    }
+  }
 
-::selection {
-  background: var(--brand-soft);
-}
+  /* Header sits on top of the first band of every page; case-study bands set its colour. */
+  .site-header {
+    color: var(--header-ink, var(--ink));
+  }
+  body:has([data-band-ink="light"]) {
+    --header-ink: #ffffff;
+  }
+  body:has([data-band-ink="dark"]) {
+    --header-ink: #001f5f;
+  }
 
-:focus-visible {
-  outline: 2px solid var(--brand);
-  outline-offset: 3px;
-  border-radius: 4px;
+  /* Giant section words ending with a full stop. They bite into the block below. */
+  .big-word {
+    position: relative;
+    z-index: 1;
+    font-size: clamp(3.25rem, 12vw, 10.5rem);
+    font-weight: 800;
+    line-height: 0.82;
+    letter-spacing: -0.045em;
+    margin-bottom: -0.1em;
+  }
+  .big-word .stop {
+    margin-left: -0.04em;
+  }
+
+  /* Hero drawing: process box, data store, decision, joined by one route. */
+  .hero-art {
+    container-type: inline-size;
+    position: relative;
+    aspect-ratio: 1100 / 530;
+    width: min(100%, 1100px, calc((100svh - 360px) * 2.075));
+    min-width: min(100%, 320px);
+    margin-inline: auto;
+  }
+  .hero-name {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    font-size: max(1.9rem, 8.2cqi);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.035em;
+  }
+  .hero-name span {
+    position: absolute;
+    white-space: nowrap;
+  }
+  .hero-name .w1 {
+    left: -1%;
+    top: 17%;
+  }
+  .hero-name .w2 {
+    left: 50%;
+    top: 45%;
+    translate: -50% 0;
+  }
+  .hero-name .w3 {
+    right: -1%;
+    top: 73%;
+  }
+  .route {
+    fill: none;
+    stroke: var(--route);
+    stroke-width: 1.35;
+    stroke-linejoin: round;
+  }
+
+  /* Case-study mosaic: solid colour fields, no gaps, no shadows. */
+  .mosaic {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  @media (min-width: 900px) {
+    .mosaic {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .mosaic .tile-wide {
+      grid-column: span 2;
+    }
+  }
+  .tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+    background: var(--tile);
+    color: var(--on-tile);
+    text-align: center;
+  }
+  .tile:has(.tile-link:focus-visible),
+  .tile:focus-visible {
+    outline: 3px solid var(--on-tile);
+    outline-offset: -12px;
+  }
+  .tile-link {
+    text-decoration-line: underline;
+    text-decoration-color: transparent;
+    text-decoration-thickness: 0.08em;
+    text-underline-offset: 0.14em;
+    transition: text-decoration-color 150ms ease;
+  }
+  .tile-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+  }
+  .tile-link:focus-visible {
+    outline: none;
+  }
+  .tile:hover .tile-link,
+  .tile-link:focus-visible {
+    text-decoration-color: currentColor;
+  }
+
+  /* Quiet text links. */
+  .link {
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+    text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+    transition: text-decoration-color 150ms ease;
+  }
+  .link:hover {
+    text-decoration-color: currentColor;
+  }
+  .link-quiet {
+    text-decoration-line: underline;
+    text-decoration-thickness: 0.08em;
+    text-underline-offset: 0.2em;
+    text-decoration-color: transparent;
+    transition: text-decoration-color 150ms ease;
+  }
+  .link-quiet:hover {
+    text-decoration-color: currentColor;
+  }
+
+  /* Buttons: square, solid or outlined, same size. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 48px;
+    padding: 0.75rem 1.35rem;
+    font-weight: 700;
+    border: 2px solid currentColor;
+    transition:
+      background-color 150ms ease,
+      color 150ms ease;
+  }
+  .btn-solid {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+  .btn-solid:hover {
+    background: transparent;
+    color: var(--ink);
+  }
+  .btn-line:hover {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+
+  /* Case-study column layout: text 42rem, wide 64rem. */
+  .article-grid {
+    display: grid;
+    grid-template-columns:
+      [full-start] minmax(16px, 1fr)
+      [wide-start] minmax(0, 11rem)
+      [text-start] min(42rem, calc(100% - 32px))
+      [text-end] minmax(0, 11rem)
+      [wide-end] minmax(16px, 1fr)
+      [full-end];
+  }
+  .article-grid > * {
+    grid-column: text;
+  }
+  .article-grid > .wide {
+    grid-column: wide;
+  }
+
+  .prose-body {
+    font-size: 1.125rem;
+    line-height: 1.8;
+  }
+  .prose-body h2 {
+    margin-top: 4.5rem;
+    margin-bottom: 1rem;
+    font-size: clamp(1.6rem, 3.4vw, 2.1rem);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .panel {
+    background: var(--mist);
+    border-radius: 18px;
+  }
+
+  /* Diagram colours: page defaults, then the version drawn on a project tile. */
+  .diagram {
+    --dg-ink: var(--ink);
+    --dg-muted: var(--graphite);
+    --dg-box: var(--paper);
+    --dg-line: var(--ink);
+    --dg-solid: var(--ink);
+    --dg-on-solid: var(--paper);
+  }
+  .diagram-on-tile .diagram {
+    --dg-ink: var(--on-tile);
+    --dg-muted: var(--on-tile);
+    --dg-box: color-mix(in srgb, var(--tile) 70%, #ffffff);
+    --dg-line: var(--on-tile);
+    --dg-solid: var(--on-tile);
+    --dg-on-solid: var(--tile);
+  }
+
+  /* Outlined button in a project's own colours (case-study band). */
+  .btn-tile:hover {
+    background: var(--on-tile);
+    border-color: var(--on-tile);
+    color: var(--tile);
+  }
 }
