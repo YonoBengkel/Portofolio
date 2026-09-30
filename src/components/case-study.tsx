@@ -197,7 +197,7 @@ export function ProjectFacts({ project }: { project: Project }) {
       {project.links.length > 0 && (
         <div className="mt-10 flex flex-wrap gap-3">
           {project.links.map((l) => (
-            <a key={l.href} href={l.href} className="btn btn-tile">
+            <a key={l.href} href={l.href} target="_blank" rel="noopener noreferrer" className="btn btn-tile">
               {l.label}
             </a>
           ))}

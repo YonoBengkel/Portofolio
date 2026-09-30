@@ -38,7 +38,7 @@ export default function Home() {
               <li key={w.title} className="border-t-2 border-ink pt-5">
                 <h4 className="text-lg font-bold leading-snug">
                   {w.href ? (
-                    <a href={w.href} className="link">
+                    <a href={w.href} target="_blank" rel="noopener noreferrer" className="link">
                       {w.title}
                     </a>
                   ) : (
@@ -133,12 +133,12 @@ export default function Home() {
             <p className="mt-4 max-w-[34rem] leading-relaxed">{profile.intro}</p>
             <ul className="mt-10 flex flex-wrap gap-x-7 gap-y-2 font-bold">
               <li>
-                <a href={profile.links.linkedin} className="link">
+                <a href={profile.links.linkedin} target="_blank" rel="noopener noreferrer" className="link">
                   LinkedIn
                 </a>
               </li>
               <li>
-                <a href={profile.links.github} className="link">
+                <a href={profile.links.github} target="_blank" rel="noopener noreferrer" className="link">
                   GitHub
                 </a>
               </li>
