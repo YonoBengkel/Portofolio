@@ -7,11 +7,11 @@ export const alt = `${profile.name}: business process, data, and applied AI`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-// next/og cannot read the site's woff2 fonts, so it gets two small static TTF instances
-// of Plus Jakarta Sans (licence in src/assets/fonts/OFL.txt).
+// next/og cannot read the site's woff2 files, so it gets static TTF copies of the same
+// two faces the site uses (licences in src/assets/fonts/OFL.txt).
 const fontDir = join(process.cwd(), "src/assets/fonts");
-const extraBold = await readFile(join(fontDir, "PlusJakartaSans-ExtraBold.ttf"));
-const medium = await readFile(join(fontDir, "PlusJakartaSans-Medium.ttf"));
+const serif = await readFile(join(fontDir, "InstrumentSerif-Regular.ttf"));
+const sans = await readFile(join(fontDir, "Archivo-Regular.ttf"));
 
 // The hero drawing (process box, data store, decision). The decision carries the one accent.
 const ROUTE = [
@@ -32,10 +32,11 @@ export default function OpengraphImage() {
   const nameSize = Math.round(width * 0.082);
   const word = {
     position: "absolute",
+    fontFamily: "Instrument Serif",
     fontSize: nameSize,
-    fontWeight: 800,
+    fontWeight: 400,
     lineHeight: 1,
-    letterSpacing: -0.035 * nameSize,
+    letterSpacing: -0.02 * nameSize,
   } as const;
 
   return new ImageResponse(
@@ -49,7 +50,7 @@ export default function OpengraphImage() {
           alignItems: "center",
           background: colors.ground,
           color: colors.ink,
-          fontFamily: "Plus Jakarta Sans",
+          fontFamily: "Archivo",
         }}
       >
         <div style={{ position: "relative", display: "flex", width, height, marginTop: 30 }}>
@@ -83,7 +84,7 @@ export default function OpengraphImage() {
             maxWidth: 860,
             textAlign: "center",
             fontSize: 27,
-            fontWeight: 500,
+            fontWeight: 400,
             lineHeight: 1.4,
           }}
         >
@@ -94,8 +95,8 @@ export default function OpengraphImage() {
     {
       ...size,
       fonts: [
-        { name: "Plus Jakarta Sans", data: extraBold, weight: 800, style: "normal" },
-        { name: "Plus Jakarta Sans", data: medium, weight: 500, style: "normal" },
+        { name: "Instrument Serif", data: serif, weight: 400, style: "normal" },
+        { name: "Archivo", data: sans, weight: 400, style: "normal" },
       ],
     },
   );

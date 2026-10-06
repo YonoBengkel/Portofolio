@@ -37,7 +37,7 @@ export default function Home() {
             Each one starts from how a job is actually done, and ends in something a person can act on.
           </p>
         </div>
-        <div className="frame pb-10">
+        <div className="column-wide pb-10">
           <ProjectLedger
             items={projects.map((p) => ({
               slug: p.slug,

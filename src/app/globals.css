@@ -121,6 +121,30 @@
     }
   }
 
+  /*
+    Starts on the reading column's left edge and runs out to the page gutter, for
+    the one block that needs more width than the column allows.
+  */
+  .column-wide {
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: 20px;
+  }
+  @media (min-width: 768px) {
+    .column-wide {
+      width: min(100%, 44rem);
+      padding-inline: 24px;
+    }
+  }
+  @media (min-width: 1280px) {
+    .column-wide {
+      width: auto;
+      margin-left: calc((100% - min(52vw, 50rem)) / 2);
+      margin-right: 40px;
+      padding-inline: 0;
+    }
+  }
+
   /* Section rhythm: 96px on phones, 160px from tablet up. */
   .band {
     padding-block: 96px;
