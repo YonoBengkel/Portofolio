@@ -208,7 +208,7 @@
   .fog {
     position: fixed;
     inset: 0;
-    z-index: 40;
+    z-index: -1;
     pointer-events: none;
     background:
       linear-gradient(to bottom, var(--void) 0%, color-mix(in oklab, var(--void) 55%, transparent) 9%, transparent 20%),
@@ -541,6 +541,7 @@
     position: sticky;
     top: 0;
     z-index: 30;
+    min-width: 0; /* a grid item must be allowed to shrink before the rail can scroll */
     padding-block: 12px;
     background: linear-gradient(to bottom, var(--void) 70%, transparent);
   }
@@ -627,7 +628,7 @@
   }
 
   .status {
-    color: var(--brass);
+    color: var(--bone);
   }
 
   .cv-frame {
