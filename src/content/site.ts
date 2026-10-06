@@ -46,12 +46,6 @@ export const otherWork = [
     meta: "Individual, Data Visualization & Data Warehousing courses",
   },
   {
-    title: "Data-quality engine",
-    body: "Checks a dataset across six quality dimensions, watches for unusual changes in volume and structure, and repairs invalid records.",
-    meta: "Individual, Data Processing Workflow course",
-    href: "https://github.com/YonoBengkel/Data-Quality",
-  },
-  {
     title: "Data science competitions",
     body: "Regular participant in national-level data competitions, working in teams on real-world datasets.",
     meta: "Team",
