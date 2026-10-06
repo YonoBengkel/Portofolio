@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { CopyButton } from "@/components/copy-button";
 import { PageHeader } from "@/components/page-header";
 import { PageTransition } from "@/components/page-transition";
-import { openTo, profile } from "@/content/site";
+import { profile } from "@/content/site";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -19,7 +19,7 @@ export default function ContactPage() {
 
   return (
     <PageTransition>
-      <PageHeader title="Contact" lede={openTo} />
+      <PageHeader title="Contact" lede="Email is the fastest way to reach me. Everything else is here too." />
 
       <section className="lit">
         <div className="column pb-24">
