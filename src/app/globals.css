@@ -17,7 +17,7 @@
   Measured against --void: bone 13.3:1, brass 8.7:1, ash 6.6:1.
 */
 :root {
-  --void: #0a0c11; /* the page. nothing else is a page background */
+  --void: #06080c; /* the page: darker than the sampled frames, so a moving light can out-rank it */
   --soot: #121823; /* raised surfaces */
   --concrete: #242e3b; /* rules, borders, dividers */
   --ash: #8e97a6; /* secondary text */
@@ -154,8 +154,8 @@
     z-index: -1;
     pointer-events: none;
     background:
-      radial-gradient(55% 50% at 50% 42%, color-mix(in oklab, var(--bone) 8%, transparent), transparent 72%),
-      radial-gradient(95% 85% at 50% 50%, color-mix(in oklab, var(--bone) 3%, transparent), transparent 78%);
+      radial-gradient(55% 50% at 50% 42%, color-mix(in oklab, var(--bone) 5%, transparent), transparent 72%),
+      radial-gradient(95% 85% at 50% 50%, color-mix(in oklab, var(--bone) 2%, transparent), transparent 78%);
   }
 
   @supports (animation-timeline: view()) {
@@ -673,14 +673,17 @@
     position: fixed;
     left: 0;
     top: 0;
-    z-index: 39;
-    width: 520px;
-    height: 520px;
-    margin: -260px 0 0 -260px;
+    z-index: -1;
+    width: 760px;
+    height: 760px;
+    margin: -380px 0 0 -380px;
     pointer-events: none;
     opacity: 0;
     transition: opacity 500ms ease;
-    background: radial-gradient(circle, color-mix(in oklab, var(--bone) 7%, transparent), transparent 62%);
+    background:
+      radial-gradient(circle, color-mix(in oklab, var(--brass) 16%, transparent) 0%, transparent 18%),
+      radial-gradient(circle, color-mix(in oklab, var(--bone) 11%, transparent) 0%, transparent 34%),
+      radial-gradient(circle, color-mix(in oklab, var(--bone) 5%, transparent) 0%, transparent 58%);
   }
   .pointer-light[data-on="true"] {
     opacity: 1;
