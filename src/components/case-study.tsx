@@ -41,21 +41,23 @@ function Caption({ children }: { children: string }) {
   return <figcaption className="mt-4 text-[0.95rem] leading-relaxed text-ash">{children}</figcaption>;
 }
 
-/** The first picture on the page. It overlaps the bottom of the coloured band. */
+/** The first picture on the page, lit on its own. */
 export function CoverFigure({ project }: { project: Project }) {
-  if (project.heroDiagram) {
-    return (
-      <figure className="wide panel relative z-10 -mt-[clamp(5rem,12vw,9rem)] p-5 sm:p-10">
-        <Diagram kind={project.heroDiagram.diagram} />
-        <Caption>{project.heroDiagram.caption}</Caption>
-      </figure>
-    );
-  }
   return (
-    <figure className="wide relative z-10 -mt-[clamp(5rem,12vw,9rem)]">
-      <Img figure={project.cover} preload />
-      <Caption>{project.cover.caption}</Caption>
-    </figure>
+    <section className="lit">
+      <div className="frame pb-20">
+        <figure className="reveal mx-auto max-w-[62rem]">
+          {project.heroDiagram ? (
+            <div className="panel p-5 sm:p-10">
+              <Diagram kind={project.heroDiagram.diagram} />
+            </div>
+          ) : (
+            <Img figure={project.cover} preload />
+          )}
+          <Caption>{project.heroDiagram ? project.heroDiagram.caption : project.cover.caption}</Caption>
+        </figure>
+      </div>
+    </section>
   );
 }
 
@@ -105,7 +107,7 @@ function SectionBlocks({ section }: { section: Section }) {
       return (
         <>
           <h2>{section.heading}</h2>
-          <div className="mt-6 overflow-x-auto">
+          <div className="reveal mt-6 overflow-x-auto">
             <table className="w-full border-collapse text-left text-[1.05rem] leading-relaxed">
               <thead>
                 <tr className="border-b border-concrete">
@@ -133,7 +135,7 @@ function SectionBlocks({ section }: { section: Section }) {
       );
     case "figures":
       return (
-        <div className={`wide panel mt-12 grid gap-8 p-5 sm:p-10 ${section.columns === 2 ? "sm:grid-cols-2" : ""}`}>
+        <div className={`wide panel reveal mt-12 grid gap-8 p-5 sm:p-10 ${section.columns === 2 ? "sm:grid-cols-2" : ""}`}>
           {section.figures.map((f) => (
             <figure key={f.alt}>
               <Img figure={f} />
@@ -144,7 +146,7 @@ function SectionBlocks({ section }: { section: Section }) {
       );
     case "diagram":
       return (
-        <figure className="wide panel mt-12 p-5 sm:p-10">
+        <figure className="wide panel reveal mt-12 p-5 sm:p-10">
           <Diagram kind={section.diagram} />
           <Caption>{section.caption}</Caption>
         </figure>
@@ -168,41 +170,43 @@ export function CaseStudyBody({ project }: { project: Project }) {
   );
 }
 
-/** Role, team, timeline and the rest, shown in the coloured band at the top of the page. */
+/** Role, team, timeline and the rest: a quiet grid, read before the pictures start. */
 export function ProjectFacts({ project }: { project: Project }) {
   const facts = [
-    { label: "Project type", value: project.teamLabel, long: false },
-    { label: "Timeline", value: project.period, long: false },
-    { label: "Context", value: project.context, long: true },
-    { label: "Field", value: project.category, long: true },
+    { label: "Status", value: project.status },
+    { label: "Project type", value: project.teamLabel },
+    { label: "Timeline", value: project.period },
+    { label: "Context", value: project.context },
   ];
   return (
-    <div className="mx-auto mt-14 max-w-[64rem] text-left">
-      <dl className="grid grid-cols-2 gap-x-6 gap-y-6 sm:gap-x-10 lg:grid-cols-4">
-        <div className="col-span-2 lg:col-span-4">
-          <dt className="text-[0.95rem] font-bold">My role</dt>
-          <dd className="mt-1 max-w-[48rem] text-lg leading-relaxed sm:text-xl">{project.role}</dd>
-        </div>
-        {facts.map((f) => (
-          <div key={f.label} className={f.long ? "col-span-2 sm:col-span-1" : undefined}>
-            <dt className="text-[0.95rem] font-bold">{f.label}</dt>
-            <dd className="mt-1 leading-snug">{f.value}</dd>
+    <section aria-label="Project facts" className="lit">
+      <div className="column pb-16">
+        <dl className="grid gap-x-10 gap-y-6 sm:grid-cols-2">
+          <div className="recede-rule border-t border-concrete pt-4 sm:col-span-2">
+            <dt className="meta">My role</dt>
+            <dd className="mt-2 max-w-[34rem] leading-relaxed">{project.role}</dd>
           </div>
-        ))}
-        <div className="col-span-2 lg:col-span-4">
-          <dt className="text-[0.95rem] font-bold">Tools</dt>
-          <dd className="mt-1 leading-snug">{project.tools.join(", ")}</dd>
-        </div>
-      </dl>
-      {project.links.length > 0 && (
-        <div className="mt-10 flex flex-wrap gap-3">
-          {project.links.map((l) => (
-            <a key={l.href} href={l.href} target="_blank" rel="noopener noreferrer" className="btn btn-tile">
-              {l.label}
-            </a>
+          {facts.map((f) => (
+            <div key={f.label} className="recede-rule border-t border-concrete pt-4">
+              <dt className="meta">{f.label}</dt>
+              <dd className="mt-2 leading-snug">{f.value}</dd>
+            </div>
           ))}
-        </div>
-      )}
-    </div>
+          <div className="recede-rule border-t border-concrete pt-4 sm:col-span-2">
+            <dt className="meta">Tools</dt>
+            <dd className="mt-2 leading-snug text-ash">{project.tools.join(", ")}</dd>
+          </div>
+        </dl>
+        {project.links.length > 0 && (
+          <div className="mt-10 flex flex-wrap gap-3">
+            {project.links.map((l) => (
+              <a key={l.href} href={l.href} target="_blank" rel="noopener noreferrer" className="btn btn-line">
+                {l.label}
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
   );
 }

@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  CaseStudyBody,
-  CoverFigure,
-  ProjectFacts,
-} from "@/components/case-study";
+import { CaseStudyBody, CoverFigure, ProjectFacts } from "@/components/case-study";
 import { FlowChain } from "@/components/flow-chain";
 import { PageTransition } from "@/components/page-transition";
-import { projectColors } from "@/components/project-card";
 import { getProject, projects } from "@/content/projects";
 
 export const dynamicParams = false;
@@ -17,9 +12,7 @@ export function generateStaticParams() {
   return projects.map((p) => ({ slug: p.slug }));
 }
 
-export async function generateMetadata(
-  props: PageProps<"/work/[slug]">,
-): Promise<Metadata> {
+export async function generateMetadata(props: PageProps<"/work/[slug]">): Promise<Metadata> {
   const { slug } = await props.params;
   const project = getProject(slug);
   if (!project) return {};
@@ -41,54 +34,43 @@ export default async function CaseStudyPage(props: PageProps<"/work/[slug]">) {
   return (
     <PageTransition>
       <article>
-        {/* The band takes the project's colour; data-band-ink tells the header which ink to use. */}
-        <header
-          data-band-ink={project.color.ink}
-          className="tile"
-          style={projectColors(project)}
-        >
-          <div className="frame pb-[clamp(8rem,17vw,13rem)] pt-32 sm:pt-40">
-            <Link href="/work" className="link" transitionTypes={["nav-back"]}>
+        {/* The page opens in the dark: name the work, say what it is, show the shape of it. */}
+        <header className="lit">
+          <div className="column pb-12 pt-32 sm:pt-40">
+            <Link href="/work" className="meta link-quiet hover:text-bone" transitionTypes={["nav-back"]}>
               All work
             </Link>
-            <h1 className="mx-auto mt-8 max-w-[22ch] text-[clamp(2.3rem,6vw,4.75rem)] font-extrabold leading-[1.03] tracking-[-0.035em]">
-              {project.title}
-            </h1>
-            <p className="mx-auto mt-6 max-w-[40rem] text-lg leading-relaxed sm:text-xl">
-              {project.subtitle}
+            <p className="meta mt-8">
+              {project.number} {project.category}
             </p>
-            <p className="meta mt-8 flex flex-wrap justify-center gap-x-5 gap-y-1">
-              <span className="status">{project.status}</span>
-              <span>{project.teamLabel}</span>
-              <span>{project.period}</span>
-            </p>
-            <div className="mt-6 flex justify-center">
-              <FlowChain steps={project.flow} />
-            </div>
-            <ProjectFacts project={project} />
+            <h1 className="display mt-3 text-[clamp(2.3rem,5.6vw,4.4rem)]">{project.title}</h1>
+            <p className="mt-6 max-w-[34rem] text-[1.1rem] leading-relaxed">{project.subtitle}</p>
+            <FlowChain steps={project.flow} />
           </div>
         </header>
 
-        <div className="article-grid prose-body pb-24">
-          <CoverFigure project={project} />
-          <CaseStudyBody project={project} />
+        <ProjectFacts project={project} />
+
+        <CoverFigure project={project} />
+
+        <div className="lit">
+          <div className="article-grid prose-body pb-24">
+            <CaseStudyBody project={project} />
+          </div>
         </div>
 
-        <nav aria-label="Next case study">
-          <Link
-            href={`/work/${next.slug}`}
-            className="tile group block"
-            style={projectColors(next)}
-          >
-            <span className="frame block py-20 sm:py-28">
-              <span className="block text-[0.95rem] font-bold">
-                Next case study
-              </span>
-              <span className="mx-auto mt-4 block max-w-[24ch] text-[clamp(2rem,5vw,3.75rem)] font-extrabold leading-[1.05] tracking-[-0.03em] underline decoration-transparent decoration-[0.07em] underline-offset-[0.14em] transition-colors group-hover:decoration-current">
-                {next.cardTitle}
-              </span>
-            </span>
-          </Link>
+        <nav aria-label="Next case study" className="lit">
+          <div className="column border-t border-concrete py-16">
+            <p className="meta">Next</p>
+            <Link
+              href={`/work/${next.slug}`}
+              className="link-quiet display mt-3 block text-[clamp(1.9rem,4.4vw,3.2rem)]"
+              transitionTypes={["nav-forward"]}
+            >
+              {next.cardTitle}
+            </Link>
+            <p className="mt-4 max-w-[32rem] leading-relaxed text-ash">{next.summary}</p>
+          </div>
         </nav>
       </article>
     </PageTransition>
