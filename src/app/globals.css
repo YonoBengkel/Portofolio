@@ -35,7 +35,7 @@
   --color-brass: var(--brass);
   --color-on-brass: var(--on-brass);
 
-  --font-display: var(--font-bodoni), ui-serif, Georgia, serif;
+  --font-display: var(--font-display-serif), ui-serif, Georgia, serif;
   --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, "SFMono-Regular", monospace;
 }
@@ -238,9 +238,9 @@
 
   .display {
     font-family: var(--font-display);
-    font-weight: 600;
-    line-height: 0.88;
-    letter-spacing: -0.045em;
+    font-weight: 400;
+    line-height: 0.92;
+    letter-spacing: -0.018em;
   }
 
   /* Metadata: small, mono, sentence case. Never a tracked-out capital eyebrow. */
@@ -259,10 +259,10 @@
     margin-top: 4rem;
     margin-bottom: 0.85rem;
     font-family: var(--font-display);
-    font-size: clamp(1.7rem, 3.4vw, 2.3rem);
-    font-weight: 600;
-    line-height: 1.12;
-    letter-spacing: -0.03em;
+    font-size: clamp(1.75rem, 3.5vw, 2.4rem);
+    font-weight: 400;
+    line-height: 1.16;
+    letter-spacing: -0.012em;
   }
 
   /* Giant section words. They still bite into the block below. */
@@ -271,9 +271,9 @@
     z-index: 1;
     font-family: var(--font-display);
     font-size: clamp(3rem, 11vw, 9.5rem);
-    font-weight: 600;
-    line-height: 0.84;
-    letter-spacing: -0.045em;
+    font-weight: 400;
+    line-height: 0.88;
+    letter-spacing: -0.02em;
     margin-bottom: -0.08em;
   }
   .big-word .stop {
@@ -296,10 +296,10 @@
     inset: 0;
     margin: 0;
     font-family: var(--font-display);
-    font-size: max(1.8rem, 8.4cqi);
-    font-weight: 600;
+    font-size: max(1.9rem, 9cqi);
+    font-weight: 400;
     line-height: 1;
-    letter-spacing: -0.045em;
+    letter-spacing: -0.02em;
   }
   .hero-name span {
     position: absolute;

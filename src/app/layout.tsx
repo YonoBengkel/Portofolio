@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Archivo, Bodoni_Moda, IBM_Plex_Mono } from "next/font/google";
+import { Archivo, IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
 import { PointerLight } from "@/components/pointer-light";
 import { RevealOnScroll } from "@/components/reveal-on-scroll";
 import { SiteFooter } from "@/components/site-footer";
@@ -8,10 +8,17 @@ import { profile } from "@/content/site";
 import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
 
-// Three faces with three jobs. Bodoni Moda is a high-contrast didone: at display size its
-// hairlines nearly disappear into a dark page, which is the point. Archivo is a plain
-// grotesque that stays legible light-on-dark. IBM Plex Mono carries metadata only.
-const bodoni = Bodoni_Moda({ variable: "--font-bodoni", subsets: ["latin"], style: ["normal"], display: "swap" });
+// Three faces with three jobs. Instrument Serif is a single-weight display serif: narrow,
+// slightly condensed, more film title than fashion masthead. It has one weight on purpose,
+// so size and spacing have to do the work instead of boldness. Archivo is a plain grotesque
+// that stays legible light-on-dark. IBM Plex Mono carries metadata only.
+const instrument = Instrument_Serif({
+  variable: "--font-display-serif",
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+  display: "swap",
+});
 const archivo = Archivo({ variable: "--font-archivo", subsets: ["latin"], style: ["normal"], display: "swap" });
 // Metadata only, so it never blocks the first screen.
 const plexMono = IBM_Plex_Mono({
@@ -47,7 +54,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${bodoni.variable} ${archivo.variable} ${plexMono.variable} h-full antialiased`}
+      className={`${instrument.variable} ${archivo.variable} ${plexMono.variable} h-full antialiased`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: plainModeBoot }} />
