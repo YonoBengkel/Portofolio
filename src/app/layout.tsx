@@ -9,13 +9,15 @@ import "./globals.css";
 // Three faces with three jobs. Bodoni Moda is a high-contrast didone: at display size its
 // hairlines nearly disappear into a dark page, which is the point. Archivo is a plain
 // grotesque that stays legible light-on-dark. IBM Plex Mono carries metadata only.
-const bodoni = Bodoni_Moda({ variable: "--font-bodoni", subsets: ["latin"], display: "swap" });
-const archivo = Archivo({ variable: "--font-archivo", subsets: ["latin"], display: "swap" });
+const bodoni = Bodoni_Moda({ variable: "--font-bodoni", subsets: ["latin"], style: ["normal"], display: "swap" });
+const archivo = Archivo({ variable: "--font-archivo", subsets: ["latin"], style: ["normal"], display: "swap" });
+// Metadata only, so it never blocks the first screen.
 const plexMono = IBM_Plex_Mono({
   variable: "--font-plex-mono",
   subsets: ["latin"],
-  weight: ["400", "500"],
+  weight: ["400"],
   display: "swap",
+  preload: false,
 });
 
 // Reads the stored Plain mode choice before the first paint, so the page never flashes
