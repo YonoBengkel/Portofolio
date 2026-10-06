@@ -4,9 +4,8 @@ import { FlowChain } from "./flow-chain";
 import { WorkIndexNav } from "./work-index-nav";
 
 /**
- * The index and the work side by side: the list keeps your place on the left,
- * the entries scroll on the right. Below 1024px the list folds into a rail
- * above the first entry.
+ * The shaft runs down the edge of the window while the entries scroll past it,
+ * so the reading column keeps the whole page to itself.
  */
 export function WorkIndex({ projects }: { projects: Project[] }) {
   const items = projects.map((p) => ({
@@ -17,12 +16,10 @@ export function WorkIndex({ projects }: { projects: Project[] }) {
   }));
 
   return (
-    <div className="frame grid gap-10 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] lg:gap-16">
-      <div className="work-index-aside">
-        <WorkIndexNav items={items} />
-      </div>
+    <div className="frame">
+      <WorkIndexNav items={items} />
 
-      <div>
+      <div className="column">
         {projects.map((project) => (
           <article
             key={project.slug}

@@ -5,48 +5,70 @@ import { useEffect, useState } from "react";
 export type IndexItem = { slug: string; number: string; category: string; title: string };
 
 /**
- * The list that stays with you. It marks whichever case study is currently in
- * the middle of the window, so the list doubles as a position marker. On a
- * phone it becomes a rail you can push sideways.
+ * The shaft.
  *
- * Without JavaScript these are still ordinary anchor links to each entry.
+ * Four landings on a vertical line pinned to the edge of the window, like the
+ * floor indicator in a lift. Only the landing you are on is lit and named; the
+ * others are marks until you reach for them. It answers where am I and how much
+ * is left without putting a list of titles on screen, and it borrows the
+ * reference's sense of a building you move down through.
+ *
+ * Below 1024px it lies on its side under the header. Without JavaScript these
+ * are ordinary anchor links, each named by its full title.
  */
 export function WorkIndexNav({ items }: { items: IndexItem[] }) {
   const [active, setActive] = useState(items[0]?.slug ?? "");
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
-        if (visible) setActive(visible.target.id.replace("project-", ""));
-      },
-      { rootMargin: "-40% 0px -50% 0px" },
-    );
+    // Work out the landing from where the entries actually are, not only from which
+    // ones the observer reported: between two entries, and at the very top and bottom
+    // of the page, nothing is inside the band and the marker would otherwise stick.
+    function pick() {
+      const line = window.innerHeight * 0.4;
+      let current = items[0]?.slug ?? "";
+      for (const item of items) {
+        const el = document.getElementById(`project-${item.slug}`);
+        if (el && el.getBoundingClientRect().top <= line) current = item.slug;
+      }
+      setActive(current);
+    }
+
+    pick();
+    const observer = new IntersectionObserver(pick, {
+      threshold: [0, 0.25, 0.5, 0.75, 1],
+    });
     for (const item of items) {
       const el = document.getElementById(`project-${item.slug}`);
       if (el) observer.observe(el);
     }
-    return () => observer.disconnect();
+    window.addEventListener("scroll", pick, { passive: true });
+    window.addEventListener("resize", pick);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", pick);
+      window.removeEventListener("resize", pick);
+    };
   }, [items]);
 
   return (
-    <ol className="work-rail">
-      {items.map((item) => (
-        <li key={item.slug}>
-          <a
-            href={`#project-${item.slug}`}
-            aria-current={active === item.slug ? "true" : undefined}
-            className="work-rail-link"
-          >
-            <span className="meta">
-              {item.number} {item.category}
-            </span>
-            <span className="mt-1 block font-semibold leading-snug">{item.title}</span>
-          </a>
-        </li>
-      ))}
-    </ol>
+    <nav className="shaft" aria-label="Case studies">
+      <ol>
+        {items.map((item) => (
+          <li key={item.slug}>
+            <a
+              href={`#project-${item.slug}`}
+              aria-current={active === item.slug ? "true" : undefined}
+              className="shaft-stop"
+            >
+              <span className="shaft-tick" aria-hidden="true" />
+              <span className="shaft-label">
+                <span className="shaft-number">{item.number}</span>
+                <span className="shaft-title">{item.title}</span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
   );
 }

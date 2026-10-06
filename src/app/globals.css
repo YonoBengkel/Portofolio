@@ -534,67 +534,129 @@
     text-decoration-color: var(--brass);
   }
 
-  /* ------------------------------------------------------- the work index */
+  /* ------------------------------------------------------------- the shaft */
 
-  /* The list keeps your place while the entries scroll past it. */
-  .work-index-aside {
+  /*
+    A lift indicator rather than a table of contents: a line with four landings,
+    only the one you are on is lit and named. Pinned to the window on desktop,
+    laid on its side under the header on smaller screens.
+  */
+  .shaft {
     position: sticky;
     top: 0;
     z-index: 30;
-    min-width: 0; /* a grid item must be allowed to shrink before the rail can scroll */
-    padding-block: 12px;
-    background: linear-gradient(to bottom, var(--void) 70%, transparent);
+    padding-block: 14px;
+    background: linear-gradient(to bottom, var(--void) 72%, transparent);
   }
+  .shaft ol {
+    display: flex;
+    gap: 10px;
+  }
+  .shaft li {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .shaft-stop {
+    display: block;
+    color: var(--ash);
+    transition: color 220ms ease;
+  }
+  .shaft-tick {
+    display: block;
+    height: 2px;
+    background: var(--concrete);
+    transition:
+      background-color 320ms ease,
+      box-shadow 320ms ease;
+  }
+  .shaft-label {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    opacity: 0.45;
+    transition: opacity 220ms ease;
+  }
+  .shaft-title {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .shaft-stop:hover,
+  .shaft-stop:focus-visible {
+    color: var(--bone);
+  }
+  .shaft-stop:hover .shaft-label,
+  .shaft-stop:focus-visible .shaft-label {
+    opacity: 1;
+  }
+  .shaft-stop[aria-current="true"] {
+    color: var(--bone);
+  }
+  .shaft-stop[aria-current="true"] .shaft-label {
+    opacity: 1;
+  }
+  .shaft-stop[aria-current="true"] .shaft-tick {
+    background: var(--brass);
+    box-shadow: 0 0 14px color-mix(in oklab, var(--brass) 55%, transparent);
+  }
+
   @media (min-width: 1024px) {
-    .work-index-aside {
-      align-self: start;
-      top: 7rem;
+    .shaft {
+      position: fixed;
+      left: 40px;
+      top: 50%;
+      translate: 0 -50%;
+      width: 13rem;
       padding-block: 0;
       background: none;
     }
-  }
-
-  .work-rail {
-    display: flex;
-    gap: 20px;
-    overflow-x: auto;
-    scrollbar-width: none;
-    scroll-snap-type: x proximity;
-  }
-  .work-rail::-webkit-scrollbar {
-    display: none;
-  }
-  .work-rail > li {
-    flex: 0 0 15rem;
-    scroll-snap-align: start;
-  }
-  @media (min-width: 1024px) {
-    .work-rail {
+    .shaft ol {
       display: grid;
-      gap: 22px;
-      overflow: visible;
+      gap: 0;
     }
-    .work-rail > li {
+    .shaft li {
       flex: none;
     }
+    .shaft-stop {
+      display: grid;
+      grid-template-columns: 2px minmax(0, 1fr);
+      align-items: center;
+      gap: 14px;
+      padding-block: 18px;
+    }
+    .shaft-tick {
+      height: 100%;
+      min-height: 26px;
+    }
+    .shaft-label {
+      margin-top: 0;
+      white-space: normal;
+    }
+    .shaft-title {
+      white-space: normal;
+    }
+    /* The landing you are on is the only one named; the rest wait to be reached for. */
+    .shaft-stop .shaft-title {
+      opacity: 0;
+      transition: opacity 220ms ease;
+    }
+    .shaft-stop:hover .shaft-title,
+    .shaft-stop:focus-visible .shaft-title,
+    .shaft-stop[aria-current="true"] .shaft-title {
+      opacity: 1;
+    }
   }
 
-  .work-rail-link {
-    display: block;
-    padding-left: 14px;
-    border-left: 1px solid var(--concrete);
-    color: var(--ash);
-    transition:
-      color 200ms ease,
-      border-color 200ms ease;
-  }
-  .work-rail-link:hover {
-    color: var(--bone);
-    border-color: var(--ash);
-  }
-  .work-rail-link[aria-current="true"] {
-    color: var(--bone);
-    border-color: var(--brass);
+  @media (prefers-reduced-motion: reduce) {
+    .shaft-tick,
+    .shaft-label,
+    .shaft-title,
+    .shaft-stop {
+      transition: none;
+    }
   }
 
   /* ------------------------------------------------------------ flow chain */
