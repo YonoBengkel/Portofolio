@@ -184,12 +184,12 @@
 
   @supports (animation-timeline: view()) {
     @media (prefers-reduced-motion: no-preference) {
-      html:not([data-plain="on"]) .lit::before {
+      .lit::before {
         animation: pool linear both;
         animation-timeline: view();
         animation-range: entry 5% exit 95%;
       }
-      html:not([data-plain="on"]) .recede {
+      .recede {
         animation: surface linear both;
         animation-timeline: view();
         animation-range: entry 5% exit 95%;
@@ -248,14 +248,6 @@
     height: 100%;
     pointer-events: none;
     opacity: 0.035;
-  }
-
-  html[data-plain="on"] .fog,
-  html[data-plain="on"] .grain {
-    display: none;
-  }
-  html[data-plain="on"] .lit::before {
-    opacity: 0.55;
   }
 
   /* ------------------------------------------------------------ typography */
@@ -355,7 +347,7 @@
     the way the reference moves something heavy.
   */
   @media (prefers-reduced-motion: no-preference) {
-    html:not([data-plain="on"]) .route-draw path {
+    .route-draw path {
       stroke-dasharray: 1 1;
       stroke-dashoffset: 1;
       animation: route-draw var(--t) cubic-bezier(0.22, 1, 0.36, 1) var(--d) forwards;
@@ -375,7 +367,7 @@
     stroke: var(--brass);
   }
   @media (prefers-reduced-motion: no-preference) {
-    html:not([data-plain="on"]) .lamp {
+    .lamp {
       animation: lamp 2.6s cubic-bezier(0.22, 1, 0.36, 1) 1.9s both;
     }
   }
@@ -626,119 +618,6 @@
     }
   }
 
-  /* ---------------------------------------------------------------- ledger */
-
-  .ledger {
-    display: grid;
-    gap: 2.5rem;
-  }
-  @media (min-width: 1024px) {
-    .ledger {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
-      gap: 4rem;
-      align-items: start;
-    }
-  }
-
-  .ledger-rows {
-    display: grid;
-  }
-
-  .ledger-row {
-    display: grid;
-    grid-template-columns: 2.5rem minmax(0, 1fr);
-    gap: 1rem;
-    padding-block: 1.6rem;
-    border-top: 1px solid var(--concrete);
-    color: var(--ash);
-    transition:
-      color 260ms ease,
-      border-color 260ms ease;
-  }
-  .ledger-rows > li:last-child .ledger-row {
-    border-bottom: 1px solid var(--concrete);
-  }
-  .ledger-number {
-    padding-top: 0.45rem;
-  }
-  .ledger-body {
-    display: grid;
-    gap: 0.5rem;
-  }
-  .ledger-title {
-    display: block;
-    font-size: clamp(1.5rem, 3.2vw, 2.1rem);
-    color: var(--ash);
-    transition: color 260ms ease;
-  }
-  .ledger-summary {
-    max-width: 30rem;
-    line-height: 1.6;
-  }
-  .ledger-facts {
-    margin-top: 0.35rem;
-  }
-
-  .ledger-row:hover,
-  .ledger-row:focus-visible,
-  .ledger-row[data-lit="true"] {
-    color: var(--bone);
-    border-color: var(--ash);
-  }
-  .ledger-row:hover .ledger-title,
-  .ledger-row:focus-visible .ledger-title,
-  .ledger-row[data-lit="true"] .ledger-title {
-    color: var(--bone);
-  }
-
-  /* The plate: one picture at a time, crossfading as the pointer moves down the rows. */
-  .ledger-plate {
-    display: none;
-  }
-  @media (min-width: 1024px) {
-    .ledger-plate {
-      display: block;
-      position: sticky;
-      top: 8rem;
-      aspect-ratio: 4 / 3;
-      border: 1px solid var(--concrete);
-      background: var(--soot);
-      overflow: hidden;
-    }
-    .ledger-plate img {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: left top;
-      opacity: 0;
-      transition: opacity 520ms cubic-bezier(0.22, 1, 0.36, 1);
-    }
-    .ledger-plate img[data-lit="true"] {
-      opacity: 1;
-    }
-  }
-
-  .ledger-inline-plate {
-    position: relative;
-    height: clamp(180px, 52vw, 320px);
-    margin-bottom: 1.6rem;
-    border: 1px solid var(--concrete);
-    background: var(--soot);
-    overflow: hidden;
-  }
-  .ledger-inline-plate img {
-    position: absolute;
-    inset: 0;
-  }
-  @media (min-width: 1024px) {
-    .ledger-inline-plate {
-      display: none;
-    }
-  }
-
-
   /* ------------------------------------------------------------ flow chain */
 
   /* A diagram made of words: it survives a narrow screen and a failed image. */
@@ -811,31 +690,89 @@
 
   /* --------------------------------------------------------- pointer light */
 
-  .pointer-light {
+  .pointer-light,
+  .pointer-ring,
+  .pointer-dot {
     position: fixed;
     left: 0;
     top: 0;
+    pointer-events: none;
+    opacity: 0;
+    will-change: transform;
+  }
+
+  .pointer-light {
     z-index: 45;
-    mix-blend-mode: screen;
     width: 760px;
     height: 760px;
     margin: -380px 0 0 -380px;
-    pointer-events: none;
-    opacity: 0;
+    mix-blend-mode: screen;
     transition: opacity 500ms ease;
     background:
       radial-gradient(circle, color-mix(in oklab, var(--brass) 16%, transparent) 0%, transparent 18%),
       radial-gradient(circle, color-mix(in oklab, var(--bone) 11%, transparent) 0%, transparent 34%),
       radial-gradient(circle, color-mix(in oklab, var(--bone) 5%, transparent) 0%, transparent 58%);
   }
-  .pointer-light[data-on="true"] {
+
+  /* The ring carries the weight; it arrives a beat after the pointer stops. */
+  .pointer-ring {
+    z-index: 70;
+    width: 34px;
+    height: 34px;
+    margin: -17px 0 0 -17px;
+    border: 1px solid color-mix(in oklab, var(--bone) 55%, transparent);
+    border-radius: 999px;
+    transition:
+      opacity 300ms ease,
+      width 240ms cubic-bezier(0.22, 1, 0.36, 1),
+      height 240ms cubic-bezier(0.22, 1, 0.36, 1),
+      margin 240ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 240ms ease;
+  }
+
+  /* The dot is exactly where the pointer is, so clicking stays precise. */
+  .pointer-dot {
+    z-index: 71;
+    width: 5px;
+    height: 5px;
+    margin: -2.5px 0 0 -2.5px;
+    border-radius: 999px;
+    background: var(--brass);
+    transition:
+      opacity 300ms ease,
+      transform 80ms linear,
+      background-color 240ms ease;
+  }
+
+  html[data-pointer="on"] .pointer-light,
+  html[data-pointer="on"] .pointer-ring,
+  html[data-pointer="on"] .pointer-dot {
     opacity: 1;
   }
-  html[data-plain="on"] .pointer-light {
-    display: none;
+
+  /* Over something you can act on, the ring opens and takes the accent. */
+  html[data-pointer-over="link"] .pointer-ring {
+    width: 56px;
+    height: 56px;
+    margin: -28px 0 0 -28px;
+    border-color: var(--brass);
   }
-  @media (prefers-reduced-motion: reduce), (pointer: coarse) {
-    .pointer-light {
+  html[data-pointer-down="true"] .pointer-ring {
+    width: 24px;
+    height: 24px;
+    margin: -12px 0 0 -12px;
+  }
+
+  /* Only once the script is running, so a page without it keeps the system arrow. */
+  html[data-cursor="light"],
+  html[data-cursor="light"] * {
+    cursor: none;
+  }
+
+  @media (pointer: coarse) {
+    .pointer-light,
+    .pointer-ring,
+    .pointer-dot {
       display: none;
     }
   }
@@ -843,61 +780,63 @@
   /* ------------------------------------------------------- page transition */
 
   /*
-    Going deeper moves the page left; coming back moves it right. The old page
-    leaves quickly so it stops competing for attention, the new one arrives more
-    slowly so there is time to read it.
+    Pages are not slid, they are lit. The page you leave is doused; the page you
+    arrive at is kindled from a point, the light opening outward until it fills the
+    window. Going deeper lights from the middle of the page; going back lights from
+    the top left, where the back link is, so the two directions do not feel alike.
   */
-  ::view-transition-old(.nav-forward) {
-    animation:
-      200ms ease-out both vt-fade reverse,
-      460ms cubic-bezier(0.22, 1, 0.36, 1) both vt-left;
+  ::view-transition-old(.nav-forward),
+  ::view-transition-old(.nav-back) {
+    animation: 260ms cubic-bezier(0.4, 0, 1, 1) both vt-douse;
   }
   ::view-transition-new(.nav-forward) {
-    animation:
-      320ms ease-in 200ms both vt-fade,
-      560ms cubic-bezier(0.22, 1, 0.36, 1) both vt-from-right;
-  }
-  ::view-transition-old(.nav-back) {
-    animation:
-      200ms ease-out both vt-fade reverse,
-      460ms cubic-bezier(0.22, 1, 0.36, 1) both vt-right;
+    animation: 680ms cubic-bezier(0.22, 1, 0.36, 1) 140ms both vt-kindle-centre;
   }
   ::view-transition-new(.nav-back) {
-    animation:
-      320ms ease-in 200ms both vt-fade,
-      560ms cubic-bezier(0.22, 1, 0.36, 1) both vt-from-left;
+    animation: 680ms cubic-bezier(0.22, 1, 0.36, 1) 140ms both vt-kindle-corner;
   }
 
-  @keyframes vt-fade {
-    from {
+  @keyframes vt-douse {
+    to {
       opacity: 0;
+      scale: 0.988;
+    }
+  }
+  @keyframes vt-kindle-centre {
+    from {
+      opacity: 0.15;
+      clip-path: circle(0% at 50% 42%);
     }
     to {
       opacity: 1;
+      clip-path: circle(135% at 50% 42%);
     }
   }
-  @keyframes vt-left {
-    to {
-      transform: translateX(-3%);
-    }
-  }
-  @keyframes vt-right {
-    to {
-      transform: translateX(3%);
-    }
-  }
-  @keyframes vt-from-right {
+  @keyframes vt-kindle-corner {
     from {
-      transform: translateX(3%);
+      opacity: 0.15;
+      clip-path: circle(0% at 14% 16%);
     }
-  }
-  @keyframes vt-from-left {
-    from {
-      transform: translateX(-3%);
+    to {
+      opacity: 1;
+      clip-path: circle(150% at 14% 16%);
     }
   }
 
-  /* The header does not travel with the page. */
+  /*
+    A case-study title is the same object on both pages, so it travels rather than
+    being redrawn. The browser matches the two by name and moves one into the other.
+  */
+  ::view-transition-group(.study-title) {
+    animation-duration: 640ms;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  ::view-transition-old(.study-title),
+  ::view-transition-new(.study-title) {
+    height: 100%;
+    animation: none;
+  }
+
   /* The header is frozen to the window; the strip behind it fades so lines pass under
      it instead of hitting an edge. */
   .site-header {

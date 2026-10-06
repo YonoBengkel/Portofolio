@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ViewTransition } from "react";
 import { CaseStudyBody, CoverFigure, ProjectFacts } from "@/components/case-study";
 import { FlowChain } from "@/components/flow-chain";
 import { PageTransition } from "@/components/page-transition";
@@ -43,7 +44,9 @@ export default async function CaseStudyPage(props: PageProps<"/work/[slug]">) {
             <p className="meta mt-8">
               {project.number} {project.category}
             </p>
-            <h1 className="display mt-3 text-[clamp(2.3rem,5.6vw,4.4rem)]">{project.title}</h1>
+            <ViewTransition name={`study-${project.slug}`} share="study-title" default="none">
+              <h1 className="display mt-3 text-[clamp(2.3rem,5.6vw,4.4rem)]">{project.title}</h1>
+            </ViewTransition>
             <p className="mt-6 max-w-[34rem] text-[1.1rem] leading-relaxed">{project.subtitle}</p>
             <FlowChain steps={project.flow} />
           </div>

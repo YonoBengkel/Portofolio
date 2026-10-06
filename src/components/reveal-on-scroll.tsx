@@ -15,7 +15,6 @@ export function RevealOnScroll() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    if (document.documentElement.dataset.plain === "on") return;
 
     const targets = Array.from(document.querySelectorAll<HTMLElement>(".reveal:not(.is-revealed)"));
     if (targets.length === 0) return;

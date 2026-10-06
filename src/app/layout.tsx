@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Archivo, IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
-import { PointerLight } from "@/components/pointer-light";
+import { Pointer } from "@/components/pointer";
 import { RevealOnScroll } from "@/components/reveal-on-scroll";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -29,10 +29,6 @@ const plexMono = IBM_Plex_Mono({
   preload: false,
 });
 
-// Reads the stored Plain mode choice before the first paint, so the page never flashes
-// out of atmosphere into plain and back.
-const plainModeBoot = `try{if(localStorage.getItem("plain-mode")==="on"){document.documentElement.dataset.plain="on"}}catch(e){}`;
-
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
@@ -56,9 +52,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       data-scroll-behavior="smooth"
       className={`${instrument.variable} ${archivo.variable} ${plexMono.variable} h-full antialiased`}
     >
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: plainModeBoot }} />
-      </head>
       <body className="flex min-h-full flex-col font-sans">
         <a
           href="#main"
@@ -73,8 +66,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteFooter />
 
         <RevealOnScroll />
-        {/* A pool of light the reader moves by hand. */}
-        <PointerLight />
+        {/* The cursor: a pool of light, a trailing ring and an exact dot. */}
+        <Pointer />
         {/* Fog: the top and bottom edges of the window sink back into the page colour. */}
         <div className="fog" aria-hidden="true" />
         {/* One static grain plate, never animated. */}

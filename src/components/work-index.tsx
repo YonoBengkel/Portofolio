@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ViewTransition } from "react";
 import type { Project } from "@/content/projects";
 import { FlowChain } from "./flow-chain";
 import { WorkIndexNav } from "./work-index-nav";
@@ -29,11 +30,13 @@ export function WorkIndex({ projects }: { projects: Project[] }) {
             <p className="meta">
               {project.number} {project.category}
             </p>
-            <h2 className="display mt-3 text-[clamp(1.9rem,4vw,2.9rem)]">
-              <Link href={`/work/${project.slug}`} className="link-quiet" transitionTypes={["nav-forward"]}>
-                {project.cardTitle}
-              </Link>
-            </h2>
+            <ViewTransition name={`study-${project.slug}`} share="study-title" default="none">
+              <h2 className="display mt-3 text-[clamp(1.9rem,4vw,2.9rem)]">
+                <Link href={`/work/${project.slug}`} className="link-quiet" transitionTypes={["nav-forward"]}>
+                  {project.cardTitle}
+                </Link>
+              </h2>
+            </ViewTransition>
             <p className="mt-4 max-w-[34rem] text-[1.05rem] leading-relaxed">{project.subtitle}</p>
 
             <FlowChain steps={project.flow} />
