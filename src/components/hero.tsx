@@ -47,7 +47,7 @@ export function Hero({ hasCv }: { hasCv: boolean }) {
   const words = profile.name.split(" ");
 
   return (
-    <section className="bg-mist">
+    <section className="bg-soot">
       <div className="frame pb-20 pt-28 sm:pb-24 sm:pt-32">
         <div className="hero-art">
           <svg viewBox="0 0 1100 530" className="route route-draw absolute inset-0 h-full w-full" aria-hidden>
@@ -99,7 +99,7 @@ export function Hero({ hasCv }: { hasCv: boolean }) {
               <li key={step.title}>
                 <MethodShape kind={KINDS[i]} />
                 <h3 className="mt-4 text-lg font-bold">{step.title}</h3>
-                <p className="mt-2 leading-relaxed text-graphite">{step.body}</p>
+                <p className="mt-2 leading-relaxed text-ash">{step.body}</p>
               </li>
             ))}
           </ol>

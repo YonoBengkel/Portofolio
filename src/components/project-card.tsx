@@ -8,7 +8,7 @@ import { PipelineDiagram, StarSchemaDiagram } from "./diagrams";
 export function projectColors(project: Project) {
   return {
     "--tile": project.color.tile,
-    "--on-tile": project.color.ink === "light" ? "#ffffff" : "#001f5f",
+    "--on-tile": project.color.ink === "light" ? "#d8d4c8" : "#0a0b0a",
   } as CSSProperties;
 }
 
@@ -35,7 +35,7 @@ export function ProjectCard({ project, wide = false }: { project: Project; wide?
         </div>
       ) : (
         <div
-          className={`relative mt-12 w-[88%] overflow-hidden rounded-t-[10px] sm:mt-14 ${
+          className={`relative mt-12 w-[88%] overflow-hidden rounded-none sm:mt-14 ${
             wide ? "h-[clamp(220px,34vw,460px)] max-w-[1040px]" : "h-[clamp(200px,24vw,340px)]"
           }`}
         >
@@ -44,7 +44,7 @@ export function ProjectCard({ project, wide = false }: { project: Project; wide?
             alt={project.cover.alt}
             fill
             sizes={wide ? "(min-width: 1440px) 1040px, 88vw" : "(min-width: 900px) 44vw, 88vw"}
-            className="object-cover object-left-top"
+            className="graded object-cover object-left-top"
           />
         </div>
       )}

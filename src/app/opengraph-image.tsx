@@ -13,7 +13,7 @@ const fontDir = join(process.cwd(), "src/assets/fonts");
 const extraBold = await readFile(join(fontDir, "PlusJakartaSans-ExtraBold.ttf"));
 const medium = await readFile(join(fontDir, "PlusJakartaSans-Medium.ttf"));
 
-// The hero drawing (process box, data store, decision) in the site's dark-mode colours.
+// The hero drawing (process box, data store, decision). The decision carries the one accent.
 const ROUTE = [
   "M40 40H400V250H40Z",
   "M400 145H560V174",
@@ -22,7 +22,7 @@ const ROUTE = [
   "M670 330H760",
   "M760 330L910 180L1060 330L910 480Z",
 ];
-const colors = { ground: "#111a31", ink: "#e6ecf8", route: "#8ea6f0" };
+const colors = { ground: "#0a0b0a", ink: "#d8d4c8", route: "#2a2e2a", lamp: "#e8b23c" };
 
 // Social preview image shown when the site link is shared (LinkedIn, WhatsApp, etc.).
 export default function OpengraphImage() {
@@ -64,8 +64,8 @@ export default function OpengraphImage() {
                 strokeWidth={1.35}
                 strokeLinejoin="round"
               >
-                {ROUTE.map((d) => (
-                  <path key={d} d={d} />
+                {ROUTE.map((d, i) => (
+                  <path key={d} d={d} stroke={i === ROUTE.length - 1 ? colors.lamp : colors.route} />
                 ))}
               </g>
             ))}

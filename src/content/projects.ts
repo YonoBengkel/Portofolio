@@ -70,7 +70,7 @@ export const projects: Project[] = [
     flow: ["Cashier sales", "Stock ledger", "Restock forecast", "Distributor order", "Goods receipt"],
     tools: ["React", "TypeScript", "Process flowcharts", "SWOT"],
     links: [{ label: "GitHub repository", href: "https://github.com/YonoBengkel/Warungku" }],
-    color: { tile: "#0C726C", ink: "light" }, // the teal of the Warungku app itself
+    color: { tile: "#121613", ink: "light" }, // first step of the luminance ramp: nearest the page
     cover: {
       src: warungkuOwner,
       alt: "Warungku business-owner screens: daily to-do list, stock forecast with reasons, and goods receipt",
@@ -176,7 +176,7 @@ export const projects: Project[] = [
     flow: ["Purchase records", "Criteria the buyer weights", "Score per supplier", "Ranking", "Expiry audit"],
     tools: ["Python", "pandas", "Streamlit", "Plotly", "SAW & TOPSIS scoring"],
     links: [{ label: "Live app", href: "https://supplier-procurement-analysis.streamlit.app/" }],
-    color: { tile: "#F2CFC6", ink: "dark" }, // pink, like the purchase-order copy
+    color: { tile: "#181C19", ink: "light" },
     cover: {
       src: supplierActive,
       alt: "Supplier recommendation per product with criteria weights set in the sidebar",
@@ -238,7 +238,7 @@ export const projects: Project[] = [
     flow: ["CRM and ERP exports", "Raw copy kept", "Cleaned and matched", "Star schema", "Data marts"],
     tools: ["Python", "pandas", "SQL", "SQLite", "Apache Airflow", "Docker"],
     links: [{ label: "GitHub repository", href: "https://github.com/YonoBengkel/Medallion" }],
-    color: { tile: "#E8B94A", ink: "dark" }, // the gold layer of the medallion pipeline
+    color: { tile: "#1D221F", ink: "light" },
     cover: {
       src: dwTopProducts,
       alt: "Bar chart of the top five product subcategories by profit",
@@ -305,7 +305,7 @@ export const projects: Project[] = [
     flow: ["Plant sensor readings", "Impurity model", "Cost-weighted threshold", "Alert", "What to adjust"],
     tools: ["Python", "scikit-learn", "FastAPI", "React"],
     links: [{ label: "GitHub repository", href: "https://github.com/YonoBengkel/Tambang" }],
-    color: { tile: "#7A2E25", ink: "light" }, // hematite, the iron ore itself
+    color: { tile: "#212722", ink: "light" }, // last step: furthest from the page
     cover: {
       src: ewsEvaluation,
       alt: "Dashboard flags a likely high-silica batch and recommends an action for the operator",

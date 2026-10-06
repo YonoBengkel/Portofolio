@@ -1,48 +1,46 @@
 @import "tailwindcss";
 
 /*
-  Design tokens.
-  Five core colours (paper, mist, ink, graphite, rule) plus cobalt for the personal blocks.
-  Ink is the navy from the CV. Each case study also owns one colour (see src/content/projects.ts).
+  Pale City.
+
+  Six colours and no more. The page is near-black with a faint green cast; text is
+  a warm off-white; one yellow is the only saturated thing on screen and appears at
+  most three times in a viewport. There is no pure black and no pure white, because
+  the reference has neither.
+
+  Luminance, not size, is the hierarchy: whatever you are reading sits in a pool of
+  light and the rest recedes toward the page colour. Text itself never dims — only
+  the pools, the rules and the imagery do — so no reading pair ever drops below
+  4.5:1. Measured against --void: bone 13.3:1, raincoat 10.2:1, ash 6.1:1.
 */
 :root {
-  --paper: #ffffff;
-  --mist: #f3f5fa;
-  --ink: #001f5f;
-  --graphite: #4f5b73;
-  --rule: #dce2ec;
-  --cobalt: #2449c4;
-  --on-cobalt: #ffffff;
-  --route: #2449c4; /* hero drawing */
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #0a0f1e;
-    --mist: #111a31;
-    --ink: #e6ecf8;
-    --graphite: #a3aec4;
-    --rule: #26314d;
-    --cobalt: #2449c4;
-    --on-cobalt: #ffffff;
-    --route: #8ea6f0;
-  }
+  --void: #0a0b0a; /* the page. nothing else is a page background */
+  --soot: #151816; /* raised surfaces */
+  --concrete: #2a2e2a; /* rules, borders, dividers */
+  --ash: #8c9188; /* secondary text. brightened from the brief's #808579, which was 4.7:1 on soot */
+  --bone: #d8d4c8; /* primary text */
+  --raincoat: #e8b23c; /* the one accent */
+  --on-raincoat: #0a0b0a;
 }
 
 @theme inline {
-  --color-paper: var(--paper);
-  --color-mist: var(--mist);
-  --color-ink: var(--ink);
-  --color-graphite: var(--graphite);
-  --color-rule: var(--rule);
-  --color-cobalt: var(--cobalt);
-  --color-on-cobalt: var(--on-cobalt);
-  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --color-void: var(--void);
+  --color-soot: var(--soot);
+  --color-concrete: var(--concrete);
+  --color-ash: var(--ash);
+  --color-bone: var(--bone);
+  --color-raincoat: var(--raincoat);
+  --color-on-raincoat: var(--on-raincoat);
+
+  --font-display: var(--font-bodoni), ui-serif, Georgia, serif;
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "SFMono-Regular", monospace;
 }
 
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
+    background: var(--void);
   }
 
   @media (prefers-reduced-motion: no-preference) {
@@ -52,23 +50,18 @@
   }
 
   body {
-    background: var(--paper);
-    color: var(--ink);
+    background: var(--void);
+    color: var(--bone);
   }
 
   ::selection {
-    background: var(--ink);
-    color: var(--paper);
+    background: var(--raincoat);
+    color: var(--on-raincoat);
   }
 
-  /* Focus ring in ink on the page; inside coloured blocks it takes the block's text colour. */
   :focus-visible {
-    outline: 3px solid var(--ink);
+    outline: 2px solid var(--raincoat);
     outline-offset: 3px;
-  }
-  .tile :focus-visible,
-  .bg-cobalt :focus-visible {
-    outline-color: currentColor;
   }
 
   h1,
@@ -85,17 +78,14 @@
 }
 
 @layer components {
-  /* Page frame: 16px gutters on phones, 40px on desktop, capped at 1440px. */
+  /* ---------------------------------------------------------------- layout */
+
+  /* Full-bleed page gutter, for chrome that spans the window. */
   .frame {
     width: 100%;
     max-width: 1440px;
     margin-inline: auto;
-    padding-inline: 16px;
-  }
-  @media (min-width: 640px) {
-    .frame {
-      padding-inline: 24px;
-    }
+    padding-inline: 20px;
   }
   @media (min-width: 1024px) {
     .frame {
@@ -103,48 +93,207 @@
     }
   }
 
-  /* Header sits on top of the first band of every page; case-study bands set its colour. */
-  .site-header {
-    color: var(--header-ink, var(--ink));
+  /*
+    Dollhouse scale: the reading column is deliberately small inside a large
+    emptiness. Above 1280px it takes a little over half the window and the void
+    keeps the rest.
+  */
+  .column {
+    width: 100%;
+    max-width: 100%;
+    margin-inline: auto;
+    padding-inline: 20px;
   }
-  body:has([data-band-ink="light"]) {
-    --header-ink: #ffffff;
+  @media (min-width: 768px) {
+    .column {
+      width: min(100%, 44rem);
+      padding-inline: 24px;
+    }
   }
-  body:has([data-band-ink="dark"]) {
-    --header-ink: #001f5f;
+  @media (min-width: 1280px) {
+    .column {
+      width: min(52vw, 50rem);
+      padding-inline: 0;
+    }
   }
 
-  /* Giant section words ending with a full stop. They bite into the block below. */
+  /* Section rhythm: 96px on phones, 160px from tablet up. */
+  .band {
+    padding-block: 96px;
+  }
+  @media (min-width: 768px) {
+    .band {
+      padding-block: 160px;
+    }
+  }
+
+  /* ------------------------------------------------------- light hierarchy */
+
+  /*
+    Each block carries its own pool of light. The pool brightens as the block
+    crosses the middle of the window, so the thing being read is the brightest
+    thing on the page. Anything marked .recede (imagery, rules, the hero drawing)
+    fades with it. Text is never touched.
+
+    Scroll-driven animations do the work, so there is no JavaScript and no scroll
+    listener. Where they are unsupported, in Plain mode, or under reduced motion,
+    every pool simply stays lit.
+  */
+  .lit {
+    position: relative;
+    isolation: isolate;
+  }
+  .lit::before {
+    content: "";
+    position: absolute;
+    inset: -10% -25%;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(55% 50% at 50% 42%, color-mix(in oklab, var(--bone) 8%, transparent), transparent 72%),
+      radial-gradient(95% 85% at 50% 50%, color-mix(in oklab, var(--bone) 3%, transparent), transparent 78%);
+  }
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      html:not([data-plain="on"]) .lit::before {
+        animation: pool linear both;
+        animation-timeline: view();
+        animation-range: entry 5% exit 95%;
+      }
+      html:not([data-plain="on"]) .recede {
+        animation: surface linear both;
+        animation-timeline: view();
+        animation-range: entry 5% exit 95%;
+      }
+    }
+  }
+
+  @keyframes pool {
+    0% {
+      opacity: 0.12;
+    }
+    42%,
+    58% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0.12;
+    }
+  }
+  @keyframes surface {
+    0% {
+      opacity: 0.35;
+    }
+    42%,
+    58% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0.35;
+    }
+  }
+
+  /* ------------------------------------------------------- air and texture */
+
+  /*
+    Fog and depth of field, done with gradients rather than filters: the window's
+    top and bottom edges sink back into the page colour, so content arrives out of
+    the dark instead of starting at a hard edge.
+  */
+  .fog {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    pointer-events: none;
+    background:
+      linear-gradient(to bottom, var(--void) 0%, color-mix(in oklab, var(--void) 55%, transparent) 9%, transparent 20%),
+      linear-gradient(to top, var(--void) 0%, color-mix(in oklab, var(--void) 55%, transparent) 7%, transparent 16%);
+  }
+
+  /* One static grain plate. Never animated. */
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: 41;
+    pointer-events: none;
+    opacity: 0.035;
+  }
+
+  html[data-plain="on"] .fog,
+  html[data-plain="on"] .grain {
+    display: none;
+  }
+  html[data-plain="on"] .lit::before {
+    opacity: 0.55;
+  }
+
+  /* ------------------------------------------------------------ typography */
+
+  .display {
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 0.88;
+    letter-spacing: -0.045em;
+  }
+
+  /* Metadata: small, mono, sentence case. Never a tracked-out capital eyebrow. */
+  .meta {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.01em;
+    color: var(--ash);
+  }
+
+  .prose-body {
+    font-size: 1.0625rem;
+    line-height: 1.75;
+  }
+  .prose-body h2 {
+    margin-top: 4rem;
+    margin-bottom: 0.85rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.7rem, 3.4vw, 2.3rem);
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.03em;
+  }
+
+  /* Giant section words. They still bite into the block below. */
   .big-word {
     position: relative;
     z-index: 1;
-    font-size: clamp(3.25rem, 12vw, 10.5rem);
-    font-weight: 800;
-    line-height: 0.82;
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 11vw, 9.5rem);
+    font-weight: 600;
+    line-height: 0.84;
     letter-spacing: -0.045em;
-    margin-bottom: -0.1em;
+    margin-bottom: -0.08em;
   }
   .big-word .stop {
-    margin-left: -0.04em;
+    margin-left: -0.03em;
+    color: var(--raincoat);
   }
 
-  /* Hero drawing: process box, data store, decision, joined by one route. */
+  /* -------------------------------------------------------------- the hero */
+
   .hero-art {
     container-type: inline-size;
     position: relative;
     aspect-ratio: 1100 / 530;
     width: min(100%, 1100px, calc((100svh - 360px) * 2.075));
-    min-width: min(100%, 320px);
+    min-width: min(100%, 300px);
     margin-inline: auto;
   }
   .hero-name {
     position: absolute;
     inset: 0;
     margin: 0;
-    font-size: max(1.9rem, 8.2cqi);
-    font-weight: 800;
+    font-family: var(--font-display);
+    font-size: max(1.8rem, 8.4cqi);
+    font-weight: 600;
     line-height: 1;
-    letter-spacing: -0.035em;
+    letter-spacing: -0.045em;
   }
   .hero-name span {
     position: absolute;
@@ -163,18 +312,23 @@
     right: -1%;
     top: 73%;
   }
+
   .route {
     fill: none;
-    stroke: var(--route);
+    stroke: var(--concrete);
     stroke-width: 1.35;
     stroke-linejoin: round;
   }
-  /* The one load moment: the hero route draws itself once. Only the big drawing, not the legend. */
+
+  /*
+    The one load moment: the route draws itself once, slowly and without bounce,
+    the way the reference moves something heavy.
+  */
   @media (prefers-reduced-motion: no-preference) {
-    .route-draw path {
+    html:not([data-plain="on"]) .route-draw path {
       stroke-dasharray: 1 1;
       stroke-dashoffset: 1;
-      animation: route-draw var(--t) cubic-bezier(0.65, 0, 0.35, 1) var(--d) forwards;
+      animation: route-draw var(--t) cubic-bezier(0.22, 1, 0.36, 1) var(--d) forwards;
     }
   }
   @keyframes route-draw {
@@ -183,7 +337,41 @@
     }
   }
 
-  /* Case-study mosaic: solid colour fields, no gaps, no shadows. */
+  /*
+    The one warm human thing, and the only flicker on the site: the decision
+    diamond settles into the accent once, after the drawing finishes.
+  */
+  .lamp {
+    stroke: var(--raincoat);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-plain="on"]) .lamp {
+      animation: lamp 2.6s cubic-bezier(0.22, 1, 0.36, 1) 1.9s both;
+    }
+  }
+  @keyframes lamp {
+    0% {
+      opacity: 0;
+    }
+    18% {
+      opacity: 1;
+    }
+    26% {
+      opacity: 0.25;
+    }
+    34% {
+      opacity: 0.9;
+    }
+    44% {
+      opacity: 0.4;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  /* ----------------------------------------------------------------- parts */
+
   .mosaic {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -205,18 +393,19 @@
     background: var(--tile);
     color: var(--on-tile);
     text-align: center;
+    border-top: 1px solid var(--concrete);
   }
   .tile:has(.tile-link:focus-visible),
   .tile:focus-visible {
-    outline: 3px solid var(--on-tile);
-    outline-offset: -12px;
+    outline: 2px solid var(--raincoat);
+    outline-offset: -10px;
   }
   .tile-link {
     text-decoration-line: underline;
     text-decoration-color: transparent;
-    text-decoration-thickness: 0.08em;
-    text-underline-offset: 0.14em;
-    transition: text-decoration-color 150ms ease;
+    text-decoration-thickness: 0.07em;
+    text-underline-offset: 0.16em;
+    transition: text-decoration-color 200ms ease;
   }
   .tile-link::after {
     content: "";
@@ -229,67 +418,69 @@
   }
   .tile:hover .tile-link,
   .tile-link:focus-visible {
-    text-decoration-color: currentColor;
+    text-decoration-color: var(--raincoat);
   }
 
-  /* Quiet text links. */
   .link {
     text-decoration-line: underline;
     text-decoration-thickness: 1px;
-    text-underline-offset: 0.2em;
-    text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
-    transition: text-decoration-color 150ms ease;
+    text-underline-offset: 0.22em;
+    text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+    transition: text-decoration-color 200ms ease;
   }
   .link:hover {
-    text-decoration-color: currentColor;
+    text-decoration-color: var(--raincoat);
   }
   .link-quiet {
     text-decoration-line: underline;
-    text-decoration-thickness: 0.08em;
-    text-underline-offset: 0.2em;
+    text-decoration-thickness: 0.07em;
+    text-underline-offset: 0.22em;
     text-decoration-color: transparent;
-    transition: text-decoration-color 150ms ease;
+    transition: text-decoration-color 200ms ease;
   }
   .link-quiet:hover {
-    text-decoration-color: currentColor;
+    text-decoration-color: var(--raincoat);
   }
 
-  /* Buttons: square, solid or outlined, same size. */
+  /* Square institutional edges: 0 radius everywhere. */
   .btn {
     display: inline-flex;
     align-items: center;
     min-height: 48px;
-    padding: 0.75rem 1.35rem;
-    font-weight: 700;
-    border: 2px solid currentColor;
+    padding: 0.7rem 1.3rem;
+    font-weight: 600;
+    border: 1px solid currentColor;
+    border-radius: 0;
     transition:
-      background-color 150ms ease,
-      color 150ms ease;
+      background-color 200ms ease,
+      color 200ms ease,
+      border-color 200ms ease;
   }
   .btn-solid {
-    background: var(--ink);
-    border-color: var(--ink);
-    color: var(--paper);
+    background: var(--raincoat);
+    border-color: var(--raincoat);
+    color: var(--on-raincoat);
   }
   .btn-solid:hover {
     background: transparent;
-    color: var(--ink);
+    color: var(--raincoat);
+  }
+  .btn-line {
+    border-color: var(--concrete);
+    color: var(--bone);
   }
   .btn-line:hover {
-    background: var(--ink);
-    border-color: var(--ink);
-    color: var(--paper);
+    border-color: var(--bone);
   }
 
-  /* Case-study column layout: text 42rem, wide 64rem. */
   .article-grid {
     display: grid;
     grid-template-columns:
-      [full-start] minmax(16px, 1fr)
-      [wide-start] minmax(0, 11rem)
-      [text-start] min(42rem, calc(100% - 32px))
-      [text-end] minmax(0, 11rem)
-      [wide-end] minmax(16px, 1fr)
+      [full-start] minmax(20px, 1fr)
+      [wide-start] minmax(0, 9rem)
+      [text-start] min(40rem, calc(100% - 40px))
+      [text-end] minmax(0, 9rem)
+      [wide-end] minmax(20px, 1fr)
       [full-end];
   }
   .article-grid > * {
@@ -299,46 +490,35 @@
     grid-column: wide;
   }
 
-  .prose-body {
-    font-size: 1.125rem;
-    line-height: 1.8;
-  }
-  .prose-body h2 {
-    margin-top: 4.5rem;
-    margin-bottom: 1rem;
-    font-size: clamp(1.6rem, 3.4vw, 2.1rem);
-    font-weight: 800;
-    line-height: 1.2;
-    letter-spacing: -0.02em;
-  }
-
   .panel {
-    background: var(--mist);
-    border-radius: 18px;
+    background: var(--soot);
+    border: 1px solid var(--concrete);
+    border-radius: 2px;
   }
 
-  /* Diagram colours: page defaults, then the version drawn on a project tile. */
+  /* Imagery is graded, never shipped at full saturation. */
+  .graded {
+    filter: saturate(0.45) contrast(1.06) brightness(0.9);
+  }
+
   .diagram {
-    --dg-ink: var(--ink);
-    --dg-muted: var(--graphite);
-    --dg-box: var(--paper);
-    --dg-line: var(--ink);
-    --dg-solid: var(--ink);
-    --dg-on-solid: var(--paper);
+    --dg-ink: var(--bone);
+    --dg-muted: var(--ash);
+    --dg-box: var(--soot);
+    --dg-line: var(--ash);
+    --dg-solid: var(--raincoat);
+    --dg-on-solid: var(--on-raincoat);
   }
   .diagram-on-tile .diagram {
     --dg-ink: var(--on-tile);
     --dg-muted: var(--on-tile);
-    --dg-box: color-mix(in srgb, var(--tile) 70%, #ffffff);
+    --dg-box: color-mix(in srgb, var(--tile) 75%, var(--bone));
     --dg-line: var(--on-tile);
-    --dg-solid: var(--on-tile);
-    --dg-on-solid: var(--tile);
+    --dg-solid: var(--raincoat);
+    --dg-on-solid: var(--on-raincoat);
   }
 
-  /* Outlined button in a project's own colours (case-study band). */
   .btn-tile:hover {
-    background: var(--on-tile);
     border-color: var(--on-tile);
-    color: var(--tile);
   }
 }

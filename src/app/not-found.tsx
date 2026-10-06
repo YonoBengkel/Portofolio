@@ -6,7 +6,7 @@ export default function NotFound() {
       <h1 className="big-word mb-0 text-[clamp(3rem,9vw,8rem)]">
         Page not found<span className="stop">.</span>
       </h1>
-      <p className="mt-10 max-w-[36rem] text-lg leading-relaxed text-graphite">
+      <p className="mt-10 max-w-[36rem] text-lg leading-relaxed text-ash">
         The link may be outdated. The case studies are on the home page.
       </p>
       <Link href="/#work" className="btn btn-solid mt-8">

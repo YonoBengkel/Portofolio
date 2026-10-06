@@ -35,7 +35,7 @@ export default function Home() {
           <h3 className="text-[1.75rem] font-extrabold tracking-[-0.025em] sm:text-4xl">Other projects</h3>
           <ul className="mt-8 grid gap-10 md:grid-cols-3 md:gap-8">
             {otherWork.map((w) => (
-              <li key={w.title} className="border-t-2 border-ink pt-5">
+              <li key={w.title} className="border-t border-concrete pt-5">
                 <h4 className="text-lg font-bold leading-snug">
                   {w.href ? (
                     <a href={w.href} target="_blank" rel="noopener noreferrer" className="link">
@@ -45,7 +45,7 @@ export default function Home() {
                     w.title
                   )}
                 </h4>
-                <p className="mt-2 leading-relaxed text-graphite">{w.body}</p>
+                <p className="mt-2 leading-relaxed text-ash">{w.body}</p>
                 <p className="mt-3 text-[0.95rem] font-semibold">{w.meta}</p>
               </li>
             ))}
@@ -58,7 +58,7 @@ export default function Home() {
         {experience.map((e) => (
           <article
             key={e.role}
-            className="grid gap-8 bg-cobalt px-6 pb-12 pt-16 text-on-cobalt sm:px-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16 lg:px-16 lg:pb-20 lg:pt-24"
+            className="grid gap-8 bg-raincoat px-6 pb-12 pt-16 text-on-raincoat sm:px-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16 lg:px-16 lg:pb-20 lg:pt-24"
           >
             <div>
               <h3 className="text-[2rem] font-extrabold leading-[1.08] tracking-[-0.03em] sm:text-[2.6rem]">{e.role}</h3>
@@ -77,11 +77,11 @@ export default function Home() {
           <h3 className="text-[1.75rem] font-extrabold tracking-[-0.025em] sm:text-4xl">Leadership</h3>
           <ul className="mt-8 grid gap-10 md:grid-cols-3 md:gap-8">
             {leadership.map((l) => (
-              <li key={l.role} className="border-t-2 border-ink pt-5">
-                <p className="text-[0.95rem] text-graphite">{l.period}</p>
+              <li key={l.role} className="border-t border-concrete pt-5">
+                <p className="text-[0.95rem] text-ash">{l.period}</p>
                 <h4 className="mt-2 text-lg font-bold leading-snug">{l.role}</h4>
                 <p className="mt-1 font-semibold">{l.org}</p>
-                <p className="mt-3 leading-relaxed text-graphite">{l.body}</p>
+                <p className="mt-3 leading-relaxed text-ash">{l.body}</p>
               </li>
             ))}
           </ul>
@@ -90,23 +90,23 @@ export default function Home() {
         <div className="mt-20 grid gap-14 sm:mt-24 lg:grid-cols-2 lg:gap-8">
           <div>
             <h3 className="text-[1.75rem] font-extrabold tracking-[-0.025em] sm:text-4xl">Education</h3>
-            <div className="mt-8 border-t-2 border-ink pt-5">
+            <div className="mt-8 border-t border-concrete pt-5">
               <p className="text-lg font-bold">{education.degree}</p>
               <p className="mt-1 font-semibold">{education.school}</p>
-              <p className="mt-1 text-[0.95rem] text-graphite">{education.period}</p>
-              <p className="mt-4 max-w-[36rem] leading-relaxed text-graphite">
-                <span className="font-bold text-ink">Coursework: </span>
+              <p className="mt-1 text-[0.95rem] text-ash">{education.period}</p>
+              <p className="mt-4 max-w-[36rem] leading-relaxed text-ash">
+                <span className="font-bold text-bone">Coursework: </span>
                 {education.coursework}
               </p>
             </div>
           </div>
           <div>
             <h3 className="text-[1.75rem] font-extrabold tracking-[-0.025em] sm:text-4xl">Toolbox</h3>
-            <dl className="mt-8 grid gap-x-8 gap-y-6 border-t-2 border-ink pt-5 sm:grid-cols-2">
+            <dl className="mt-8 grid gap-x-8 gap-y-6 border-t border-concrete pt-5 sm:grid-cols-2">
               {toolbox.map((t) => (
                 <div key={t.group}>
                   <dt className="font-bold">{t.group}</dt>
-                  <dd className="mt-1 leading-relaxed text-graphite">{t.items.join(", ")}</dd>
+                  <dd className="mt-1 leading-relaxed text-ash">{t.items.join(", ")}</dd>
                 </div>
               ))}
             </dl>
@@ -117,7 +117,7 @@ export default function Home() {
       <section id="contact" aria-labelledby="contact-title" className="frame scroll-mt-6 pb-16 pt-28 sm:pt-40">
         <BigWord id="contact-title">Contact</BigWord>
         <div className="grid lg:grid-cols-2">
-          <div className="bg-cobalt px-6 pb-14 pt-16 text-on-cobalt sm:px-10 lg:px-16 lg:pb-20 lg:pt-24">
+          <div className="bg-raincoat px-6 pb-14 pt-16 text-on-raincoat sm:px-10 lg:px-16 lg:pb-20 lg:pt-24">
             <a
               href={`mailto:${profile.email}`}
               aria-label={profile.email}
@@ -151,10 +151,10 @@ export default function Home() {
               )}
             </ul>
           </div>
-          <dl className="space-y-7 bg-mist px-6 py-14 sm:px-10 lg:px-16 lg:py-24">
+          <dl className="space-y-7 bg-soot px-6 py-14 sm:px-10 lg:px-16 lg:py-24">
             {atAGlance.map((item) => (
               <div key={item.label}>
-                <dt className="text-[0.95rem] font-bold text-graphite">{item.label}</dt>
+                <dt className="text-[0.95rem] font-bold text-ash">{item.label}</dt>
                 <dd className="mt-1 text-lg font-semibold leading-snug">{item.value}</dd>
               </div>
             ))}

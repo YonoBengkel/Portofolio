@@ -11,14 +11,14 @@ function Img({ figure, preload = false }: { figure: Figure; preload?: boolean })
   return (
     <a
       href={figure.src.src}
-      className={`block cursor-zoom-in rounded-[10px] ${figure.narrow ? "mx-auto max-w-[28rem]" : ""}`}
+      className={`block cursor-zoom-in rounded-[2px] ${figure.narrow ? "mx-auto max-w-[28rem]" : ""}`}
     >
       <Image
         src={figure.src}
         alt={figure.alt}
         preload={preload}
         sizes={figure.narrow ? "(min-width: 640px) 28rem, 100vw" : "(min-width: 1080px) 1024px, 100vw"}
-        className="h-auto w-full rounded-[10px] border border-rule bg-paper"
+        className="h-auto w-full rounded-[2px] border border-concrete bg-soot"
       />
       <span className="sr-only"> (opens the full-size image)</span>
     </a>
@@ -38,7 +38,7 @@ function Diagram({ kind }: { kind: "pipeline" | "star-schema" }) {
 }
 
 function Caption({ children }: { children: string }) {
-  return <figcaption className="mt-4 text-[0.95rem] leading-relaxed text-graphite">{children}</figcaption>;
+  return <figcaption className="mt-4 text-[0.95rem] leading-relaxed text-ash">{children}</figcaption>;
 }
 
 /** The first picture on the page. It overlaps the bottom of the coloured band. */
@@ -92,7 +92,7 @@ function SectionBlocks({ section }: { section: Section }) {
       return (
         <>
           <h2>{section.heading}</h2>
-          <ul className="mt-2 list-disc space-y-3 pl-6 marker:text-graphite">
+          <ul className="mt-2 list-disc space-y-3 pl-6 marker:text-ash">
             {section.items.map((item) => (
               <li key={item} className="pl-1">
                 <Rich text={item} />
@@ -108,7 +108,7 @@ function SectionBlocks({ section }: { section: Section }) {
           <div className="mt-6 overflow-x-auto">
             <table className="w-full border-collapse text-left text-[1.05rem] leading-relaxed">
               <thead>
-                <tr className="border-b-2 border-ink">
+                <tr className="border-b border-concrete">
                   <th scope="col" className="w-[38%] py-3 pr-6 text-[0.95rem] font-bold">
                     Decision
                   </th>
@@ -119,11 +119,11 @@ function SectionBlocks({ section }: { section: Section }) {
               </thead>
               <tbody>
                 {section.items.map((d) => (
-                  <tr key={d.title} className="border-b border-rule align-top">
+                  <tr key={d.title} className="border-b border-concrete align-top">
                     <th scope="row" className="py-4 pr-6 font-bold">
                       {d.title}
                     </th>
-                    <td className="py-4 text-graphite">{d.body}</td>
+                    <td className="py-4 text-ash">{d.body}</td>
                   </tr>
                 ))}
               </tbody>
@@ -151,7 +151,7 @@ function SectionBlocks({ section }: { section: Section }) {
       );
     case "note":
       return (
-        <p className="mt-12 border-t border-rule pt-5 text-[0.95rem] text-graphite">
+        <p className="mt-12 border-t border-concrete pt-5 text-[0.95rem] text-ash">
           <Rich text={section.body} />
         </p>
       );
