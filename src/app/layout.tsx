@@ -68,15 +68,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <RevealOnScroll />
         {/* The cursor: a pool of light, a trailing ring and an exact dot. */}
         <Pointer />
+        {/* The warm seam where the doors meet during a page change. */}
+        <div className="shutter-seam" aria-hidden="true" />
         {/* Fog: the top and bottom edges of the window sink back into the page colour. */}
         <div className="fog" aria-hidden="true" />
         {/* One static grain plate, never animated. */}
-        <svg className="grain" aria-hidden="true" focusable="false">
-          <filter id="grain">
-            <feTurbulence type="fractalNoise" baseFrequency="0.82" numOctaves="3" stitchTiles="stitch" />
-          </filter>
-          <rect width="100%" height="100%" filter="url(#grain)" />
-        </svg>
+        <div className="grain" aria-hidden="true" />
       </body>
     </html>
   );

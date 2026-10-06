@@ -239,15 +239,16 @@
       linear-gradient(to top, var(--void) 0%, color-mix(in oklab, var(--void) 55%, transparent) 7%, transparent 16%);
   }
 
-  /* One static grain plate. Never animated. */
+  /* One static grain plate: a 96px tile, repeated. Never animated. */
   .grain {
     position: fixed;
     inset: 0;
     z-index: 41;
-    width: 100%;
-    height: 100%;
     pointer-events: none;
     opacity: 0.035;
+    background-image: url("/grain.png");
+    background-repeat: repeat;
+    background-size: 96px 96px;
   }
 
   /* ------------------------------------------------------------ typography */
@@ -785,46 +786,68 @@
   /* ------------------------------------------------------- page transition */
 
   /*
-    Pages are not slid, they are lit. The page you leave is doused; the page you
-    arrive at is kindled from a point, the light opening outward until it fills the
-    window. Going deeper lights from the middle of the page; going back lights from
-    the top left, where the back link is, so the two directions do not feel alike.
+    The lift doors, to match the shaft on the work index.
+
+    Two halves of the page colour close over the page you are leaving, meet at the
+    middle with a warm seam, then part again on the page you asked for. The whole
+    move takes 640ms: long enough to feel deliberate, short enough that a click
+    still answers immediately.
   */
-  ::view-transition-old(.nav-forward),
-  ::view-transition-old(.nav-back) {
-    animation: 260ms cubic-bezier(0.4, 0, 1, 1) both vt-douse;
+  ::view-transition-old(.page) {
+    animation: 280ms cubic-bezier(0.55, 0, 1, 0.45) both shutter-close;
   }
-  ::view-transition-new(.nav-forward) {
-    animation: 680ms cubic-bezier(0.22, 1, 0.36, 1) 140ms both vt-kindle-centre;
-  }
-  ::view-transition-new(.nav-back) {
-    animation: 680ms cubic-bezier(0.22, 1, 0.36, 1) 140ms both vt-kindle-corner;
+  ::view-transition-new(.page) {
+    animation: 360ms cubic-bezier(0.22, 1, 0.36, 1) 280ms both shutter-open;
   }
 
-  @keyframes vt-douse {
+  @keyframes shutter-close {
+    from {
+      clip-path: inset(0 0 0 0);
+    }
     to {
+      clip-path: inset(50% 0 50% 0);
+    }
+  }
+  @keyframes shutter-open {
+    from {
+      clip-path: inset(50% 0 50% 0);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+    }
+  }
+
+  /* The seam. The one warm thing in the move, and the only way you see the doors meet. */
+  .shutter-seam {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    z-index: 80;
+    pointer-events: none;
+    opacity: 0;
+    background: linear-gradient(to right, transparent, var(--brass), transparent);
+  }
+  html:active-view-transition .shutter-seam {
+    animation: seam 640ms ease-out both;
+  }
+  @keyframes seam {
+    0% {
       opacity: 0;
-      scale: 0.988;
+      scale: 0.2 1;
     }
-  }
-  @keyframes vt-kindle-centre {
-    from {
-      opacity: 0.15;
-      clip-path: circle(0% at 50% 42%);
-    }
-    to {
+    42% {
       opacity: 1;
-      clip-path: circle(135% at 50% 42%);
+      scale: 1 1;
     }
-  }
-  @keyframes vt-kindle-corner {
-    from {
-      opacity: 0.15;
-      clip-path: circle(0% at 14% 16%);
-    }
-    to {
+    58% {
       opacity: 1;
-      clip-path: circle(150% at 14% 16%);
+      scale: 1 1;
+    }
+    100% {
+      opacity: 0;
+      scale: 1 1;
     }
   }
 

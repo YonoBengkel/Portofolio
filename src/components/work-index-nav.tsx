@@ -33,20 +33,32 @@ export function WorkIndexNav({ items }: { items: IndexItem[] }) {
       setActive(current);
     }
 
+    // Scroll fires far more often than the screen redraws, so coalesce to one
+    // measurement per frame.
+    let frame = 0;
+    function onScroll() {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        pick();
+      });
+    }
+
     pick();
-    const observer = new IntersectionObserver(pick, {
+    const observer = new IntersectionObserver(onScroll, {
       threshold: [0, 0.25, 0.5, 0.75, 1],
     });
     for (const item of items) {
       const el = document.getElementById(`project-${item.slug}`);
       if (el) observer.observe(el);
     }
-    window.addEventListener("scroll", pick, { passive: true });
-    window.addEventListener("resize", pick);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
     return () => {
       observer.disconnect();
-      window.removeEventListener("scroll", pick);
-      window.removeEventListener("resize", pick);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (frame) cancelAnimationFrame(frame);
     };
   }, [items]);
 
