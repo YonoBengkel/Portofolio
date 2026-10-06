@@ -378,55 +378,6 @@
 
   /* ----------------------------------------------------------------- parts */
 
-  .mosaic {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-  }
-  @media (min-width: 900px) {
-    .mosaic {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-    .mosaic .tile-wide {
-      grid-column: span 2;
-    }
-  }
-  .tile {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    overflow: hidden;
-    background: var(--tile);
-    color: var(--on-tile);
-    text-align: center;
-    border-top: 1px solid var(--concrete);
-  }
-  .tile:has(.tile-link:focus-visible),
-  .tile:focus-visible {
-    outline: 2px solid var(--brass);
-    outline-offset: -10px;
-  }
-  .tile-link {
-    text-decoration-line: underline;
-    text-decoration-color: transparent;
-    text-decoration-thickness: 0.07em;
-    text-underline-offset: 0.16em;
-    transition: text-decoration-color 200ms ease;
-  }
-  .tile-link::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-  }
-  .tile-link:focus-visible {
-    outline: none;
-  }
-  .tile:hover .tile-link,
-  .tile-link:focus-visible {
-    text-decoration-color: var(--brass);
-  }
-
   .link {
     text-decoration-line: underline;
     text-decoration-thickness: 1px;
@@ -512,14 +463,6 @@
     --dg-muted: var(--ash);
     --dg-box: var(--soot);
     --dg-line: var(--ash);
-    --dg-solid: var(--brass);
-    --dg-on-solid: var(--on-brass);
-  }
-  .diagram-on-tile .diagram {
-    --dg-ink: var(--on-tile);
-    --dg-muted: var(--on-tile);
-    --dg-box: color-mix(in srgb, var(--tile) 75%, var(--bone));
-    --dg-line: var(--on-tile);
     --dg-solid: var(--brass);
     --dg-on-solid: var(--on-brass);
   }
@@ -659,6 +602,119 @@
     }
   }
 
+  /* ---------------------------------------------------------------- ledger */
+
+  .ledger {
+    display: grid;
+    gap: 2.5rem;
+  }
+  @media (min-width: 1024px) {
+    .ledger {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
+      gap: 4rem;
+      align-items: start;
+    }
+  }
+
+  .ledger-rows {
+    display: grid;
+  }
+
+  .ledger-row {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    gap: 1rem;
+    padding-block: 1.6rem;
+    border-top: 1px solid var(--concrete);
+    color: var(--ash);
+    transition:
+      color 260ms ease,
+      border-color 260ms ease;
+  }
+  .ledger-rows > li:last-child .ledger-row {
+    border-bottom: 1px solid var(--concrete);
+  }
+  .ledger-number {
+    padding-top: 0.45rem;
+  }
+  .ledger-body {
+    display: grid;
+    gap: 0.5rem;
+  }
+  .ledger-title {
+    display: block;
+    font-size: clamp(1.5rem, 3.2vw, 2.1rem);
+    color: var(--ash);
+    transition: color 260ms ease;
+  }
+  .ledger-summary {
+    max-width: 30rem;
+    line-height: 1.6;
+  }
+  .ledger-facts {
+    margin-top: 0.35rem;
+  }
+
+  .ledger-row:hover,
+  .ledger-row:focus-visible,
+  .ledger-row[data-lit="true"] {
+    color: var(--bone);
+    border-color: var(--ash);
+  }
+  .ledger-row:hover .ledger-title,
+  .ledger-row:focus-visible .ledger-title,
+  .ledger-row[data-lit="true"] .ledger-title {
+    color: var(--bone);
+  }
+
+  /* The plate: one picture at a time, crossfading as the pointer moves down the rows. */
+  .ledger-plate {
+    display: none;
+  }
+  @media (min-width: 1024px) {
+    .ledger-plate {
+      display: block;
+      position: sticky;
+      top: 8rem;
+      aspect-ratio: 4 / 3;
+      border: 1px solid var(--concrete);
+      background: var(--soot);
+      overflow: hidden;
+    }
+    .ledger-plate img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: left top;
+      opacity: 0;
+      transition: opacity 520ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .ledger-plate img[data-lit="true"] {
+      opacity: 1;
+    }
+  }
+
+  .ledger-inline-plate {
+    position: relative;
+    height: clamp(180px, 52vw, 320px);
+    margin-bottom: 1.6rem;
+    border: 1px solid var(--concrete);
+    background: var(--soot);
+    overflow: hidden;
+  }
+  .ledger-inline-plate img {
+    position: absolute;
+    inset: 0;
+  }
+  @media (min-width: 1024px) {
+    .ledger-inline-plate {
+      display: none;
+    }
+  }
+
+
   /* ------------------------------------------------------------ flow chain */
 
   /* A diagram made of words: it survives a narrow screen and a failed image. */
@@ -735,7 +791,8 @@
     position: fixed;
     left: 0;
     top: 0;
-    z-index: -1;
+    z-index: 45;
+    mix-blend-mode: screen;
     width: 760px;
     height: 760px;
     margin: -380px 0 0 -380px;
@@ -817,8 +874,12 @@
   }
 
   /* The header does not travel with the page. */
+  /* The header is frozen to the window; the strip behind it fades so lines pass under
+     it instead of hitting an edge. */
   .site-header {
     view-transition-name: site-header;
+    background: linear-gradient(to bottom, var(--void) 42%, color-mix(in oklab, var(--void) 70%, transparent) 72%, transparent);
+    padding-bottom: 18px;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -827,9 +888,5 @@
     ::view-transition-new(*) {
       animation: none !important;
     }
-  }
-
-  .btn-tile:hover {
-    border-color: var(--on-tile);
   }
 }

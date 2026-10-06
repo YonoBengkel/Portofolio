@@ -3,7 +3,7 @@ import path from "node:path";
 import Link from "next/link";
 import { Hero } from "@/components/hero";
 import { PageTransition } from "@/components/page-transition";
-import { ProjectCard } from "@/components/project-card";
+import { ProjectLedger } from "@/components/project-ledger";
 import { projects } from "@/content/projects";
 import { atAGlance, profile } from "@/content/site";
 
@@ -28,21 +28,30 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="work" aria-labelledby="work-title" className="lit scroll-mt-6">
-        <div className="column">
+      <section id="work" aria-labelledby="work-title" className="lit scroll-mt-28">
+        <div className="column pb-10">
           <h2 id="work-title" className="display text-[clamp(2.4rem,6vw,4.4rem)]">
-            Four things I built
+            My recent projects
           </h2>
           <p className="mt-5 max-w-[32rem] leading-relaxed text-ash">
             Each one starts from how a job is actually done, and ends in something a person can act on.
           </p>
         </div>
-        <div className="mosaic mt-12">
-          {projects.map((p, i) => (
-            <ProjectCard key={p.slug} project={p} wide={i === 0 || i === projects.length - 1} />
-          ))}
+        <div className="frame pb-10">
+          <ProjectLedger
+            items={projects.map((p) => ({
+              slug: p.slug,
+              number: p.number,
+              title: p.cardTitle,
+              summary: p.summary,
+              status: p.status,
+              teamLabel: p.teamLabel,
+              period: p.period,
+              cover: { src: p.cover.src, alt: p.cover.alt },
+            }))}
+          />
         </div>
-        <div className="column pt-12">
+        <div className="column pt-6">
           <Link href="/work" className="link" transitionTypes={["nav-forward"]}>
             All work, including the smaller projects
           </Link>

@@ -42,8 +42,6 @@ export type Project = {
   flow: string[];
   tools: string[];
   links: { label: string; href: string }[];
-  /** The project's own colour: its home tile, the band at the top of its page, and the "next case study" link. */
-  color: { tile: string; ink: "light" | "dark" };
   cover: Figure;
   /** Show a diagram instead of the cover image at the top of the case study and on the home tile. */
   heroDiagram?: { diagram: "pipeline" | "star-schema"; caption: string };
@@ -70,7 +68,6 @@ export const projects: Project[] = [
     flow: ["Cashier sales", "Stock ledger", "Restock forecast", "Distributor order", "Goods receipt"],
     tools: ["React", "TypeScript", "Process flowcharts", "SWOT"],
     links: [{ label: "GitHub repository", href: "https://github.com/YonoBengkel/Warungku" }],
-    color: { tile: "#10151D", ink: "light" }, // first step of the luminance ramp: nearest the page
     cover: {
       src: warungkuOwner,
       alt: "Warungku business-owner screens: daily to-do list, stock forecast with reasons, and goods receipt",
@@ -176,7 +173,6 @@ export const projects: Project[] = [
     flow: ["Purchase records", "Criteria the buyer weights", "Score per supplier", "Ranking", "Expiry audit"],
     tools: ["Python", "pandas", "Streamlit", "Plotly", "SAW & TOPSIS scoring"],
     links: [{ label: "Live app", href: "https://supplier-procurement-analysis.streamlit.app/" }],
-    color: { tile: "#151C27", ink: "light" },
     cover: {
       src: supplierActive,
       alt: "Supplier recommendation per product with criteria weights set in the sidebar",
@@ -238,7 +234,6 @@ export const projects: Project[] = [
     flow: ["CRM and ERP exports", "Raw copy kept", "Cleaned and matched", "Star schema", "Data marts"],
     tools: ["Python", "pandas", "SQL", "SQLite", "Apache Airflow", "Docker"],
     links: [{ label: "GitHub repository", href: "https://github.com/YonoBengkel/Medallion" }],
-    color: { tile: "#1A2230", ink: "light" },
     cover: {
       src: dwTopProducts,
       alt: "Bar chart of the top five product subcategories by profit",
@@ -305,7 +300,6 @@ export const projects: Project[] = [
     flow: ["Plant sensor readings", "Impurity model", "Cost-weighted threshold", "Alert", "What to adjust"],
     tools: ["Python", "scikit-learn", "FastAPI", "React"],
     links: [{ label: "GitHub repository", href: "https://github.com/YonoBengkel/Tambang" }],
-    color: { tile: "#1F2839", ink: "light" }, // last step: furthest from the page
     cover: {
       src: ewsEvaluation,
       alt: "Dashboard flags a likely high-silica batch and recommends an action for the operator",
