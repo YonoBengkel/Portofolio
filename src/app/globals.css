@@ -3,24 +3,27 @@
 /*
   Pale City.
 
-  Six colours and no more. The page is near-black with a faint green cast; text is
-  a warm off-white; one yellow is the only saturated thing on screen and appears at
-  most three times in a viewport. There is no pure black and no pure white, because
-  the reference has neither.
+  The palette is sampled from the reference frames in D:\KULIAH\IDENTITAS\Referensi, not
+  guessed: across those fourteen images the dark and mid tones sit at hue 210-240 at about
+  half saturation, and every light source sits at hue 24-60. So the world is cold blue
+  slate and the only warm thing is the light itself, the way the lamps and the raincoat
+  are the only warm things on screen.
 
-  Luminance, not size, is the hierarchy: whatever you are reading sits in a pool of
-  light and the rest recedes toward the page colour. Text itself never dims — only
-  the pools, the rules and the imagery do — so no reading pair ever drops below
-  4.5:1. Measured against --void: bone 13.3:1, raincoat 10.2:1, ash 6.1:1.
+  There is no pure black and no pure white, because the reference has neither.
+
+  Luminance, not size, is the hierarchy: whatever you are reading sits in a pool of light
+  and the rest recedes toward the page colour. Text itself never dims - only the pools,
+  the rules and the imagery do - so no reading pair ever drops below 4.5:1.
+  Measured against --void: bone 13.3:1, brass 8.7:1, ash 6.6:1.
 */
 :root {
-  --void: #0a0b0a; /* the page. nothing else is a page background */
-  --soot: #151816; /* raised surfaces */
-  --concrete: #2a2e2a; /* rules, borders, dividers */
-  --ash: #8c9188; /* secondary text. brightened from the brief's #808579, which was 4.7:1 on soot */
-  --bone: #d8d4c8; /* primary text */
-  --raincoat: #e8b23c; /* the one accent */
-  --on-raincoat: #0a0b0a;
+  --void: #0a0c11; /* the page. nothing else is a page background */
+  --soot: #121823; /* raised surfaces */
+  --concrete: #242e3b; /* rules, borders, dividers */
+  --ash: #8e97a6; /* secondary text */
+  --bone: #d9d5c8; /* primary text. the warm off-white of Mono's paper bag */
+  --brass: #d9a441; /* the one accent: lamplight, not a highlighter */
+  --on-brass: #0a0c11;
 }
 
 @theme inline {
@@ -29,8 +32,8 @@
   --color-concrete: var(--concrete);
   --color-ash: var(--ash);
   --color-bone: var(--bone);
-  --color-raincoat: var(--raincoat);
-  --color-on-raincoat: var(--on-raincoat);
+  --color-brass: var(--brass);
+  --color-on-brass: var(--on-brass);
 
   --font-display: var(--font-bodoni), ui-serif, Georgia, serif;
   --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
@@ -56,12 +59,12 @@
   }
 
   ::selection {
-    background: var(--raincoat);
-    color: var(--on-raincoat);
+    background: var(--brass);
+    color: var(--on-brass);
   }
 
   :focus-visible {
-    outline: 2px solid var(--raincoat);
+    outline: 2px solid var(--brass);
     outline-offset: 3px;
   }
 
@@ -275,7 +278,7 @@
   }
   .big-word .stop {
     margin-left: -0.03em;
-    color: var(--raincoat);
+    color: var(--brass);
   }
 
   /* -------------------------------------------------------------- the hero */
@@ -345,7 +348,7 @@
     diamond settles into the accent once, after the drawing finishes.
   */
   .lamp {
-    stroke: var(--raincoat);
+    stroke: var(--brass);
   }
   @media (prefers-reduced-motion: no-preference) {
     html:not([data-plain="on"]) .lamp {
@@ -400,7 +403,7 @@
   }
   .tile:has(.tile-link:focus-visible),
   .tile:focus-visible {
-    outline: 2px solid var(--raincoat);
+    outline: 2px solid var(--brass);
     outline-offset: -10px;
   }
   .tile-link {
@@ -421,7 +424,7 @@
   }
   .tile:hover .tile-link,
   .tile-link:focus-visible {
-    text-decoration-color: var(--raincoat);
+    text-decoration-color: var(--brass);
   }
 
   .link {
@@ -432,7 +435,7 @@
     transition: text-decoration-color 200ms ease;
   }
   .link:hover {
-    text-decoration-color: var(--raincoat);
+    text-decoration-color: var(--brass);
   }
   .link-quiet {
     text-decoration-line: underline;
@@ -442,7 +445,7 @@
     transition: text-decoration-color 200ms ease;
   }
   .link-quiet:hover {
-    text-decoration-color: var(--raincoat);
+    text-decoration-color: var(--brass);
   }
 
   /* Square institutional edges: 0 radius everywhere. */
@@ -460,13 +463,13 @@
       border-color 200ms ease;
   }
   .btn-solid {
-    background: var(--raincoat);
-    border-color: var(--raincoat);
-    color: var(--on-raincoat);
+    background: var(--brass);
+    border-color: var(--brass);
+    color: var(--on-brass);
   }
   .btn-solid:hover {
     background: transparent;
-    color: var(--raincoat);
+    color: var(--brass);
   }
   .btn-line {
     border-color: var(--concrete);
@@ -509,16 +512,16 @@
     --dg-muted: var(--ash);
     --dg-box: var(--soot);
     --dg-line: var(--ash);
-    --dg-solid: var(--raincoat);
-    --dg-on-solid: var(--on-raincoat);
+    --dg-solid: var(--brass);
+    --dg-on-solid: var(--on-brass);
   }
   .diagram-on-tile .diagram {
     --dg-ink: var(--on-tile);
     --dg-muted: var(--on-tile);
     --dg-box: color-mix(in srgb, var(--tile) 75%, var(--bone));
     --dg-line: var(--on-tile);
-    --dg-solid: var(--raincoat);
-    --dg-on-solid: var(--on-raincoat);
+    --dg-solid: var(--brass);
+    --dg-on-solid: var(--on-brass);
   }
 
   .btn-tile:hover {

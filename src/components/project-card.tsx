@@ -8,7 +8,7 @@ import { PipelineDiagram, StarSchemaDiagram } from "./diagrams";
 export function projectColors(project: Project) {
   return {
     "--tile": project.color.tile,
-    "--on-tile": project.color.ink === "light" ? "#d8d4c8" : "#0a0b0a",
+    "--on-tile": project.color.ink === "light" ? "#d9d5c8" : "#0a0c11",
   } as CSSProperties;
 }
 

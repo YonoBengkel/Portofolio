@@ -58,7 +58,7 @@ export default function Home() {
         {experience.map((e) => (
           <article
             key={e.role}
-            className="grid gap-8 bg-raincoat px-6 pb-12 pt-16 text-on-raincoat sm:px-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16 lg:px-16 lg:pb-20 lg:pt-24"
+            className="grid gap-8 bg-brass px-6 pb-12 pt-16 text-on-brass sm:px-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16 lg:px-16 lg:pb-20 lg:pt-24"
           >
             <div>
               <h3 className="text-[2rem] font-extrabold leading-[1.08] tracking-[-0.03em] sm:text-[2.6rem]">{e.role}</h3>
@@ -117,7 +117,7 @@ export default function Home() {
       <section id="contact" aria-labelledby="contact-title" className="frame scroll-mt-6 pb-16 pt-28 sm:pt-40">
         <BigWord id="contact-title">Contact</BigWord>
         <div className="grid lg:grid-cols-2">
-          <div className="bg-raincoat px-6 pb-14 pt-16 text-on-raincoat sm:px-10 lg:px-16 lg:pb-20 lg:pt-24">
+          <div className="bg-brass px-6 pb-14 pt-16 text-on-brass sm:px-10 lg:px-16 lg:pb-20 lg:pt-24">
             <a
               href={`mailto:${profile.email}`}
               aria-label={profile.email}

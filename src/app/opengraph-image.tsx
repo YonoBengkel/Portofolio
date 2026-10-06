@@ -22,7 +22,7 @@ const ROUTE = [
   "M670 330H760",
   "M760 330L910 180L1060 330L910 480Z",
 ];
-const colors = { ground: "#0a0b0a", ink: "#d8d4c8", route: "#2a2e2a", lamp: "#e8b23c" };
+const colors = { ground: "#0a0c11", ink: "#d9d5c8", route: "#242e3b", lamp: "#d9a441" };
 
 // Social preview image shown when the site link is shared (LinkedIn, WhatsApp, etc.).
 export default function OpengraphImage() {
