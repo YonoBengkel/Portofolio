@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Archivo, Bodoni_Moda, IBM_Plex_Mono } from "next/font/google";
+import { PointerLight } from "@/components/pointer-light";
+import { RevealOnScroll } from "@/components/reveal-on-scroll";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { profile } from "@/content/site";
@@ -63,6 +65,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </main>
         <SiteFooter />
 
+        <RevealOnScroll />
+        {/* A pool of light the reader moves by hand. */}
+        <PointerLight />
         {/* Fog: the top and bottom edges of the window sink back into the page colour. */}
         <div className="fog" aria-hidden="true" />
         {/* One static grain plate, never animated. */}

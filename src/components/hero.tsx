@@ -1,5 +1,6 @@
+import Link from "next/link";
 import { Fragment, type CSSProperties } from "react";
-import { howIWork, profile } from "@/content/site";
+import { profile } from "@/content/site";
 
 // The route through the three flowchart symbols behind the name: a process box,
 // a data store and a decision, in the same order as "How I work".
@@ -19,29 +20,6 @@ const ECHO_DELAY = 0.022;
 // Each outline is repeated a few pixels lower and fainter, like a stack of tracing paper.
 const ECHOES = 14;
 const ECHO_STEP = 3.2;
-
-type Kind = "process" | "data" | "decision";
-const KINDS: Kind[] = ["process", "data", "decision"];
-
-const SMALL: Record<Kind, string[]> = {
-  process: ["M4 6H116V50H4Z"],
-  data: ["M24 12A36 8 0 1 0 96 12A36 8 0 1 0 24 12", "M24 12V44A36 8 0 0 0 96 44V12"],
-  decision: ["M22 30L60 4L98 30L60 56Z"],
-};
-
-function MethodShape({ kind }: { kind: Kind }) {
-  return (
-    <svg viewBox="0 0 120 68" className="route h-14 w-auto" aria-hidden>
-      {Array.from({ length: 5 }, (_, k) => (
-        <g key={k} transform={`translate(0 ${k * 2.2})`} opacity={1 - k * 0.19}>
-          {SMALL[kind].map((d) => (
-            <path key={d} d={d} />
-          ))}
-        </g>
-      ))}
-    </svg>
-  );
-}
 
 export function Hero({ hasCv }: { hasCv: boolean }) {
   const words = profile.name.split(" ");
@@ -80,37 +58,18 @@ export function Hero({ hasCv }: { hasCv: boolean }) {
           <p className="mt-12 max-w-[32rem] text-[1.1rem] leading-relaxed sm:text-[1.2rem]">{profile.tagline}</p>
 
           <div className="mt-9 flex flex-wrap gap-3">
-            <a href="#work" className="btn btn-solid">
-              Read the case studies
-            </a>
+            <Link href="/work" className="btn btn-solid" transitionTypes={["nav-forward"]}>
+              See the work
+            </Link>
             {hasCv && (
-              <a href={profile.cvPath} className="btn btn-line">
-                Download CV
-              </a>
+              <Link href="/cv" className="btn btn-line" transitionTypes={["nav-forward"]}>
+                CV
+              </Link>
             )}
-            <a href={`mailto:${profile.email}`} className="btn btn-line">
-              Email me
-            </a>
+            <Link href="/contact" className="btn btn-line" transitionTypes={["nav-forward"]}>
+              Get in touch
+            </Link>
           </div>
-        </div>
-      </section>
-
-      <section className="lit">
-        <div className="column band">
-          <h2 className="sr-only">How I work</h2>
-          <ol className="grid gap-12 sm:gap-14">
-            {howIWork.map((step, i) => (
-              <li key={step.title} className="grid gap-5 sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-8">
-                <div className="recede">
-                  <MethodShape kind={KINDS[i]} />
-                </div>
-                <div>
-                  <h3 className="display text-[1.6rem] sm:text-[1.9rem]">{step.title}</h3>
-                  <p className="mt-3 leading-relaxed text-ash">{step.body}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
         </div>
       </section>
     </>

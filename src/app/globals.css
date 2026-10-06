@@ -524,6 +524,245 @@
     --dg-on-solid: var(--on-brass);
   }
 
+  /* ------------------------------------------------------------ navigation */
+
+  .nav-current {
+    color: var(--bone);
+    text-decoration-line: underline;
+    text-decoration-thickness: 0.07em;
+    text-underline-offset: 0.22em;
+    text-decoration-color: var(--brass);
+  }
+
+  /* ------------------------------------------------------- the work index */
+
+  /* The list keeps your place while the entries scroll past it. */
+  .work-index-aside {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    padding-block: 12px;
+    background: linear-gradient(to bottom, var(--void) 70%, transparent);
+  }
+  @media (min-width: 1024px) {
+    .work-index-aside {
+      align-self: start;
+      top: 7rem;
+      padding-block: 0;
+      background: none;
+    }
+  }
+
+  .work-rail {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+  }
+  .work-rail::-webkit-scrollbar {
+    display: none;
+  }
+  .work-rail > li {
+    flex: 0 0 15rem;
+    scroll-snap-align: start;
+  }
+  @media (min-width: 1024px) {
+    .work-rail {
+      display: grid;
+      gap: 22px;
+      overflow: visible;
+    }
+    .work-rail > li {
+      flex: none;
+    }
+  }
+
+  .work-rail-link {
+    display: block;
+    padding-left: 14px;
+    border-left: 1px solid var(--concrete);
+    color: var(--ash);
+    transition:
+      color 200ms ease,
+      border-color 200ms ease;
+  }
+  .work-rail-link:hover {
+    color: var(--bone);
+    border-color: var(--ash);
+  }
+  .work-rail-link[aria-current="true"] {
+    color: var(--bone);
+    border-color: var(--brass);
+  }
+
+  /* ------------------------------------------------------------ flow chain */
+
+  /* A diagram made of words: it survives a narrow screen and a failed image. */
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    margin-top: 1.75rem;
+  }
+  .flow-step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .flow-mark {
+    width: 14px;
+    height: 1px;
+    background: var(--concrete);
+  }
+  .flow-label {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.01em;
+    color: var(--ash);
+    border: 1px solid var(--concrete);
+    border-radius: 1px;
+    padding: 5px 9px;
+  }
+
+  .status {
+    color: var(--brass);
+  }
+
+  .cv-frame {
+    width: 100%;
+    height: min(80svh, 900px);
+    border: 1px solid var(--concrete);
+    background: var(--soot);
+  }
+
+  /* ---------------------------------------------------------------- reveal */
+
+  /*
+    Blocks arrive once, slowly, and stay. Scrolling back up does not take them
+    away again. Nothing is hidden until the observer runs, so a reader without
+    JavaScript sees the whole page.
+  */
+  .reveal.is-hidden {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  .reveal {
+    transition:
+      opacity 760ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 760ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .reveal.is-revealed {
+    opacity: 1;
+    transform: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal,
+    .reveal.is-hidden {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+
+  /* --------------------------------------------------------- pointer light */
+
+  .pointer-light {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 39;
+    width: 520px;
+    height: 520px;
+    margin: -260px 0 0 -260px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 500ms ease;
+    background: radial-gradient(circle, color-mix(in oklab, var(--bone) 7%, transparent), transparent 62%);
+  }
+  .pointer-light[data-on="true"] {
+    opacity: 1;
+  }
+  html[data-plain="on"] .pointer-light {
+    display: none;
+  }
+  @media (prefers-reduced-motion: reduce), (pointer: coarse) {
+    .pointer-light {
+      display: none;
+    }
+  }
+
+  /* ------------------------------------------------------- page transition */
+
+  /*
+    Going deeper moves the page left; coming back moves it right. The old page
+    leaves quickly so it stops competing for attention, the new one arrives more
+    slowly so there is time to read it.
+  */
+  ::view-transition-old(.nav-forward) {
+    animation:
+      200ms ease-out both vt-fade reverse,
+      460ms cubic-bezier(0.22, 1, 0.36, 1) both vt-left;
+  }
+  ::view-transition-new(.nav-forward) {
+    animation:
+      320ms ease-in 200ms both vt-fade,
+      560ms cubic-bezier(0.22, 1, 0.36, 1) both vt-from-right;
+  }
+  ::view-transition-old(.nav-back) {
+    animation:
+      200ms ease-out both vt-fade reverse,
+      460ms cubic-bezier(0.22, 1, 0.36, 1) both vt-right;
+  }
+  ::view-transition-new(.nav-back) {
+    animation:
+      320ms ease-in 200ms both vt-fade,
+      560ms cubic-bezier(0.22, 1, 0.36, 1) both vt-from-left;
+  }
+
+  @keyframes vt-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes vt-left {
+    to {
+      transform: translateX(-3%);
+    }
+  }
+  @keyframes vt-right {
+    to {
+      transform: translateX(3%);
+    }
+  }
+  @keyframes vt-from-right {
+    from {
+      transform: translateX(3%);
+    }
+  }
+  @keyframes vt-from-left {
+    from {
+      transform: translateX(-3%);
+    }
+  }
+
+  /* The header does not travel with the page. */
+  .site-header {
+    view-transition-name: site-header;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+      animation: none !important;
+    }
+  }
+
   .btn-tile:hover {
     border-color: var(--on-tile);
   }
