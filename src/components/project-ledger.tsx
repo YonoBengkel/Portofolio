@@ -57,6 +57,7 @@ export function ProjectLedger({ items }: { items: LedgerItem[] }) {
                 src={item.cover.src}
                 alt={item.cover.alt}
                 sizes="(min-width: 1024px) 0px, 92vw"
+                preload={i === 0}
                 className="graded h-full w-full object-cover object-left-top"
               />
             </div>
