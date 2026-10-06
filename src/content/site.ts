@@ -39,7 +39,9 @@ export const howIWork = [
   },
 ];
 
-export const otherWork = [
+export type OtherWork = { title: string; body: string; meta: string; href?: string };
+
+export const otherWork: OtherWork[] = [
   {
     title: "Retail BI for a multi-branch minimart",
     body: "A sales dashboard tracking revenue, costs, profit, and margin by branch, fed by a star-schema warehouse.",
