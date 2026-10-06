@@ -469,6 +469,11 @@
     border-radius: 2px;
   }
 
+  /* The figure comes out of the dark rather than being cut off by a crop line. */
+  .portrait {
+    mask-image: linear-gradient(to bottom, #000 62%, transparent 97%);
+  }
+
   /* Imagery is graded, never shipped at full saturation. */
   .graded {
     filter: saturate(0.45) contrast(1.06) brightness(0.9);

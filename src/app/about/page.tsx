@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
+import portrait from "@/assets/images/portrait.png";
 import { EntryList } from "@/components/entry-list";
 import { HowIWork } from "@/components/how-i-work";
 import { PageHeader } from "@/components/page-header";
@@ -15,6 +17,19 @@ export default function AboutPage() {
   return (
     <PageTransition>
       <PageHeader title="About" lede={profile.intro} />
+
+      {/* A face, once. The suit falls away into the page and the light stays on it. */}
+      <section aria-label="Portrait" className="lit">
+        <div className="column pb-6">
+          <Image
+            src={portrait}
+            alt={`${profile.name}, photographed from the front`}
+            sizes="260px"
+            className="graded portrait w-[clamp(160px,38vw,260px)]"
+            placeholder="blur"
+          />
+        </div>
+      </section>
 
       <section aria-labelledby="method-title" className="lit">
         <div className="column band">
