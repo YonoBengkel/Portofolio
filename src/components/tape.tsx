@@ -16,11 +16,15 @@ export function Tape({ text, tilt = -2 }: { text: string; tilt?: number }) {
     </span>
   ));
 
+  // The strip is wider than the window so the tilt never exposes a bare corner, and the slot
+  // clips it so the document itself is never wider than the viewport.
   return (
-    <div className="tape" style={{ rotate: `${tilt}deg` }} role="presentation">
-      <div className="tape-run" aria-hidden="true">
-        {run}
-        {run}
+    <div className="tape-slot" role="presentation">
+      <div className="tape" style={{ rotate: `${tilt}deg` }}>
+        <div className="tape-run" aria-hidden="true">
+          {run}
+          {run}
+        </div>
       </div>
     </div>
   );

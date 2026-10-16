@@ -3,11 +3,12 @@ import Image from "next/image";
 import Link from "next/link";
 import portrait from "@/assets/images/portrait-bw.webp";
 import { EntryList } from "@/components/entry-list";
+import { Timeline, buildTimeline } from "@/components/timeline";
 import { HowIWork } from "@/components/how-i-work";
 import { Marquee } from "@/components/marquee";
 import { PageHeader } from "@/components/page-header";
 import { PageTransition } from "@/components/page-transition";
-import { education, experience, leadership, profile, toolbox } from "@/content/site";
+import { education, experience, leadership, profile, toolbox, volunteering } from "@/content/site";
 
 export const metadata: Metadata = {
   title: "About",
@@ -43,27 +44,16 @@ export default function AboutPage() {
       <section className="band band-ink" aria-labelledby="exp-h">
         <div className="frame">
           <div className="column">
-            <h2 id="exp-h" className="h-sec reveal">
-              Experience
+            <h2 id="exp-h" className="h-sec rise">
+              Experience &amp; education
             </h2>
-            <div className="mt-12 grid gap-5">
-              {experience.map((e, i) => (
-                <article key={e.role} className="sticker sticker-ink entry reveal">
-                  <p className="entry-n">{String(i + 1).padStart(2, "0")}</p>
-                  <div>
-                    <p className="meta opacity-70">{e.period}</p>
-                    <h3 className="work-title mt-1.5">{e.role}</h3>
-                    <p className="mt-1 opacity-80">{e.org}</p>
-                    <ul className="mt-4 grid gap-2.5">
-                      {e.points.map((pt) => (
-                        <li key={pt} className="leading-relaxed">
-                          {pt}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </article>
-              ))}
+            <div className="draw rule mt-6" />
+            <p className="lede rise mt-6 max-w-[38rem] opacity-80">
+              Work, the seats held in student organisations, and the degree. Each one says which it
+              is, because a paid internship and a committee seat are not the same claim.
+            </p>
+            <div className="mt-12">
+              <Timeline entries={buildTimeline(experience, leadership, education)} dark />
             </div>
           </div>
         </div>
@@ -72,43 +62,18 @@ export default function AboutPage() {
       <section className="band" aria-labelledby="org-h">
         <div className="frame">
           <div className="column">
-            <h2 id="org-h" className="h-sec reveal">
-              Organisations
+            <h2 id="org-h" className="h-sec rise">
+              Event committees
             </h2>
-            <p className="lede reveal mt-5 max-w-[38rem]">
-              Seats in an organisation, not jobs for one event. Those are listed separately.
+            <p className="lede rise mt-5 max-w-[38rem]">
+              Jobs for one event, however long the event ran. The seats in an organisation are in the
+              list above; these are not the same thing and are not counted as one.
             </p>
-            <div className="mt-12">
-              <EntryList
-                entries={leadership.map((l) => ({ title: l.role, org: l.org, period: l.period, body: l.body }))}
-              />
-            </div>
             <p className="mt-12">
               <Link href="/about/activities" className="pill pill-solid" transitionTypes={["nav-forward"]}>
-                Event committees &amp; volunteering
+                See all {volunteering.length}
               </Link>
             </p>
-          </div>
-        </div>
-      </section>
-
-      <Marquee text="Education" />
-
-      <section className="band" aria-labelledby="edu-h">
-        <div className="frame">
-          <div className="column">
-            <h2 id="edu-h" className="h-sec reveal">
-              Education
-            </h2>
-            <article className="sticker entry reveal mt-12">
-              <p className="entry-n">01</p>
-              <div>
-                <p className="meta opacity-70">{education.period}</p>
-                <h3 className="work-title mt-1.5">{education.degree}</h3>
-                <p className="mt-1 opacity-80">{education.school}</p>
-                <p className="mt-4 leading-relaxed">{education.coursework}</p>
-              </div>
-            </article>
           </div>
         </div>
       </section>

@@ -442,6 +442,12 @@
       padding: 26px 30px;
     }
   }
+  .entry-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+  }
   .entry-n {
     font-family: var(--font-display);
     font-size: 2rem;
@@ -627,6 +633,9 @@
 
   /* ---------------------------------------------------------- hazard tape */
 
+  .tape-slot {
+    overflow: clip;
+  }
   /* Wider than the window, because a tilted strip would otherwise leave a bare triangle
      of page colour at each end. */
   .tape {

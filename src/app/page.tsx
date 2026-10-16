@@ -6,7 +6,8 @@ import { Tape } from "@/components/tape";
 import { PageTransition } from "@/components/page-transition";
 import { WorkGrid } from "@/components/work-grid";
 import { projects } from "@/content/projects";
-import { achievements, competitions, experience, leadership, toolbox } from "@/content/site";
+import { Timeline, buildTimeline } from "@/components/timeline";
+import { achievements, competitions, education, experience, leadership, toolbox } from "@/content/site";
 
 /**
  * The order is the reference's, and Ilham asked for it by name: who he is, what he has
@@ -17,10 +18,9 @@ import { achievements, competitions, experience, leadership, toolbox } from "@/c
  * moves without being scrolled, and even that waits for the switch.
  */
 export default function Home() {
-  const entries = [
-    ...experience.map((e) => ({ title: e.role, org: e.org, period: e.period, body: e.points.join(" ") })),
-    ...leadership.slice(0, 2).map((l) => ({ title: l.role, org: l.org, period: l.period, body: l.body })),
-  ];
+  // Work, then the organisation seats, then the degree. The full list lives on /about;
+  // the home page shows the four most recent so the section stays one screen deep.
+  const timeline = buildTimeline(experience, leadership, education).slice(0, 4);
 
   return (
     <PageTransition>
@@ -45,25 +45,11 @@ export default function Home() {
         <div className="frame">
           <div className="column">
             <h2 id="exp-h" className="h-sec rise">
-              Experience
+              Experience &amp; education
             </h2>
             <div className="draw rule mt-6" />
-            <div className="stagger mt-12 grid gap-5">
-              {entries.map((e, i) => (
-                <article
-                  key={`${e.title}-${e.period}`}
-                  className="sticker sticker-ink entry"
-                  style={{ "--i": i } as React.CSSProperties}
-                >
-                  <p className="entry-n">{String(i + 1).padStart(2, "0")}</p>
-                  <div>
-                    <p className="meta opacity-80">{e.period}</p>
-                    <h3 className="work-title mt-1.5">{e.title}</h3>
-                    <p className="mt-1 opacity-80">{e.org}</p>
-                    <p className="mt-4 leading-relaxed">{e.body}</p>
-                  </div>
-                </article>
-              ))}
+            <div className="mt-12">
+              <Timeline entries={timeline} dark />
             </div>
             <p className="mt-10">
               <Link href="/about" className="pill" transitionTypes={["nav-forward"]}>
