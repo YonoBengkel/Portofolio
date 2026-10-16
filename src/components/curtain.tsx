@@ -13,9 +13,14 @@ const NAMES: Record<string, string> = {
   "/contact": "Contact",
 };
 
-const COVER = 380; // the panel rises
-const HOLD = 160; // the name sits there while the new page mounts behind it
-const CLEAR = 420; // the panel carries on upward and off
+/*
+  Slower than it was. The numbers never changed, but the feel did: the header now sits
+  above the panel, so the page no longer disappears completely and the cover stopped
+  reading as a pause. Giving it longer puts the pause back.
+*/
+const COVER = 520; // the panel rises
+const HOLD = 260; // the name sits there while the new page mounts behind it
+const CLEAR = 560; // the panel carries on upward and off
 
 function nameFor(path: string) {
   return NAMES[path] ?? path.split("/").filter(Boolean).pop()?.replace(/-/g, " ") ?? "";

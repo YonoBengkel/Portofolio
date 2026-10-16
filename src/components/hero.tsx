@@ -12,22 +12,37 @@ import { openTo, profile } from "@/content/site";
  * existing, a sink says it went somewhere. Each letter rides inside its own clipped
  * slot, so what you see is a letter sliding under a line, not dissolving on the spot.
  *
- * Two more bands sit permanently in the corners, one top-left and one bottom-right,
- * cropped by the window. They are not part of the switch: they are what stops the first
- * screen reading as a blank sheet with a name on it.
+ * There are no permanent corner bands. They were tried and removed: a strip cropped into
+ * the corner of an otherwise empty page reads as something that failed to get out of the
+ * way rather than as a deliberate mark.
  *
  * The split text is hidden from the accessibility tree and the real string sits beside
  * it, because a screen reader given one letter per element reads out one letter at a
  * time.
  */
 
-// Four, not six. They are much taller now, and six at this height left no page between
-// them at all.
-const BANDS = ["Process", "Data", "Decisions", "Evidence"];
+/*
+  Seven. Four of them, at this thickness, left too much cream showing between the tilts
+  and the screen read as empty rather than as a changed ground. They overlap, so adding
+  more fills the field rather than stretching it.
+
+  The words repeat on purpose. Four ideas across seven bands is a wall of the same few
+  words, which is what a police line is; seven different words would be a list.
+*/
+const BANDS = ["Process", "Data", "Decisions", "Evidence", "Process", "Decisions", "Data"];
 
 // Enough repeats that half a track is wider than any window, since the keyframe moves
 // each band by half its own width - the same arithmetic as every other marquee here.
 const PER_BAND = 8;
+
+/*
+  Which words come out in the accent. Not Math.random: the server and the browser have to
+  agree on the markup or React replaces it on hydration, and a wall that reshuffles itself
+  on every render is a different thing from one that looks hand-placed. This is a fixed
+  pattern chosen to have no visible period - the gaps run 3, 4, 2, 5, 3 - so it reads as
+  irregular without being unstable.
+*/
+const LIT = new Set([2, 6, 9, 15, 19]);
 
 function Band({ word, i, className = "" }: { word: string; i: number; className?: string }) {
   return (
@@ -37,7 +52,9 @@ function Band({ word, i, className = "" }: { word: string; i: number; className?
           {[0, 1].map((copy) => (
             <span className="hero-band-set" key={copy}>
               {Array.from({ length: PER_BAND }, (_, k) => (
-                <b key={k}>{word}</b>
+                <b key={k} className={LIT.has((i * 3 + k) % 21) ? "lit" : undefined}>
+                  {word}
+                </b>
               ))}
             </span>
           ))}
@@ -83,12 +100,6 @@ export function Hero() {
         {BANDS.map((word, i) => (
           <Band key={`${word}-${i}`} word={word} i={i} />
         ))}
-      </div>
-
-      {/* The two that never leave. */}
-      <div className="hero-corners marquee-run" aria-hidden="true">
-        <Band word="Process" i={0} className="hero-stub hero-stub-tl" />
-        <Band word="Decisions" i={1} className="hero-stub hero-stub-br" />
       </div>
 
       <div className="hero-copy">

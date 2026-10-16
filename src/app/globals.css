@@ -987,6 +987,15 @@
   .hero-band:nth-child(4) {
     --tilt: 5deg;
   }
+  .hero-band:nth-child(5) {
+    --tilt: -3deg;
+  }
+  .hero-band:nth-child(6) {
+    --tilt: 6deg;
+  }
+  .hero-band:nth-child(7) {
+    --tilt: -4deg;
+  }
   /* The strip itself: much taller than it was, because thin reads as limp. */
   .hero-band-in {
     overflow: hidden;
@@ -1007,42 +1016,11 @@
   }
   html[data-run="1"] .hero-alt .hero-band-in {
     translate: 0 0;
-    transition-delay: calc((3 - var(--i)) * 60ms);
+    transition-delay: calc((6 - var(--i)) * 48ms);
   }
   /* Flipped, the switch sits on ink; its focus ring has to come with it. */
   html[data-run="1"] .hero {
     --focus: var(--yellow);
-  }
-
-  /*
-    The two that never leave: one cropped into the top-left corner, one into the
-    bottom-right. They sit outside .hero-alt so the switch does not take them with it.
-  */
-  .hero-corners {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 50%;
-    translate: -50% 0;
-    width: 100vw;
-    z-index: 0;
-    overflow: clip;
-    pointer-events: none;
-  }
-  .hero-stub {
-    position: absolute;
-    width: 46%;
-    margin-inline: 0;
-  }
-  .hero-stub-tl {
-    --tilt: -14deg;
-    top: -4.4rem;
-    left: -15%;
-  }
-  .hero-stub-br {
-    --tilt: -11deg;
-    bottom: -4.4rem;
-    right: -15%;
   }
 
   /* The words run along the band. A police line with still lettering is a picture of one. */
@@ -1063,9 +1041,14 @@
   .hero-band:nth-child(4) .hero-band-run {
     --dur: 58s;
   }
-  .hero-stub-br .hero-band-run {
-    --dur: 70s;
-    animation-direction: reverse;
+  .hero-band:nth-child(5) .hero-band-run {
+    --dur: 68s;
+  }
+  .hero-band:nth-child(6) .hero-band-run {
+    --dur: 49s;
+  }
+  .hero-band:nth-child(7) .hero-band-run {
+    --dur: 82s;
   }
   .hero-band-set {
     display: inline-flex;
@@ -1079,6 +1062,11 @@
     line-height: 1.1;
     letter-spacing: -0.02em;
     text-transform: uppercase;
+  }
+  /* A handful of words in the accent, so the wall is not one flat colour. Ink on yellow
+     is 9.92:1, the same pair the rest of the site uses. */
+  .hero-band-run b.lit {
+    color: var(--yellow);
   }
 
   /* ------------------------------------------------------------ sinking */
@@ -2334,6 +2322,14 @@
     browser rather than from a listener that has to be remembered.
   */
   .zoom {
+    /*
+      A modal <dialog> is centred by the browser through `margin: auto`, and Tailwind's
+      preflight resets every element's margin to 0 - which quietly parks it in the
+      top-left corner. Putting the auto margins back, with inset: 0 to give them room, is
+      what centres it.
+    */
+    inset: 0;
+    margin: auto;
     width: min(94vw, 1200px);
     max-width: none;
     max-height: 92svh;
@@ -2462,16 +2458,16 @@
     pointer-events: auto;
   }
   .curtain-covering {
-    animation: curtain-up 380ms cubic-bezier(0.76, 0, 0.24, 1) both;
+    animation: curtain-up 520ms cubic-bezier(0.76, 0, 0.24, 1) both;
   }
   .curtain-covering span {
-    animation: curtain-word-in 300ms ease 140ms both;
+    animation: curtain-word-in 380ms ease 190ms both;
   }
   .curtain-clearing {
-    animation: curtain-off 420ms cubic-bezier(0.76, 0, 0.24, 1) both;
+    animation: curtain-off 560ms cubic-bezier(0.76, 0, 0.24, 1) both;
   }
   .curtain-clearing span {
-    animation: curtain-word-out 200ms ease both;
+    animation: curtain-word-out 260ms ease both;
   }
   @keyframes curtain-up {
     from {
