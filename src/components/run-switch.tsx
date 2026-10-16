@@ -15,28 +15,15 @@ import { useEffect, useState } from "react";
  * it has to start something, and a page that arrives already flipped turns the gesture
  * into switching things off.
  *
- * The choice is remembered inside a session rather than forever. A reader coming back a
- * week later should get the name first - that is the thing the page is for - but somebody
- * who flipped it and then opened a case study should not have to flip it again.
+ * The choice is not persisted. Restoring it would mean setting React state inside an
+ * effect on every mount, and the only way back to this screen is the home page itself -
+ * where the name is what the page is for.
  */
 export function RunSwitch() {
   const [alt, setAlt] = useState(false);
 
   useEffect(() => {
-    try {
-      if (sessionStorage.getItem("hero") === "alt") setAlt(true);
-    } catch {
-      /* private window: the switch still works, it just will not be remembered */
-    }
-  }, []);
-
-  useEffect(() => {
     document.documentElement.dataset.run = alt ? "1" : "0";
-    try {
-      sessionStorage.setItem("hero", alt ? "alt" : "name");
-    } catch {
-      /* as above */
-    }
   }, [alt]);
 
   return (

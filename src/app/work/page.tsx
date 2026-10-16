@@ -20,7 +20,9 @@ export default function WorkPage() {
         lede="Four case studies, each one a job someone actually had to do. Every card opens the whole thing: the problem, the decisions, and the screens."
       />
 
-      <section className="band band-slate" aria-labelledby="studies-h">
+      {/* Ink, not slate: the reference puts its own project grid on #5A6F84 and this
+          site's slate is #4A5A6B. Same reason as the home page. */}
+      <section className="band band-ink" aria-labelledby="studies-h">
         <div className="frame">
           <div className="column">
             <h2 id="studies-h" className="sr-only">
