@@ -40,7 +40,9 @@ export function RunSwitch() {
           <span className="run-ball" />
         </span>
       </label>
-      <p className="run-label" aria-live="polite">
+      {/* No aria-live: the words here never change, only which one is marked, and the
+          checkbox announces its own state. A live region that can never fire is noise. */}
+      <p className="run-label">
         <span className={alt ? "" : "is-on"}>Name</span>
         <span aria-hidden="true"> / </span>
         <span className={alt ? "is-on" : ""}>Method</span>

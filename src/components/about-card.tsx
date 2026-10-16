@@ -99,7 +99,7 @@ export function AboutCard() {
             </div>
           </div>
 
-          <nav className="about-social" aria-label="Elsewhere">
+          <nav className="about-social" aria-label="Profiles">
             <a
               href={profile.links.github}
               target="_blank"

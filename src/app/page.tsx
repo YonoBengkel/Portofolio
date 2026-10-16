@@ -77,11 +77,10 @@ export default function Home() {
               <h2 id="work-h" className="plaque">
                 Projects
               </h2>
-              <p className="plaque-tag">Business process · Data · Applied AI</p>
+              <p className="plaque-tag">Case studies</p>
             </div>
             <p className="lede rise mt-8 max-w-[38rem] opacity-85">
-              Four case studies, each written from what it actually does rather than from the stack it was
-              built with.
+              Each one written from what it actually does rather than from the stack it was built with.
             </p>
             <div className="mt-14">
               <WorkGrid projects={projects} />
