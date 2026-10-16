@@ -1441,6 +1441,15 @@
     display: grid;
     gap: 28px;
   }
+  /*
+    Same trap as the tools row, and it only appears once the screenshots have actually
+    loaded: a grid item's automatic minimum size is its content, and the content here is
+    an <img> whose intrinsic width is 1600-1800px. Until this is set, two 686px columns
+    are forced open to 900 and the document really does scroll sideways - measured at 368px.
+  */
+  .pgrid > * {
+    min-width: 0;
+  }
   @media (min-width: 860px) {
     .pgrid {
       grid-template-columns: 1fr 1fr;
