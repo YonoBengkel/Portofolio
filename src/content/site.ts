@@ -336,4 +336,4 @@ export const toolbox = [
 // Ilham asked for this on 2026-10-17: he wants the page to read as somebody looking
 // for a data role, not for a placement. It overrides the additions-only rule on this
 // file, at his direct instruction.
-export const openTo = "Open to data positions.";
+export const openTo = "Open to work in data positions.";

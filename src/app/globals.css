@@ -381,8 +381,13 @@
     position: fixed;
     inset-inline: 0;
     top: 0;
-    /* Above the curtain, so the fill sliding to the next page can actually be seen. */
-    z-index: 95;
+    /*
+      Under the curtain, not above it. It was raised so the fill sliding to the next page
+      could be watched; Ilham preferred the page going away completely, so the panel
+      covers the header too. The fill still moves the moment the link is clicked - it is
+      simply already in place when the panel lifts rather than being watched on its way.
+    */
+    z-index: 50;
     padding-block: 18px;
     background: color-mix(in srgb, var(--paper) 88%, transparent);
     border-bottom: 1px solid transparent;
