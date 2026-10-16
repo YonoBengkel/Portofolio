@@ -3,7 +3,7 @@ import { EntryList } from "@/components/entry-list";
 import { Marquee } from "@/components/marquee";
 import { PageHeader } from "@/components/page-header";
 import { PageTransition } from "@/components/page-transition";
-import { leadership, volunteering } from "@/content/site";
+import { leadership, training, volunteering } from "@/content/site";
 
 export const metadata: Metadata = {
   title: "Organisations and committees",
@@ -15,7 +15,7 @@ export default function ActivitiesPage() {
     <PageTransition>
       <PageHeader
         title="Organisations &amp; committees"
-        lede="A seat in an organisation and a job for one event are different things, so they are listed apart."
+        lede="A seat in an organisation, a job for one event, and a training course attended are three different things, so they are listed apart."
         back={{ href: "/about", label: "Back to about" }}
       />
 
@@ -52,6 +52,32 @@ export default function ActivitiesPage() {
                   org: v.org,
                   period: v.period,
                   body: v.body,
+                  scan: v.scan,
+                }))}
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="band" aria-labelledby="training-h">
+        <div className="frame">
+          <div className="column">
+            <h2 id="training-h" className="h-sec reveal">
+              Training &amp; seminars
+            </h2>
+            <p className="lede reveal mt-5 max-w-[38rem]">
+              Things he sat in rather than ran. They are here and not with the awards, because attending
+              something is not an achievement and the page should not imply it was.
+            </p>
+            <div className="mt-12">
+              <EntryList
+                entries={training.map((t) => ({
+                  title: t.title,
+                  org: t.org,
+                  period: t.period,
+                  body: t.body,
+                  scan: t.scan,
                 }))}
               />
             </div>

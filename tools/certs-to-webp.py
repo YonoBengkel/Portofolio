@@ -22,15 +22,35 @@ from PIL import Image
 MAX_W = 1400
 QUALITY = 80
 
-# source (relative to the folder passed in) -> output name
+# source (relative to the folder passed in) -> output name.
+#
+# Two certificates in that folder are deliberately NOT here, and must not be added:
+# "PPU Suksesi.pdf" is a committee decree listing about seventy students' full names
+# against their NRP, and "Surat_Lulus_OPP_...pdf" carries Ilham's own NRP and class.
+# Both roles are on the site; neither document can be.
 FILES = {
+    # awards and courses
     "Non-Linear/SIC 7.pdf": "sic-7",
     "Non-Linear/certificate-DQLABAI003WBCLJD.pdf": "dqlab-sql",
+    # data competitions
     "Linear/ARA ITS 2026.png": "ara-7",
     "Linear/Sertifikat Gammafest 2026 - Peserta DSC-4.pdf": "gammafest-2026",
     "Non-Linear/Compfest.pdf": "compfest-18",
     "Non-Linear/Gelar Rasa 2024.pdf": "gelar-rasa-2024",
     "Non-Linear/Gelar Rasa 2025.png": "gelar-rasa-2025",
+    # chess
+    "Non-Linear/Juara 2 Eltafest.jpg": "catur-eltafest",
+    "Non-Linear/ITS Chess Tournament.png": "catur-its",
+    "Non-Linear/Unessa Chess Tournament.pdf": "catur-unesa",
+    # committee roles
+    "Non-Linear/Kaderisasi.png": "dynamic-himit",
+    "Non-Linear/Panitia PKT PKO.pdf": "pengenalan-komunitas",
+    "Non-Linear/Panitia LKMM.pdf": "lkmm-lo",
+    "Non-Linear/Mentoring UKKI.pdf": "mentoring-ukki",
+    # training and seminars attended
+    "Non-Linear/Peserta LKMM TD.pdf": "lkmm-dasar",
+    "Non-Linear/Peserta LKMM Pra-TD.pdf": "lkmm-pra-dasar",
+    "Non-Linear/Mentoring Mas Ody.png": "ieee-seminar",
 }
 
 

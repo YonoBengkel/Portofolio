@@ -220,15 +220,26 @@
     box-shadow: 10px 10px 0 0 rgba(251, 239, 216, 0.22);
   }
   /*
-    A light card standing on a dark band takes the ring back. --focus is inherited, so
-    without this a button inside a paper card on an ink band draws a yellow ring on
-    paper: 1.72:1, the same mistake in the other direction.
+    A light card standing on a dark band takes the ink back - the text as well as the
+    focus ring. `color` is inherited, so a .sticker on a slate or ink band was printing
+    paper-coloured text on a paper-coloured card: 1.00:1, invisible. Five entries on
+    /about/activities were unreadable this way, and it survived because the contrast
+    audit was only ever run against the home page.
   */
   .sticker,
   .about-card,
   .pcard,
   .cert {
     --focus: var(--ink);
+  }
+  .band-slate .sticker,
+  .band-ink .sticker {
+    color: var(--ink);
+  }
+  /* Except the one that is itself dark, where the band's own colour was right. */
+  .band-slate .sticker-ink,
+  .band-ink .sticker-ink {
+    color: var(--paper);
   }
   .sticker-ink {
     --focus: var(--yellow);
@@ -481,9 +492,15 @@
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
+  /*
+    A yellow chip carries ink, always. It used to inherit whatever the band gave it, so
+    on a dark band it printed paper on yellow: 1.59:1. That was invisible to the audit
+    while the entries were still held at opacity 0 by the entrance animation.
+  */
   .chip-live {
     background: var(--yellow);
     border-color: var(--ink);
+    color: var(--on-yellow);
   }
 
   /* A numbered entry, for experience and education. */
@@ -498,6 +515,28 @@
       gap: 24px;
       padding: 26px 30px;
     }
+  }
+  @media (min-width: 900px) {
+    .entry-scanned {
+      grid-template-columns: 58px minmax(0, 1fr) 15rem;
+    }
+  }
+  /* The certificate, printed small beside the entry rather than filling it. */
+  .entry-scan {
+    align-self: start;
+    overflow: clip;
+    border: 1px solid var(--line-strong);
+    border-radius: 3px;
+    background: var(--paper);
+  }
+  .entry-scan img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .band-slate .entry-scan,
+  .band-ink .entry-scan {
+    border-color: var(--line-strong);
   }
   .entry-head {
     display: flex;
@@ -815,13 +854,19 @@
       translate: 0 3.5%;
     }
   }
+  /*
+    Movement only, no fade - the same correction the social tiles needed. `both` fill
+    pins an element to the `from` keyframe until its scroll range opens, so a fade from
+    zero holds everything below the fold at opacity 0: invisible, but still in the
+    accessibility tree and still focusable. It also made an accessibility audit of
+    /about/activities report five contrast failures at about 1.1:1, which were really
+    this. Sliding up reads as an arrival just as well and holds nothing back.
+  */
   @keyframes rise {
     from {
-      opacity: 0;
       translate: 0 42px;
     }
     to {
-      opacity: 1;
       translate: 0 0;
     }
   }
@@ -1512,7 +1557,7 @@
 
   .pgrid {
     display: grid;
-    gap: 28px;
+    gap: 24px;
   }
   /*
     Same trap as the tools row, and it only appears once the screenshots have actually
@@ -1523,12 +1568,18 @@
   .pgrid > * {
     min-width: 0;
   }
-  @media (min-width: 860px) {
+  @media (min-width: 760px) {
     .pgrid {
       grid-template-columns: 1fr 1fr;
     }
     .pgrid > * {
       display: flex;
+    }
+  }
+  /* Three to a row, as asked - the cards get leaner and the band gets shorter. */
+  @media (min-width: 1180px) {
+    .pgrid {
+      grid-template-columns: repeat(3, 1fr);
     }
   }
   .pcard {

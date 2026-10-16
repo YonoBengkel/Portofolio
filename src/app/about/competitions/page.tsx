@@ -20,6 +20,9 @@ export default function CompetitionsPage() {
       <section className="band">
         <div className="frame">
           <div className="column">
+            {/* The list's own items are h3, so the page needs its h2 - visually it would
+                only repeat the title above it, so it is for the outline, not the eye. */}
+            <h2 className="sr-only">Every competition entered</h2>
             <EntryList
               entries={competitions.map((c) => ({ title: c.name, org: c.org, period: c.year, body: c.body }))}
             />

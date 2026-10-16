@@ -8,6 +8,16 @@ import gammafestCert from "@/assets/images/certs/gammafest-2026.webp";
 import gelarRasa24Cert from "@/assets/images/certs/gelar-rasa-2024.webp";
 import gelarRasa25Cert from "@/assets/images/certs/gelar-rasa-2025.webp";
 import sicCert from "@/assets/images/certs/sic-7.webp";
+import caturEltafestCert from "@/assets/images/certs/catur-eltafest.webp";
+import caturItsCert from "@/assets/images/certs/catur-its.webp";
+import caturUnesaCert from "@/assets/images/certs/catur-unesa.webp";
+import dynamicCert from "@/assets/images/certs/dynamic-himit.webp";
+import komunitasCert from "@/assets/images/certs/pengenalan-komunitas.webp";
+import lkmmLoCert from "@/assets/images/certs/lkmm-lo.webp";
+import mentoringCert from "@/assets/images/certs/mentoring-ukki.webp";
+import lkmmDasarCert from "@/assets/images/certs/lkmm-dasar.webp";
+import lkmmPraDasarCert from "@/assets/images/certs/lkmm-pra-dasar.webp";
+import ieeeSeminarCert from "@/assets/images/certs/ieee-seminar.webp";
 
 /**
  * A scan of the certificate itself, where there is one. Rendered from his own folder by
@@ -59,6 +69,25 @@ export const howIWork = [
 export type OtherWork = { title: string; body: string; meta: string; href?: string };
 
 export const otherWork: OtherWork[] = [
+  /*
+    The first two here are case studies waiting on their evidence rather than on their
+    writing. Rule 6 of this site is that a case study carries a real screenshot of the
+    thing working, and neither has one yet: the fall-detection repo holds its architecture
+    and state-machine diagrams but not a single frame of the running dashboard, and the
+    competition repo is private. They are listed honestly in the meantime rather than
+    written up from a README.
+  */
+  {
+    title: "Fall detection for a nursing home",
+    body: "Four cameras read each frame into a posture, and a state machine decides whether what it is seeing is a fall. The hard part is the frames where nobody is detected at all - someone lying on the floor who gets covered by a blanket or hidden behind a chair stops being visible exactly when the situation is most dangerous - so losing the person holds the timer open instead of resetting it, and the timer belongs to the person who started it rather than to the frame.",
+    meta: "Team of 3, Intelligent Systems Project course",
+    href: "https://github.com/0Raja0-RA/nursing-home-fall-detection",
+  },
+  {
+    title: "Waste-image classification, Satria Data",
+    body: "A national competition where the team's first move was to doubt the labels they had been given, and then go and show they were wrong: quarantining corrupt images, finding mislabelled ones with confident learning, and catching thousands of brochures and documents sitting inside the organic class. Near-duplicate images were grouped before the split, so the validation score stopped flattering the model.",
+    meta: "Team, national competition",
+  },
   {
     title: "Air-quality index forecasting for East Java",
     body: "A dashboard that projects each district's pollutant levels a day ahead, turns raw hourly readings into the official government index including its rule that a day only counts when enough of its hours were measured, and checks every earlier forecast against the reading that later arrived.",
@@ -119,6 +148,7 @@ export const volunteering = [
     org: "HIMIT PENS",
     period: "Mar – May 2026",
     body: "Designed the programme from its target outcomes down to the parameters each participant was assessed on.",
+    scan: dynamicCert,
   },
   {
     role: "Vice Coordinator, Election Committee",
@@ -126,6 +156,8 @@ export const volunteering = [
     org: "HIMIT PENS",
     period: "Oct 2025 – Feb 2026",
     body: "Deputised for the coordinator in running the association's general election.",
+    // No scan: the only document for this one is the committee decree, which lists about
+    // seventy students' full names against their NRP, his own among them.
   },
   {
     role: "Operations Division",
@@ -133,6 +165,7 @@ export const volunteering = [
     org: "HIMIT PENS",
     period: "Nov 2025",
     body: "Ran the floor logistics across the event's two weeks.",
+    scan: komunitasCert,
   },
   {
     role: "Liaison Officer",
@@ -140,6 +173,7 @@ export const volunteering = [
     org: "BEM PENS",
     period: "Jun 2026",
     body: "Looked after one group of participants from arrival to the closing session.",
+    scan: lkmmLoCert,
   },
   {
     role: "Mentor",
@@ -147,6 +181,37 @@ export const volunteering = [
     org: "UKKI PENS",
     period: "2026",
     body: "Led a weekly discussion group for first-year students.",
+    scan: mentoringCert,
+  },
+];
+
+/**
+ * Training and seminars he sat in, rather than ran. They are not committee seats and not
+ * competitions, so they are neither on the home page nor in the list above: they sit at
+ * the foot of the organisations page, which is where a reader looking for this kind of
+ * thing would go.
+ */
+export const training = [
+  {
+    title: "LKMM Tingkat Dasar",
+    org: "BEM PENS",
+    period: "Apr 2025",
+    body: "The second tier of the student management training: running a programme rather than joining one.",
+    scan: lkmmDasarCert,
+  },
+  {
+    title: "LKMM Tingkat Pra-Dasar",
+    org: "BEM PENS",
+    period: "Oct – Nov 2024",
+    body: "The first tier, taken in his first semester.",
+    scan: lkmmPraDasarCert,
+  },
+  {
+    title: "Engineering Your Brand",
+    org: "IEEE PENS Student Branch",
+    period: "May 2026",
+    body: "A seminar on how an engineer's work reads to the people outside engineering.",
+    scan: ieeeSeminarCert,
   },
 ];
 
@@ -199,6 +264,39 @@ export const competitions = [
     year: "2026",
     body: "An analytics round run over August and September, against teams from across the country.",
     scan: compfestCert,
+  },
+];
+
+/**
+ * Chess. Not data work, and it does not pretend to be - but it is competitive, it is
+ * where his placements are, and he asked for all of it. The belt on the home page reads
+ * each card's own result rather than labelling them all Participant, because one of these
+ * is a second place and flattening that would be the opposite of the rule.
+ */
+export const chess = [
+  {
+    name: "ELTAFEST Chess",
+    org: "Lembaga Minat Bakat PENS",
+    year: "2025",
+    result: "2nd place",
+    body: "The institute's own tournament, run across four weeks in September and October.",
+    scan: caturEltafestCert,
+  },
+  {
+    name: "ITS Chess Tournament, Open",
+    org: "UKM Catur, Institut Teknologi Sepuluh Nopember",
+    year: "2025",
+    result: "Participant",
+    body: "The open category, played in one day in Surabaya.",
+    scan: caturItsCert,
+  },
+  {
+    name: "UNESA Rapid Chess Tournament, Open",
+    org: "UKMPC, Universitas Negeri Surabaya",
+    year: "2025",
+    result: "Participant",
+    body: "Rapid format, open category, played at BG Junction in Surabaya.",
+    scan: caturUnesaCert,
   },
 ];
 

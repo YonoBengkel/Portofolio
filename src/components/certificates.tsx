@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { achievements, competitions } from "@/content/site";
+import { achievements, chess, competitions } from "@/content/site";
 import type { Scan } from "@/content/site";
 
 /**
@@ -10,10 +10,16 @@ import type { Scan } from "@/content/site";
  * by half its width, at a measured speed. 28 px/s, slower than the tools' 50, because
  * these cards carry a document to look at rather than a word to read.
  *
- * It shows the awards and the competitions together, because that is what a certificate
- * folder is - but each card says which it is. A competition card is labelled Participant,
- * not Competition, because that is what every one of them was: the site used to make that
- * point in a sentence beside a separate list, and the point has to survive the merge.
+ * It shows the awards, the courses, the data competitions and the chess together,
+ * because that is what a certificate folder is - but each card says what it actually was.
+ * A data-competition card is labelled Participant rather than Competition, because that
+ * is what every one of them was; the chess cards carry their own result, because one of
+ * them is a second place. The site used to make that point in a sentence beside a
+ * separate list, and the point has to survive the merge.
+ *
+ * What is NOT here: the committee seats and the training he sat in. He asked for the
+ * non-competitive certificates to go with the organisations, and they do - at the foot
+ * of /about/activities, where somebody looking for that kind of thing would go.
  *
  * Where there is a scan, the card is the scan. Where there is not - the olympiad medal,
  * the language test, two of the competitions - the slot carries the year at display size
@@ -22,7 +28,7 @@ import type { Scan } from "@/content/site";
  */
 
 export type Certificate = {
-  kind: "Award" | "Course" | "Participant";
+  kind: string;
   title: string;
   org: string;
   year: string;
@@ -49,7 +55,17 @@ export function buildCertificates(): Certificate[] {
     note: c.body,
     scan: c.scan,
   }));
-  return [...awards, ...entered];
+  // Chess carries its own result, because one of them is a second place and a blanket
+  // "Participant" would be the opposite of the rule it was written to keep.
+  const board: Certificate[] = chess.map((c) => ({
+    kind: c.result,
+    title: c.name,
+    org: c.org,
+    year: c.year,
+    note: c.body,
+    scan: c.scan,
+  }));
+  return [...awards, ...entered, ...board];
 }
 
 const SPEED = 28; // px per second
@@ -69,7 +85,7 @@ function Card({ item }: { item: Certificate }) {
         )}
       </div>
       <div className="cert-meta">
-        <span className={`chip ${item.kind === "Award" ? "chip-live" : ""}`}>{item.kind}</span>
+        <span className={`chip ${item.kind === "Participant" ? "" : "chip-live"}`}>{item.kind}</span>
         <span className="meta opacity-70">{item.year}</span>
       </div>
       <h3 className="cert-name">{item.title}</h3>

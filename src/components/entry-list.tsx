@@ -1,11 +1,18 @@
+import Image from "next/image";
+import type { Scan } from "@/content/site";
+
 /**
  * A list of things that each have a name, a place, a period and a line about them:
  * competitions, volunteer roles, organisations.
  *
  * Numbered stickers rather than a bulleted list, because every other list on this site
  * is numbered and a reader should be able to say "the third one" out loud.
+ *
+ * An entry may carry its certificate, and then the card grows a third column holding it.
+ * Entries without one keep the two-column shape rather than reserving an empty slot, so
+ * a missing scan reads as a thing that has no document rather than as a loading failure.
  */
-export type Entry = { title: string; org: string; period: string; body: string };
+export type Entry = { title: string; org: string; period: string; body: string; scan?: Scan };
 
 export function EntryList({ entries }: { entries: Entry[] }) {
   return (
@@ -13,7 +20,7 @@ export function EntryList({ entries }: { entries: Entry[] }) {
       {entries.map((entry, i) => (
         <li
           key={`${entry.title}-${entry.period}`}
-          className="sticker entry"
+          className={`sticker entry ${entry.scan ? "entry-scanned" : ""}`}
           style={{ "--i": i } as React.CSSProperties}
         >
           <p className="entry-n">{String(i + 1).padStart(2, "0")}</p>
@@ -23,6 +30,11 @@ export function EntryList({ entries }: { entries: Entry[] }) {
             <p className="mt-1 opacity-80">{entry.org}</p>
             <p className="mt-4 leading-relaxed">{entry.body}</p>
           </div>
+          {entry.scan && (
+            <div className="entry-scan">
+              <Image src={entry.scan} alt={`Certificate: ${entry.title}, ${entry.org}`} sizes="(min-width: 760px) 15rem, 90vw" />
+            </div>
+          )}
         </li>
       ))}
     </ol>

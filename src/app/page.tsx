@@ -105,9 +105,9 @@ export default function Home() {
             </h2>
             <div className="draw rule mt-6" />
             <p className="lede rise mt-6 max-w-[38rem]">
-              Awards, courses and the competitions he entered, each with the body that gave them and the
-              certificate where there is one. Every competition card reads <b>Participant</b>, because that
-              is what every one of them was.
+              Awards, courses, data competitions and chess, each with the body that gave them and the
+              certificate where there is one. Every data-competition card reads <b>Participant</b>, because
+              that is what every one of them was. Committee seats and training are with the organisations.
             </p>
           </div>
         </div>
