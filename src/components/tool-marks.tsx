@@ -8,12 +8,22 @@
  * chips carry the letter badge instead - which is the fallback the chip was designed
  * around in the first place, not a patch over a gap.
  *
- * Every mark renders in `currentColor`, so the row stays monochrome and the page keeps
- * its one accent. Twenty vendor palettes in a strip would read as a logo wall, which is a
- * different claim from "these are the tools I use".
+ * Each mark renders in its owner's own colour, which is what Ilham asked for and is also
+ * the stricter trademark position - an unaltered mark in its own colour is the use every
+ * brand page allows, where a recoloured one often is not. The hex values are the ones
+ * Simple Icons records for each brand.
  *
  * The marks are the trademarks of their owners and are used here only to name a tool.
  */
+
+const COLOURS: Record<string, string> = {
+  python: "#3776AB",
+  looker: "#4285F4",
+  streamlit: "#FF4B4B",
+  apacheairflow: "#017CEE",
+  docker: "#2496ED",
+  react: "#61DAFB",
+};
 
 const PATHS: Record<string, string> = {
   python:
@@ -61,7 +71,7 @@ export function ToolMark({ tool, size = 14 }: { tool: string; size?: number }) {
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill="currentColor"
+      fill={COLOURS[key] ?? "currentColor"}
       aria-hidden="true"
       focusable="false"
     >

@@ -73,19 +73,10 @@ export function AboutCard() {
                 <div className="about-say">
                   <p>
                     Applied Data Science student at <b>Politeknik Elektronika Negeri Surabaya</b> and{" "}
-                    <b>AI Engineer intern</b> at <b>Ideola</b>, a digital marketing agency for SMEs. He maps how a
+                    <b>AI Engineer</b> at <b>Ideola</b>, a digital marketing agency for SMEs. He maps how a
                     business runs, organizes its data, and turns both into practical recommendations and tools.
                   </p>
                 </div>
-
-                <dl className="about-facts">
-                  {atAGlance.map((item) => (
-                    <div key={item.label}>
-                      <dt>{item.label}</dt>
-                      <dd>{item.value}</dd>
-                    </div>
-                  ))}
-                </dl>
 
                 <div className="about-cta">
                   <Link href="/contact" className="stamp stamp-fill">
@@ -96,6 +87,22 @@ export function AboutCard() {
                   </Link>
                 </div>
               </div>
+
+              {/*
+                The four facts on their own reversed strip across the foot of the card.
+                They used to be a quiet two-by-two grid in the same ink on the same paper
+                as everything else, which is why the card read as one soft block: there
+                was nothing in it with any weight. A band of ink gives the card a base to
+                stand on and a second register to read in.
+              */}
+              <dl className="about-facts">
+                {atAGlance.map((item) => (
+                  <div key={item.label}>
+                    <dt>{item.label}</dt>
+                    <dd>{item.value}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
           </div>
 

@@ -3,6 +3,8 @@ import dwTopProducts from "@/assets/images/dw-top-products.png";
 import fallArchitecture from "@/assets/images/fall-architecture.webp";
 import fallStateMachine from "@/assets/images/fall-state-machine.webp";
 import bdcPipeline from "@/assets/images/bdc-pipeline.webp";
+import ispuDashboard from "@/assets/images/ispu-dashboard.webp";
+import agentRetrieval from "@/assets/images/agent-retrieval.webp";
 import ewsAdvice from "@/assets/images/ews-advice.jpg";
 import ewsAlert from "@/assets/images/ews-alert.jpg";
 import ewsEvaluation from "@/assets/images/ews-evaluation.jpg";
@@ -511,6 +513,130 @@ export const projects: Project[] = [
       {
         kind: "note",
         body: "The repository is private and stays private, so there is no link here. Two figures do exist in the notebooks - the mislabel review and a cluster scatter of the image embeddings - and this page will carry them instead of the diagram once they are exported.",
+      },
+    ],
+  },
+  {
+    slug: "air-quality-index",
+    number: "07",
+    category: "Forecasting & public data",
+    title: "A day-ahead air quality index for East Java",
+    cardTitle: "Day-Ahead Air Quality for East Java",
+    subtitle:
+      "Turning a government index into something a reader can act on, including the rule that says when a day does not count.",
+    summary:
+      "A dashboard that projects each district's air quality a day ahead, and is honest about the hours it did not get.",
+    type: "Team",
+    teamLabel: "Team of 3",
+    status: "Live",
+    context: "Web Service Technology course",
+    period: "2026",
+    role: "Mine was the index conversion and the model notebook: turning raw hourly readings into the official government index under its own rules, and the forecasting work behind the day-ahead numbers. The dashboard itself and the deployment were a teammate's.",
+    flow: ["Hourly readings", "Official index", "Day-ahead forecast", "Checked against what arrived"],
+    tools: ["Python", "pandas", "scikit-learn", "FastAPI"],
+    links: [{ label: "Live dashboard", href: "https://web-prediksi-ispu.vercel.app/" }],
+    cover: {
+      src: ispuDashboard,
+      alt: "The dashboard header, a 24-hour prediction slider, and summary cards for the most and least polluted districts",
+      caption:
+        "The live dashboard. The map below this panel currently renders a tile-provider watermark; that is a deployment key, not a design choice.",
+    },
+    sections: [
+      {
+        kind: "text",
+        heading: "The problem",
+        body: [
+          "Air quality is published as hourly concentrations for several pollutants, which is useful to an instrument and useless to a person. The government index, ISPU, is what a person can act on - but turning readings into it is not an average.",
+          "The rule that matters is the one about missing data: a day only counts when enough of its hours were actually measured. A sensor that was down for most of a day must not produce a confident-looking number, and the obvious implementation - average what you have - produces exactly that.",
+        ],
+      },
+      {
+        kind: "decisions",
+        heading: "Decisions",
+        items: [
+          {
+            title: "The coverage rule is enforced, not assumed",
+            body: "The conversion checks how many hours a day actually has before it will report an index for it. A day that does not clear the bar is reported as not measured rather than as clean air.",
+          },
+          {
+            title: "Yesterday's forecast is checked against today's reading",
+            body: "A forecast that is never compared to what arrived is a claim nobody can test. Each earlier prediction is held against the reading that later came in, so the dashboard can be wrong in public.",
+          },
+          {
+            title: "The index is computed per pollutant, then reduced",
+            body: "ISPU is defined per pollutant with its own breakpoints, and the day's figure is the worst of them rather than their average - because the point of the index is the thing that would hurt you.",
+          },
+        ],
+      },
+      {
+        kind: "note",
+        body: "This was a team of three and the repository belongs to a teammate, so there is no repository link here - only the live dashboard. What is mine is stated above rather than implied by the page.",
+      },
+    ],
+  },
+  {
+    slug: "vault-retrieval",
+    number: "08",
+    category: "Retrieval & evaluation",
+    title: "Knowing when a search engine got worse",
+    cardTitle: "Knowing When a Search Got Worse",
+    subtitle:
+      "A hybrid search over a note vault, and the held-out set that killed the feature which looked like an improvement.",
+    summary:
+      "Search across a working knowledge vault, built around a held-out question set rather than around a demo.",
+    type: "Individual",
+    teamLabel: "Individual",
+    status: "Code only",
+    context: "A working tool, built for his own notes",
+    period: "2026",
+    role: "All of it: the retrieval, the fusion, the evaluation set and the decision to throw a feature away.",
+    flow: ["Notes", "Chunks", "Dense + keyword", "Fused", "Measured against held-out questions"],
+    tools: ["Python", "Chroma", "BM25", "Embeddings"],
+    links: [],
+    cover: {
+      src: agentRetrieval,
+      alt: "Diagram: a note vault feeding dense and keyword retrieval, fused by reciprocal rank fusion, then measured against a held-out question set",
+      caption:
+        "The shape of it. A drawing rather than a screenshot: this one is a command-line tool over a private vault, so there is no interface to photograph.",
+    },
+    sections: [
+      {
+        kind: "text",
+        heading: "The problem",
+        body: [
+          "A vault of working notes is only worth keeping if you can find the right note later. Keyword search misses anything phrased differently; embedding search misses exact names, file paths and identifiers, which is most of what a technical note is made of. Running both and merging them is the obvious answer.",
+          "The interesting part is not building that. It is knowing whether a change to it made things better or only looked like it did.",
+        ],
+      },
+      {
+        kind: "text",
+        heading: "The feature that had to go",
+        body: [
+          "Notes link to each other, so following those links to pull in neighbouring notes should help. It did: on the set of questions used while developing, the scores went up, and the sensible thing would have been to ship it.",
+          "On the held-out set they went **down**, and not slightly - the mean reciprocal rank fell from 0.88 to 0.68. So the link expansion was switched off, its weight is still sitting at zero in the code, and the comment next to it says why. That is the whole discipline in one line: a development set tells you what you want to hear, and the only defence is a question set you have not been tuning against.",
+        ],
+      },
+      {
+        kind: "decisions",
+        heading: "Decisions",
+        items: [
+          {
+            title: "The question set includes questions with no answer",
+            body: "If every question in the set has an answer somewhere, a system that always returns something confident scores well. Some questions are about things the vault does not contain, so saying nothing is the right behaviour and can be measured.",
+          },
+          {
+            title: "Two retrievers, fused by rank rather than by score",
+            body: "A keyword score and an embedding distance are not on the same scale and averaging them is meaningless. Fusing by position sidesteps that entirely.",
+          },
+          {
+            title: "Re-indexing is incremental, keyed on file contents",
+            body: "A vault that takes minutes to re-index is a vault nobody re-indexes. Each file carries a hash, so a run only touches what changed.",
+          },
+        ],
+      },
+      {
+        kind: "note",
+        body: "The vault this runs over is private working notes, so the repository holds the tools and not the content. There are no accuracy figures on this page beyond the one that caused a feature to be deleted, which is the only one that decided anything.",
       },
     ],
   },

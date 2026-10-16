@@ -34,7 +34,7 @@ export const profile = {
   tagline:
     "I map how a business runs, organize its data, and turn both into practical recommendations and tools.",
   intro:
-    "Applied Data Science student at Politeknik Elektronika Negeri Surabaya (PENS) and AI Engineer intern at a digital marketing agency for SMEs. I enjoy understanding how a business runs: mapping its processes, organizing its data, and turning both into practical recommendations and tools.",
+    "Applied Data Science student at Politeknik Elektronika Negeri Surabaya (PENS) and AI Engineer at a digital marketing agency for SMEs. I enjoy understanding how a business runs: mapping its processes, organizing its data, and turning both into practical recommendations and tools.",
   location: "Surabaya, East Java, Indonesia",
   email: "ilhambintang437@gmail.com",
   links: {
@@ -47,7 +47,7 @@ export const profile = {
 
 export const atAGlance = [
   { label: "Studying", value: "Applied Data Science (D4), Politeknik Elektronika Negeri Surabaya, since 2024" },
-  { label: "Working", value: "AI Engineer Intern at Ideola, a digital marketing agency for SMEs, since Jul 2026" },
+  { label: "Working", value: "AI Engineer at Ideola, a digital marketing agency for SMEs, since Jul 2026" },
   { label: "Leading", value: "Research sub-division, IEEE PENS Student Branch" },
   { label: "Based in", value: "Surabaya, East Java, Indonesia" },
 ];
@@ -71,12 +71,6 @@ export type OtherWork = { title: string; body: string; meta: string; href?: stri
 
 export const otherWork: OtherWork[] = [
   {
-    title: "Air-quality index forecasting for East Java",
-    body: "A dashboard that projects each district's pollutant levels a day ahead, turns raw hourly readings into the official government index including its rule that a day only counts when enough of its hours were measured, and checks every earlier forecast against the reading that later arrived.",
-    meta: "Team of 3, Web Service Technology course",
-    href: "https://web-prediksi-ispu.vercel.app/",
-  },
-  {
     title: "Retail BI for a multi-branch minimart",
     body: "A sales dashboard tracking revenue, costs, profit, and margin by branch, fed by a star-schema warehouse.",
     meta: "Individual, Data Visualization & Data Warehousing courses",
@@ -90,7 +84,7 @@ export const otherWork: OtherWork[] = [
 
 export const experience = [
   {
-    role: "AI Engineer Intern",
+    role: "AI Engineer",
     org: "Ideola, digital marketing agency for SMEs",
     period: "Jul 2026 – present",
     points: [
@@ -339,4 +333,7 @@ export const toolbox = [
 ];
 
 // One line, used on the contact page and in the CV page's header.
-export const openTo = "Open to a data internship from January 2027, for at least four months.";
+// Ilham asked for this on 2026-10-17: he wants the page to read as somebody looking
+// for a data role, not for a placement. It overrides the additions-only rule on this
+// file, at his direct instruction.
+export const openTo = "Open to data positions.";

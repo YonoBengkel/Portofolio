@@ -81,6 +81,9 @@ export function Curtain() {
       busy.current = true;
       setLabel(nameFor(url.pathname));
       setState("covering");
+      // The header's fill listens for this, so it has already slid to the destination by
+      // the time the panel lifts rather than appearing there afterwards.
+      window.dispatchEvent(new CustomEvent("nav:pending", { detail: url.pathname }));
 
       timers.push(
         window.setTimeout(() => {
@@ -92,6 +95,7 @@ export function Curtain() {
                 window.setTimeout(() => {
                   setState("idle");
                   busy.current = false;
+                  window.dispatchEvent(new CustomEvent("nav:pending", { detail: null }));
                 }, CLEAR),
               );
             }, HOLD),

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Anton, Archivo, IBM_Plex_Mono } from "next/font/google";
 import { Curtain } from "@/components/curtain";
+import { Lightbox } from "@/components/lightbox";
 import { RevealOnScroll } from "@/components/reveal-on-scroll";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -55,6 +56,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteFooter />
         <RevealOnScroll />
         <Curtain />
+        <Lightbox />
       </body>
     </html>
   );

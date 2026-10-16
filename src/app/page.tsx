@@ -19,7 +19,25 @@ import { competitions, education, experience, leadership } from "@/content/site"
  * reference puts its own grid on #5A6F84 and this site's slate is #4A5A6B, which is the
  * same colour to anyone who opens both - and the same lecturers will open both.
  */
+/*
+  The six Ilham picked for the front page, in the order he gave them. The rest of the
+  work is on /work; this is not a ranking, it is a front page, and a front page is
+  allowed to be a choice.
+*/
+const FRONT = [
+  "warungku",
+  "vault-retrieval",
+  "supplier-decision-support",
+  "fall-detection",
+  "quality-early-warning",
+  "air-quality-index",
+];
+
 export default function Home() {
+  const front = FRONT.map((slug) => projects.find((p) => p.slug === slug)).filter(
+    (p): p is (typeof projects)[number] => Boolean(p),
+  );
+
   // Work, then the organisation seats, then the degree. The full list lives on /about;
   // the home page shows the four most recent so the section stays one screen deep.
   const timeline = buildTimeline(experience, leadership, education).slice(0, 4);
@@ -80,10 +98,11 @@ export default function Home() {
               <p className="plaque-tag">Case studies</p>
             </div>
             <p className="lede rise mt-8 max-w-[38rem] opacity-85">
-              Each one written from what it actually does rather than from the stack it was built with.
+              Six of them, each written from what it actually does rather than from the stack it was
+              built with.
             </p>
             <div className="mt-14">
-              <WorkGrid projects={projects} />
+              <WorkGrid projects={front} />
             </div>
             <p className="mt-14">
               <Link href="/work" className="pill pill-yellow">

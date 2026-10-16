@@ -381,12 +381,14 @@
     position: fixed;
     inset-inline: 0;
     top: 0;
-    z-index: 50;
+    /* Above the curtain, so the fill sliding to the next page can actually be seen. */
+    z-index: 95;
     padding-block: 18px;
     background: color-mix(in srgb, var(--paper) 88%, transparent);
     border-bottom: 1px solid transparent;
   }
   .nav-pill {
+    position: relative;
     display: inline-flex;
     align-items: center;
     gap: 4px;
@@ -401,25 +403,42 @@
   }
   /*
     The page you are on is filled in, the way the hero's switch is filled in when it is
-    on - which is what Ilham asked for. The fill is state, not decoration: aria-current
-    carries the same fact to anyone who is not looking at it.
+    on. One element does the filling and slides between the links, because four separate
+    backgrounds cannot animate into each other - only a single object can travel. Its
+    position comes from measuring the live link, in nav-links.tsx.
   */
   .nav-pill a {
+    position: relative;
+    z-index: 1;
     padding: 7px 13px;
     border-radius: 999px;
-    transition:
-      background-color 150ms ease,
-      color 150ms ease;
+    transition: color 220ms ease;
   }
   .nav-pill a:hover {
-    background: color-mix(in srgb, var(--ink) 10%, transparent);
+    color: color-mix(in srgb, var(--ink) 55%, var(--yellow));
   }
-  .nav-pill a[data-current] {
-    background: var(--ink);
+  .nav-pill a[data-current],
+  .nav-pill a[data-current]:hover {
     color: var(--paper-2);
   }
-  .nav-pill a[data-current]:hover {
+  .nav-fill {
+    position: absolute;
+    top: 5px;
+    bottom: 5px;
+    left: 0;
+    z-index: 0;
+    width: var(--fill-w, 0);
+    translate: var(--fill-x, 0) 0;
+    border-radius: 999px;
     background: var(--ink);
+    opacity: 0;
+    transition:
+      translate 420ms cubic-bezier(0.76, 0, 0.24, 1),
+      width 420ms cubic-bezier(0.76, 0, 0.24, 1),
+      opacity 180ms ease;
+  }
+  .nav-pill[data-has-fill] .nav-fill {
+    opacity: 1;
   }
 
   /* ----------------------------------------------------------- the grid */
@@ -732,7 +751,7 @@
 
   .tape-slot {
     overflow: clip;
-    contain-intrinsic-size: auto 92px;
+    contain-intrinsic-size: auto 112px;
   }
   /* Wider than the window, because a tilted strip would otherwise leave a bare triangle
      of page colour at each end. */
@@ -741,7 +760,8 @@
     overflow: hidden;
     width: 108vw;
     margin-inline: -4vw;
-    padding-block: 15px;
+    /* Taller. At 15px it read as a ribbon rather than as tape across a doorway. */
+    padding-block: 24px;
     white-space: nowrap;
     color: var(--ink);
     border-block: 3px solid var(--ink);
@@ -756,12 +776,12 @@
   .tape-run {
     display: inline-block;
     background: var(--yellow);
-    padding-block: 7px;
+    padding-block: 11px;
   }
   .tape-run span {
     display: inline-block;
     font-family: var(--font-display);
-    font-size: clamp(1.3rem, 2.8vw, 2.1rem);
+    font-size: clamp(1.7rem, 3.6vw, 2.8rem);
     letter-spacing: -0.01em;
     text-transform: uppercase;
     padding-right: 0.45em;
@@ -800,6 +820,17 @@
   html.js-marquee .marquee-run.is-running .hero-band-run,
   html.js-marquee .marquee-run.is-running .belt-track {
     animation-play-state: running;
+  }
+  /*
+    The certificates stop under the cursor and start again when it leaves. They are the
+    one belt carrying something a reader might want to stop and look at, and a card that
+    walks away while you are reading it is the reference's own worst habit.
+  */
+  .certbelt:hover .certbelt-track,
+  .certbelt:focus-within .certbelt-track,
+  html.js-marquee .certbelt.marquee-run:hover .certbelt-track,
+  html.js-marquee .certbelt.marquee-run:focus-within .certbelt-track {
+    animation-play-state: paused;
   }
   /* Last, so it beats the rule above: the bands are off-screen when the switch is off,
      and an animation nobody can see is a frame a phone pays for anyway. */
@@ -910,14 +941,15 @@
   /* ======================================================= the hero ground */
 
   /*
-    What the switch does. Three full-bleed bands slide in from alternating sides and the
-    name leaves downward; flipping back reverses it exactly. The reference uses five
-    bands at angles re-rolled randomly up to 30 degrees; three at fixed shallow angles is
-    the calmer version of the same idea, and because they carry his own three words
-    rather than a stack list, the alternate state says something.
+    What the switch does. Four bands arrive along their own diagonals, and the name goes
+    down into the floor letter by letter.
 
-    The bands sit at 100vw rather than inside the frame, because a tilted strip clipped
-    at the gutter leaves a bare triangle of page colour at each end.
+    The diagonal is the point, and it comes from where the transform sits rather than
+    from a clever value. `rotate` is on the band and `translate` is on the element inside
+    it, so the translate happens in the band's own rotated frame: moving it "down" moves
+    it perpendicular to itself, which on a tilted strip is diagonal on screen. The first
+    version translated the rotated element, and CSS applies translate before rotate, so
+    everything slid straight down no matter what angle it was set at.
   */
   .hero-alt {
     position: absolute;
@@ -930,54 +962,87 @@
     overflow: clip;
     display: grid;
     align-content: center;
-    gap: clamp(4px, 1vw, 14px);
+    /*
+      Negative, so the bands overlap. A 150%-wide strip tilted even six degrees rises
+      about 110px across its own length, which is most of a band's thickness - set edge
+      to edge they splay apart and leave cream wedges across the middle of the screen.
+      Overlapping them closes that, and since they are all the same ink the overlap is
+      not visible as a seam.
+    */
+    gap: -38px;
     pointer-events: none;
   }
-  /*
-    Each band comes up out of the floor and sinks back into it, rather than sliding in
-    from the side. A strip set at nine degrees that travels horizontally reads as a
-    mistake, because the eye expects a tilted thing to move along its own line; rising has
-    no such expectation to break. The travel is a whole viewport, so they really do come
-    from below the page rather than from just off the edge of their own box.
-
-    The stagger runs bottom-up on the way in and top-down on the way out, so the wall
-    assembles from the floor and then falls back into it.
-  */
   .hero-band {
-    --tilt: -8deg;
-    width: 138%;
-    margin-inline: -19%;
-    overflow: hidden;
-    padding-block: 0.18rem;
-    background: var(--ink);
-    color: var(--paper);
+    --tilt: -5deg;
+    width: 150%;
+    margin-inline: -25%;
     rotate: var(--tilt);
-    translate: 0 calc(100svh + var(--i) * 40px);
-    transition: translate 760ms cubic-bezier(0.22, 1, 0.3, 1);
-    transition-delay: calc(var(--i) * 45ms);
   }
   .hero-band:nth-child(2) {
-    --tilt: 6deg;
+    --tilt: 4deg;
   }
   .hero-band:nth-child(3) {
-    --tilt: -12deg;
+    --tilt: -6deg;
   }
   .hero-band:nth-child(4) {
-    --tilt: 9deg;
+    --tilt: 5deg;
   }
-  .hero-band:nth-child(5) {
-    --tilt: -5deg;
+  /* The strip itself: much taller than it was, because thin reads as limp. */
+  .hero-band-in {
+    overflow: hidden;
+    padding-block: 0.42rem;
+    background: var(--ink);
+    color: var(--paper);
   }
-  .hero-band:nth-child(6) {
-    --tilt: 11deg;
+  /*
+    One viewport is not enough travel. A 150%-wide strip tilted twelve degrees rises and
+    falls by about 150px across its own length, so at exactly 100svh the far corner was
+    still showing along the bottom of the page - which is what the stripes under the
+    buttons were. Measured: 340px of margin clears every one of the four.
+  */
+  .hero-alt .hero-band-in {
+    translate: 0 calc(100svh + 340px + var(--i) * 40px);
+    transition: translate 820ms cubic-bezier(0.22, 1, 0.3, 1);
+    transition-delay: calc(var(--i) * 50ms);
   }
-  html[data-run="1"] .hero-band {
+  html[data-run="1"] .hero-alt .hero-band-in {
     translate: 0 0;
-    transition-delay: calc((5 - var(--i)) * 55ms);
+    transition-delay: calc((3 - var(--i)) * 60ms);
   }
   /* Flipped, the switch sits on ink; its focus ring has to come with it. */
   html[data-run="1"] .hero {
     --focus: var(--yellow);
+  }
+
+  /*
+    The two that never leave: one cropped into the top-left corner, one into the
+    bottom-right. They sit outside .hero-alt so the switch does not take them with it.
+  */
+  .hero-corners {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    translate: -50% 0;
+    width: 100vw;
+    z-index: 0;
+    overflow: clip;
+    pointer-events: none;
+  }
+  .hero-stub {
+    position: absolute;
+    width: 46%;
+    margin-inline: 0;
+  }
+  .hero-stub-tl {
+    --tilt: -14deg;
+    top: -4.4rem;
+    left: -15%;
+  }
+  .hero-stub-br {
+    --tilt: -11deg;
+    bottom: -4.4rem;
+    right: -15%;
   }
 
   /* The words run along the band. A police line with still lettering is a picture of one. */
@@ -998,11 +1063,9 @@
   .hero-band:nth-child(4) .hero-band-run {
     --dur: 58s;
   }
-  .hero-band:nth-child(5) .hero-band-run {
+  .hero-stub-br .hero-band-run {
     --dur: 70s;
-  }
-  .hero-band:nth-child(6) .hero-band-run {
-    --dur: 46s;
+    animation-direction: reverse;
   }
   .hero-band-set {
     display: inline-flex;
@@ -1012,34 +1075,80 @@
   .hero-band-run b {
     font-family: var(--font-display);
     font-weight: 400;
-    font-size: clamp(2rem, 9vw, 7rem);
-    line-height: 1.12;
+    font-size: clamp(2.6rem, 12vw, 9.5rem);
+    line-height: 1.1;
     letter-spacing: -0.02em;
     text-transform: uppercase;
   }
 
-  .hero-copy {
-    position: relative;
-    z-index: 2;
+  /* ------------------------------------------------------------ sinking */
+
+  /*
+    The copy goes down into the floor rather than fading out, and that difference is the
+    whole feel: a fade says the text stopped existing, a sink says it went somewhere.
+    Each piece rides inside its own clipped slot, so what you see is a letter sliding
+    under a line.
+
+    The stagger runs forwards on the way down and backwards on the way back, which is why
+    the queue length is carried in --n alongside each piece's own --i.
+  */
+  .sink-line {
+    display: inline;
+  }
+  .sink {
+    display: inline-block;
+    overflow: clip;
+    /* Room for the parts of a glyph that sit below the line box, so the slot clips the
+       letter leaving rather than the letter standing still. */
+    padding-bottom: 0.1em;
+    margin-bottom: -0.1em;
+    vertical-align: bottom;
+  }
+  .sink > span {
+    display: inline-block;
+    translate: 0 0;
+    transition: translate 560ms cubic-bezier(0.76, 0, 0.24, 1);
+    transition-delay: calc((var(--n, 10) - var(--i, 0)) * 18ms);
+  }
+  html[data-run="1"] .sink > span {
+    translate: 0 118%;
+    transition-delay: calc(var(--i, 0) * 24ms);
+  }
+  /* The highlighter is carried by the slots, so the plate goes down with the letters. */
+  .marker-split {
+    background: none;
+    padding: 0;
+    margin-inline: 0;
+  }
+  .marker-split .sink {
+    background: var(--yellow);
+    padding: 0.08em 0 0.1em;
+    margin-bottom: -0.1em;
+  }
+  /* Whole blocks that are not split into pieces still go down, inside their own clip. */
+  .sink-block {
+    overflow: clip;
+  }
+  .sink-block > * {
+    transition: translate 560ms cubic-bezier(0.76, 0, 0.24, 1);
+    transition-delay: 120ms;
+  }
+  html[data-run="1"] .sink-block > * {
+    translate: 0 140%;
+    transition-delay: 0ms;
   }
   /*
-    The copy leaves rather than fades under the bands. visibility goes with it, so none of
-    these links can be tabbed to while they are off-screen.
+    No opacity and no movement here any more - the sink does both. This only takes the
+    links out of the tab order once they are off the floor, and puts them back first on
+    the way in.
   */
   .hero-out {
-    transition:
-      opacity 450ms ease,
-      translate 650ms cubic-bezier(0.16, 1, 0.3, 1),
-      visibility 0s;
+    display: block;
+    transition: visibility 0s;
   }
   html[data-run="1"] .hero-out {
-    opacity: 0;
     visibility: hidden;
-    translate: 0 36px;
-    transition:
-      opacity 450ms ease,
-      translate 650ms cubic-bezier(0.16, 1, 0.3, 1),
-      visibility 0s linear 650ms;
+    transition: visibility 0s linear 760ms;
   }
   .dots {
     transition: opacity 400ms ease;
@@ -1056,10 +1165,6 @@
     The readout rides on its own plate. It has to sit over both grounds - half of it can
     land on an ink band while the other half is still on paper - so it carries its own
     background rather than switching colour with the state.
-
-    Which half is live is shown by weight and a rule, not by dimming: at 40% opacity the
-    inactive word measured 1.97:1 against the page, and it is the only thing on screen
-    that says what the switch just did.
   */
   .run-label {
     padding: 7px 14px;
@@ -1163,12 +1268,12 @@
     right: 0;
     z-index: 5;
     overflow: hidden;
-    padding-block: 11px;
+    padding-block: 16px;
     white-space: nowrap;
     background: var(--ink);
     color: var(--paper);
     border-bottom: 2px solid color-mix(in srgb, var(--paper) 34%, transparent);
-    contain-intrinsic-size: auto 48px;
+    contain-intrinsic-size: auto 60px;
   }
   /* 50s because one cycle now covers two of the four runs; the speed is unchanged. */
   .about-tape-run {
@@ -1183,7 +1288,7 @@
     padding-inline: 1.5rem;
     font-family: var(--font-display);
     font-weight: 400;
-    font-size: 1.35rem;
+    font-size: 1.7rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
   }
@@ -1238,7 +1343,8 @@
     display: grid;
     gap: 28px;
     width: min(1160px, 100%);
-    padding: 26px;
+    padding: 26px 26px 0;
+    overflow: clip;
     background: var(--paper-2);
     color: var(--ink);
     border: 2px solid var(--ink);
@@ -1251,10 +1357,10 @@
   }
   @media (min-width: 860px) {
     .about-card {
-      grid-template-columns: 15rem minmax(0, 1fr);
+      grid-template-columns: 17rem minmax(0, 1fr);
       align-items: center;
       gap: 52px;
-      padding: 46px;
+      padding: 44px 44px 0;
       /*
         90%, not 100%. The display type behind the card has to be wider than the card or
         it is never seen at all, and at every desktop width from 860 to about 1294 a
@@ -1292,7 +1398,7 @@
   .about-photo {
     /* A flat 15rem is a 240px min-content floor, which at 320px pushed the whole stack
        16px wider than the window and threw the card and the social row off centre. */
-    width: min(15rem, 100%);
+    width: min(17rem, 100%);
     aspect-ratio: 250 / 300;
     padding: 10px;
     background: var(--paper-2);
@@ -1325,10 +1431,12 @@
     scale: 1.1;
   }
 
+  /* Bigger. The card read soft because its loudest thing was barely louder than its
+     quietest: at 2.8rem the name was only two and a half times the body copy. */
   .about-name {
-    font-size: clamp(1.8rem, 3.4vw, 2.8rem);
-    line-height: 1.05;
-    letter-spacing: -0.03em;
+    font-size: clamp(2.2rem, 4.6vw, 3.9rem);
+    line-height: 0.98;
+    letter-spacing: -0.035em;
   }
   .about-role {
     margin-top: 10px;
@@ -1360,30 +1468,53 @@
     font-size: 0.94em;
     color: var(--ink);
   }
+  /*
+    The four facts, on their own reversed strip across the foot of the card. It bleeds to
+    the card's edges, which is what the negative margins and the card's own overflow are
+    for, and it is the only mass in the card besides the photograph.
+  */
   .about-facts {
-    margin-top: 22px;
+    grid-column: 1 / -1;
+    /* The card centres its rows, so without this the strip floats off the bottom edge
+       instead of being the floor the card stands on. Stretch, not end: the strip should
+       be the whole last row, not a box resting inside it. */
+    align-self: stretch;
+    align-content: center;
+    margin: 36px -26px 0;
+    padding: 22px 26px;
     display: grid;
-    gap: 13px 26px;
+    gap: 16px 26px;
+    background: var(--ink);
+    color: var(--paper);
   }
   @media (min-width: 640px) {
     .about-facts {
       grid-template-columns: 1fr 1fr;
     }
   }
+  @media (min-width: 860px) {
+    .about-facts {
+      margin: 12px -44px 0;
+      padding: 26px 44px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 22px;
+    }
+  }
   .about-facts dt {
     font-family: var(--font-mono);
-    font-size: 0.64rem;
-    letter-spacing: 0.14em;
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--ink-2);
+    color: color-mix(in srgb, var(--paper) 70%, transparent);
   }
   .about-facts dd {
-    margin-top: 4px;
-    font-size: 0.9rem;
+    margin-top: 6px;
+    font-size: 0.88rem;
     line-height: 1.4;
   }
   .about-cta {
     margin-top: 26px;
+    margin-bottom: 8px;
     display: flex;
     flex-wrap: wrap;
     gap: 14px;
@@ -1817,6 +1948,21 @@
     object-fit: cover;
     object-position: top center;
   }
+  .cert-shot-open {
+    padding: 0;
+    cursor: zoom-in;
+    transition: border-color 150ms ease;
+  }
+  .cert-shot-open:hover {
+    border-color: var(--ink);
+  }
+  .entry-scan {
+    cursor: zoom-in;
+    transition: border-color 150ms ease;
+  }
+  .entry-scan:hover {
+    border-color: var(--ink);
+  }
   /* The year, where there is no scan to show. Not a placeholder graphic: the fact. */
   .cert-noscan {
     font-size: 3.6rem;
@@ -2025,7 +2171,7 @@
         position: sticky;
         top: 0;
         height: 100svh;
-        padding-block: 131px 0;
+        padding-block: 146px 0;
       }
       .about-tape {
         top: 75px;
@@ -2091,6 +2237,167 @@
     to {
       scale: 1;
     }
+  }
+
+  /* ===================================================== the work contents */
+
+  /*
+    A contents page rather than two grids. Each row is the whole hit area, the number
+    stays in the display face so the list reads as a numbered thing rather than a table,
+    and a row with no case study behind it says so in its own column instead of being
+    filed under a heading that means "the lesser ones".
+  */
+  .windex {
+    border-top: 2px solid var(--line-strong);
+  }
+  .windex-row {
+    border-bottom: 1px solid var(--line);
+  }
+  .windex-link {
+    display: grid;
+    grid-template-columns: 3.2rem minmax(0, 1fr);
+    align-items: baseline;
+    gap: 4px 18px;
+    padding: 18px 4px;
+    transition:
+      background-color 150ms ease,
+      padding-inline 150ms ease;
+  }
+  @media (min-width: 860px) {
+    .windex-link {
+      grid-template-columns: 3.2rem minmax(0, 1fr) 15rem 9rem 1.5rem;
+      align-items: center;
+      gap: 20px;
+    }
+  }
+  a.windex-link:hover {
+    background: color-mix(in srgb, var(--ink) 6%, transparent);
+    padding-inline: 12px 4px;
+  }
+  .windex-n {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--ink-2);
+  }
+  .windex-title {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+  }
+  .windex-meta,
+  .windex-note {
+    grid-column: 2;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  @media (min-width: 860px) {
+    .windex-meta {
+      grid-column: 3;
+    }
+    .windex-note {
+      grid-column: 4;
+    }
+  }
+  .windex-go {
+    display: none;
+    text-align: right;
+    color: var(--ink-2);
+    transition: translate 150ms ease;
+  }
+  @media (min-width: 860px) {
+    .windex-go {
+      display: block;
+    }
+  }
+  a.windex-link:hover .windex-go {
+    translate: 5px 0;
+    color: var(--ink);
+  }
+  /* A row with nothing behind it is quieter, and does not pretend to be clickable. */
+  .windex-flat {
+    cursor: default;
+  }
+  .windex-flat .windex-title {
+    color: var(--ink-2);
+  }
+
+  /* ========================================================== the viewer */
+
+  /*
+    A real <dialog>, so Escape, the focus trap and the inert background all come from the
+    browser rather than from a listener that has to be remembered.
+  */
+  .zoom {
+    width: min(94vw, 1200px);
+    max-width: none;
+    max-height: 92svh;
+    padding: 0;
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    background: var(--paper-2);
+    color: var(--ink);
+    overflow: visible;
+  }
+  .zoom::backdrop {
+    background: color-mix(in srgb, var(--ink) 86%, transparent);
+  }
+  /* The whole field outside the picture closes it, which is what everyone tries first. */
+  .zoom-field {
+    position: fixed;
+    inset: 0;
+    cursor: zoom-out;
+  }
+  .zoom-figure {
+    position: relative;
+    margin: 0;
+    padding: 14px;
+  }
+  .zoom-figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: calc(92svh - 86px);
+    object-fit: contain;
+    border: 1px solid var(--line-strong);
+    border-radius: 3px;
+    background: var(--paper);
+  }
+  .zoom-figure figcaption {
+    margin-top: 12px;
+    color: var(--ink-2);
+    text-transform: none;
+    letter-spacing: 0.04em;
+  }
+  .zoom-close {
+    position: absolute;
+    top: -16px;
+    right: -10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 16px;
+    background: var(--yellow);
+    color: var(--on-yellow);
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    box-shadow: 4px 4px 0 0 var(--ink);
+    transition:
+      translate 150ms ease,
+      box-shadow 150ms ease;
+  }
+  .zoom-close:hover {
+    translate: 2px 2px;
+    box-shadow: 2px 2px 0 0 var(--ink);
   }
 
   /* ---------------------------------------------------------- the reveal */

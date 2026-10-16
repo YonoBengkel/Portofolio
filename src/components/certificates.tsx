@@ -73,17 +73,27 @@ const CARD = 384; // .cert-card width in px, kept in step with globals.css
 const GAP = 20;
 
 function Card({ item }: { item: Certificate }) {
+  const alt = `Certificate: ${item.title}, ${item.org}, ${item.year}`;
   return (
     <article className="cert-card">
-      <div className="cert-shot">
-        {item.scan ? (
-          <Image src={item.scan} alt={`Certificate: ${item.title}, ${item.org}, ${item.year}`} sizes="384px" />
-        ) : (
+      {item.scan ? (
+        <button
+          type="button"
+          className="cert-shot cert-shot-open"
+          data-zoom-src={item.scan.src}
+          data-zoom-alt={alt}
+          data-zoom-caption={`${item.title} — ${item.org}, ${item.year}`}
+        >
+          <Image src={item.scan} alt={alt} sizes="384px" />
+          <span className="sr-only">Open this certificate full size</span>
+        </button>
+      ) : (
+        <div className="cert-shot">
           <p className="cert-noscan display" aria-hidden="true">
             {item.year}
           </p>
-        )}
-      </div>
+        </div>
+      )}
       <div className="cert-meta">
         <span className={`chip ${item.kind === "Participant" ? "" : "chip-live"}`}>{item.kind}</span>
         <span className="meta opacity-70">{item.year}</span>
@@ -102,8 +112,13 @@ export function Certificates() {
   return (
     <div className="certbelt marquee-run">
       <div className="certbelt-track" style={{ animationDuration: `${seconds}s` }}>
+        {/*
+          The second copy is `inert` as well as aria-hidden: each card now holds a button
+          that opens the scan, and aria-hidden alone leaves those in the tab order - a
+          reader would tab through every certificate twice.
+        */}
         {[0, 1].map((copy) => (
-          <div className="certbelt-set" key={copy} aria-hidden={copy === 1 ? "true" : undefined}>
+          <div className="certbelt-set" key={copy} aria-hidden={copy === 1} inert={copy === 1}>
             {items.map((item) => (
               <Card key={`${item.title}-${item.year}`} item={item} />
             ))}

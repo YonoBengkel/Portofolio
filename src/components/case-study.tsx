@@ -6,12 +6,19 @@ import { Rich } from "./rich";
 // Case-study building blocks. Every block is a direct child of .article-grid, so it can
 // choose its width: the 42rem text column (default) or the 64rem "wide" column.
 
-/** Each picture links to its original file, so it can be opened at full size without any script. */
+/**
+ * Each picture opens full size in the viewer, which is a real <dialog> and so closes on
+ * Escape. It used to be an <a> to the image file, which navigated away from the page: no
+ * Escape, only a back button.
+ */
 function Img({ figure, preload = false }: { figure: Figure; preload?: boolean }) {
   return (
-    <a
-      href={figure.src.src}
-      className={`block cursor-zoom-in overflow-clip rounded-[6px] border-2 border-ink bg-ink ${
+    <button
+      type="button"
+      data-zoom-src={figure.src.src}
+      data-zoom-alt={figure.alt}
+      data-zoom-caption={figure.caption}
+      className={`block w-full cursor-zoom-in overflow-clip rounded-[6px] border-2 border-ink bg-ink ${
         figure.narrow ? "mx-auto max-w-[28rem]" : ""
       }`}
     >
@@ -23,7 +30,7 @@ function Img({ figure, preload = false }: { figure: Figure; preload?: boolean })
         className="h-auto w-full"
       />
       <span className="sr-only"> (opens the full-size image)</span>
-    </a>
+    </button>
   );
 }
 

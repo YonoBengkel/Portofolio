@@ -31,9 +31,20 @@ export function EntryList({ entries }: { entries: Entry[] }) {
             <p className="mt-4 leading-relaxed">{entry.body}</p>
           </div>
           {entry.scan && (
-            <div className="entry-scan">
-              <Image src={entry.scan} alt={`Certificate: ${entry.title}, ${entry.org}`} sizes="(min-width: 760px) 15rem, 90vw" />
-            </div>
+            <button
+              type="button"
+              className="entry-scan"
+              data-zoom-src={entry.scan.src}
+              data-zoom-alt={`Certificate: ${entry.title}, ${entry.org}`}
+              data-zoom-caption={`${entry.title} — ${entry.org}, ${entry.period}`}
+            >
+              <Image
+                src={entry.scan}
+                alt={`Certificate: ${entry.title}, ${entry.org}`}
+                sizes="(min-width: 760px) 15rem, 90vw"
+              />
+              <span className="sr-only">Open this certificate full size</span>
+            </button>
           )}
         </li>
       ))}
