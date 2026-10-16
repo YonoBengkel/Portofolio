@@ -10,35 +10,20 @@ export const contentType = "image/png";
 // next/og cannot read the site's woff2 files, so it gets static TTF copies of the same
 // two faces the site uses (licences in src/assets/fonts/OFL.txt).
 const fontDir = join(process.cwd(), "src/assets/fonts");
-const serif = await readFile(join(fontDir, "InstrumentSerif-Regular.ttf"));
+const serif = await readFile(join(fontDir, "Newsreader-Regular.ttf"));
 const sans = await readFile(join(fontDir, "Archivo-Regular.ttf"));
 
-// The hero drawing (process box, data store, decision). The decision carries the one accent.
-const ROUTE = [
-  "M40 40H400V250H40Z",
-  "M400 145H560V174",
-  "M450 200A110 26 0 1 0 670 200A110 26 0 1 0 450 200",
-  "M450 200V420A110 26 0 0 0 670 420V200",
-  "M670 330H760",
-  "M760 330L910 180L1060 330L910 480Z",
-];
-const colors = { ground: "#0a0c11", ink: "#d9d5c8", route: "#242e3b", lamp: "#d9a441" };
+const colors = { void: "#0c131d", soot: "#142638", concrete: "#2b4962", ink: "#d9d5c8", ash: "#92acc4" };
 
-// Social preview image shown when the site link is shared (LinkedIn, WhatsApp, etc.).
+// The mark: a decision diamond cut open by a vertical slot that reads as an I.
+const MARK = "M 128 26 L 230 128 L 128 230 L 26 128 Z M 110 63 L 146 63 L 146 187 L 110 187 Z";
+
+/**
+ * The link preview. It used to draw the hero flowchart, which the site no longer has, so
+ * it now shows what the site shows: the mark, the name, and one line about the work, on
+ * the page colour with a single band of light behind it.
+ */
 export default function OpengraphImage() {
-  const [first, middle, last] = profile.name.split(" ");
-  const width = 960;
-  const height = Math.round((width * 530) / 1100);
-  const nameSize = Math.round(width * 0.082);
-  const word = {
-    position: "absolute",
-    fontFamily: "Instrument Serif",
-    fontSize: nameSize,
-    fontWeight: 400,
-    lineHeight: 1,
-    letterSpacing: -0.02 * nameSize,
-  } as const;
-
   return new ImageResponse(
     (
       <div
@@ -47,55 +32,69 @@ export default function OpengraphImage() {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          background: colors.ground,
+          justifyContent: "center",
+          padding: "0 84px",
+          background: colors.void,
           color: colors.ink,
           fontFamily: "Archivo",
         }}
       >
-        <div style={{ position: "relative", display: "flex", width, height, marginTop: 30 }}>
-          <svg width={width} height={height} viewBox="0 0 1100 530" style={{ position: "absolute", left: 0, top: 0 }}>
-            {Array.from({ length: 14 }, (_, k) => (
-              <g
-                key={k}
-                transform={`translate(0 ${k * 3.2})`}
-                opacity={1 - k * 0.066}
-                fill="none"
-                stroke={colors.route}
-                strokeWidth={1.35}
-                strokeLinejoin="round"
-              >
-                {ROUTE.map((d, i) => (
-                  <path key={d} d={d} stroke={i === ROUTE.length - 1 ? colors.lamp : colors.route} />
-                ))}
-              </g>
-            ))}
+        {/* The one pool of light, behind the name rather than everywhere. */}
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 110,
+            width: 1200,
+            height: 430,
+            background: `radial-gradient(44% 58% at 34% 50%, ${colors.concrete}, transparent 72%)`,
+            opacity: 0.5,
+          }}
+        />
+        <div style={{ display: "flex", alignItems: "center", gap: 18, marginBottom: 34 }}>
+          <svg width={44} height={44} viewBox="0 0 256 256">
+            <path d={MARK} fill={colors.ink} fillRule="evenodd" />
           </svg>
-          <div style={{ ...word, left: -0.01 * width, top: 0.17 * height }}>{first}</div>
-          <div style={{ ...word, left: 0, right: 0, top: 0.45 * height, display: "flex", justifyContent: "center" }}>
-            {middle}
+          <div style={{ fontSize: 23, letterSpacing: "0.14em", textTransform: "uppercase", color: colors.ash }}>
+            {profile.label}
           </div>
-          <div style={{ ...word, right: -0.01 * width, top: 0.73 * height }}>{last}</div>
         </div>
+
         <div
           style={{
             display: "flex",
-            marginTop: 22,
-            maxWidth: 860,
-            textAlign: "center",
-            fontSize: 27,
-            fontWeight: 400,
-            lineHeight: 1.4,
+            fontFamily: "Newsreader",
+            fontSize: 104,
+            lineHeight: 1,
+            letterSpacing: "-0.025em",
           }}
+        >
+          {profile.name}
+        </div>
+
+        <div
+          style={{ display: "flex", marginTop: 34, maxWidth: 820, fontSize: 28, lineHeight: 1.45, color: colors.ash }}
         >
           {profile.tagline}
         </div>
+
+        {/* The floor line, so the frame holds a room rather than a void. */}
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            bottom: 0,
+            width: 1200,
+            height: 92,
+            background: `linear-gradient(to top, ${colors.soot}, transparent)`,
+          }}
+        />
       </div>
     ),
     {
       ...size,
       fonts: [
-        { name: "Instrument Serif", data: serif, weight: 400, style: "normal" },
+        { name: "Newsreader", data: serif, weight: 400, style: "normal" },
         { name: "Archivo", data: sans, weight: 400, style: "normal" },
       ],
     },

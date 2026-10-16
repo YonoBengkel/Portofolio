@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
   <title>Ilham Bintang Satria</title>
-  <rect width="256" height="256" fill="#06080C"/>
+  <rect width="256" height="256" fill="#0C131D"/>
   <!-- Small-size cut: wider slot, diamond pulled in, so both survive the pixel grid
        at 16px. Bone on void, the same pair as the page. -->
   <g transform="translate(26 26) scale(0.797)" fill="#D9D5C8">
