@@ -1,5 +1,5 @@
 import Image from "next/image";
-import portrait from "@/assets/images/portrait.webp";
+import portrait from "@/assets/images/portrait-cutout.webp";
 import { atAGlance, experience, openTo, profile, toolbox } from "@/content/site";
 
 /**
@@ -22,11 +22,16 @@ export function Dossier() {
     <section className="lit band" aria-label="About Ilham">
       <div className="column">
         <div className="dossier panel plate reveal">
+          {/*
+            A cut-out standing on a sheet of paper, the way the reference site does it:
+            the person without the room behind them. The sheet is a generated paper tile,
+            so the only photograph here is him.
+          */}
           <div className="dossier-portrait">
             <Image
               src={portrait}
-              alt={`${profile.name}, standing in the same room`}
-              sizes="(min-width: 768px) 18rem, 60vw"
+              alt={profile.name}
+              sizes="(min-width: 900px) 17rem, 60vw"
               placeholder="blur"
             />
           </div>

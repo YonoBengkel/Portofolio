@@ -142,9 +142,22 @@ def paint():
     return norm(a, 0.40, 1.0)
 
 
+def paper():
+    """Pressed paper: long fibres lying in every direction, a slow unevenness across the
+    sheet, and the odd darker speck where the pulp did not take."""
+    a = norm(fnoise(51, beta=2.0, lo=2)) * 0.52            # the sheet is not flat
+    a += norm(fnoise(52, beta=0.5, aniso=9.0, lo=8)) * 0.22  # fibres one way
+    a += norm(fnoise(53, beta=0.5, aniso=0.11, lo=8)) * 0.20  # and the other
+    a += norm(fnoise(54, beta=0.2, lo=70)) * 0.10           # tooth
+    specks = fnoise(55, beta=0.3, lo=40)
+    a -= (specks > np.percentile(specks, 99.3)) * 0.30      # flecks in the pulp
+    return norm(a, 0.30, 1.0)
+
+
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
     save(concrete(), "concrete.webp", floor=0.32)
     save(wood(), "wood.webp", q=62, floor=0.22, levels=12)
     save(ceramic(), "ceramic.webp", floor=0.18)
     save(paint(), "paint.webp", floor=0.26)
+    save(paper(), "paper.webp", floor=0.10, levels=16)

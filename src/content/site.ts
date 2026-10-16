@@ -43,6 +43,12 @@ export type OtherWork = { title: string; body: string; meta: string; href?: stri
 
 export const otherWork: OtherWork[] = [
   {
+    title: "Air-quality index forecasting for East Java",
+    body: "A dashboard that projects each district's pollutant levels a day ahead, turns raw hourly readings into the official government index including its rule that a day only counts when enough of its hours were measured, and checks every earlier forecast against the reading that later arrived.",
+    meta: "Team of 3, Web Service Technology course",
+    href: "https://web-prediksi-ispu.vercel.app/",
+  },
+  {
     title: "Retail BI for a multi-branch minimart",
     body: "A sales dashboard tracking revenue, costs, profit, and margin by branch, fed by a star-schema warehouse.",
     meta: "Individual, Data Visualization & Data Warehousing courses",

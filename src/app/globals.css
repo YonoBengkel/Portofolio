@@ -585,15 +585,44 @@
     gap: 28px;
     padding: 24px;
   }
+  /* A sheet of paper with him standing on it, rather than a window into another room. */
   .dossier-portrait {
     position: relative;
     overflow: clip;
     border: 1px solid var(--concrete);
+    background: var(--void);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    isolation: isolate;
+  }
+  .dossier-portrait::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--pale);
+    opacity: 0.16;
+    -webkit-mask-image: url("/tex/paper.webp");
+    mask-image: url("/tex/paper.webp");
+    -webkit-mask-size: 256px 256px;
+    mask-size: 256px 256px;
+  }
+  /* The light falls from the top left, as it does in the hero photograph. */
+  .dossier-portrait::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: radial-gradient(68% 52% at 34% 18%, color-mix(in oklab, var(--glow) 16%, transparent), transparent 74%);
   }
   .dossier-portrait img {
-    width: 100%;
+    position: relative;
+    width: auto;
+    max-width: 92%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    object-position: bottom center;
   }
   .dossier-body {
     display: grid;
@@ -678,6 +707,85 @@
     display: block;
     width: 100%;
     height: auto;
+  }
+
+  /* --------------------------------------------------- the one television */
+
+  /*
+    A dead channel. Scan lines plus a little snow, both static: the brief bans animated
+    grain, and a 404 that flickers would be a gimmick rather than a reference. The lines
+    are a repeating gradient, so this costs no asset at all.
+  */
+  .dead-channel {
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
+    max-width: 44rem;
+    padding: 44px 32px 40px;
+    border: 1px solid var(--concrete);
+    background: var(--soot);
+  }
+  /* The glow of a screen that is on but carrying nothing. */
+  .dead-channel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    /* Dimmer than it wants to be: at 30% the body copy measured 3.97:1 and the brass label 4.44:1 against the lit
+       part of the screen. A television that is on but empty is not a lamp. */
+    background: radial-gradient(
+      72% 58% at 50% 42%,
+      color-mix(in oklab, var(--stone) 12%, transparent),
+      transparent 76%
+    );
+  }
+  /*
+    Scan lines read; snow at any strength that reads would eat the text. The first pass
+    put the grain at half opacity and the body copy underneath it measured as unreadable,
+    so the lines carry the idea and the snow is barely there.
+  */
+  .dead-channel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image:
+      repeating-linear-gradient(
+        to bottom,
+        color-mix(in oklab, var(--void) 55%, transparent) 0 1px,
+        transparent 1px 3px
+      );
+    opacity: 0.7;
+  }
+  .dead-snow {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.12;
+    background-image: url("/grain.png");
+    background-size: 96px 96px;
+  }
+
+  /*
+    Not brass. Brass marks things you can act on, and this label is not one - it only
+    took the accent because it looked like a warning. On a phone the panel is narrower,
+    so the label sits closer to the middle of the screen's glow, where it measured
+    4.44:1. The button below it is the page's one accent.
+  */
+  .dead-label {
+    color: var(--bone);
+  }
+  .dead-title {
+    margin: 14px 0 0;
+    font-size: clamp(2.4rem, 7vw, 4.6rem);
+  }
+  /* Bone, not ash: this sits on the brightest part of the screen. */
+  .dead-body {
+    margin-top: 1.2rem;
+    max-width: 30rem;
+    line-height: 1.65;
+    color: var(--bone);
   }
 
   /* ----------------------------------------------------- work on the home */
