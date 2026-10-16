@@ -1,4 +1,5 @@
 import { achievements } from "@/content/site";
+import { CarouselDots } from "./carousel-dots";
 
 /**
  * Certificates and achievements, in the reference's format: one card at a time on a
@@ -38,13 +39,7 @@ export function Certificates() {
         ))}
       </ol>
 
-      <nav className="carousel-dots" aria-label="Certificates">
-        {achievements.map((a, i) => (
-          <a key={a.title} href={`#cert-${i + 1}`} className="carousel-dot">
-            <span className="sr-only">{`Go to ${a.title}, ${i + 1} of ${achievements.length}`}</span>
-          </a>
-        ))}
-      </nav>
+      <CarouselDots items={achievements.map((a, i) => ({ id: `cert-${i + 1}`, label: a.title }))} />
     </div>
   );
 }

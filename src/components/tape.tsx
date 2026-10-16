@@ -10,7 +10,10 @@
  * tree because the heading underneath says the same thing.
  */
 export function Tape({ text, tilt = -2 }: { text: string; tilt?: number }) {
-  const run = Array.from({ length: 10 }, (_, i) => (
+  // Fourteen, not ten. The keyframe moves the strip by half its width, so that half has
+  // to be at least as wide as the strip's 108vw - and at ten it measured 1846px against
+  // 2076px at a 1920 window, so the last tenth of every cycle was bare stripe.
+  const run = Array.from({ length: 14 }, (_, i) => (
     <span key={i}>
       {text} <span aria-hidden="true">✦</span>
     </span>
@@ -19,7 +22,7 @@ export function Tape({ text, tilt = -2 }: { text: string; tilt?: number }) {
   // The strip is wider than the window so the tilt never exposes a bare corner, and the slot
   // clips it so the document itself is never wider than the viewport.
   return (
-    <div className="tape-slot" role="presentation">
+    <div className="tape-slot marquee-run" role="presentation">
       <div className="tape" style={{ rotate: `${tilt}deg` }}>
         <div className="tape-run" aria-hidden="true">
           {run}

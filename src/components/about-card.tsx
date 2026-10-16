@@ -31,9 +31,14 @@ export function AboutCard() {
   return (
     <section id="about" className="about-stage" aria-labelledby="about-h">
       <div className="about-sticky">
-        <div className="about-tape" aria-hidden="true">
+        {/*
+          Four runs, not two: the keyframe moves the strip by half its width, and that
+          half has to outrun the window or the band runs out of words before it wraps.
+          Measured at 1440, two runs left the last fifth of every cycle empty.
+        */}
+        <div className="about-tape marquee-run" aria-hidden="true">
           <div className="about-tape-run">
-            {Array.from({ length: 2 }, (_, t) => (
+            {Array.from({ length: 4 }, (_, t) => (
               <span key={t}>
                 {Array.from({ length: 8 }, (_, i) => (
                   <b key={i}>About me</b>

@@ -298,6 +298,7 @@
     border-block: 2px solid currentColor;
     padding-block: 14px;
     white-space: nowrap;
+    contain-intrinsic-size: auto 76px;
   }
   .marquee span {
     display: inline-block;
@@ -307,7 +308,7 @@
     text-transform: uppercase;
     padding-right: 0.4em;
   }
-  .marquee div {
+  .marquee-track {
     display: inline-block;
   }
   @keyframes slide {
@@ -657,8 +658,9 @@
   html[data-run="1"] .run-ball {
     translate: 68px 0;
   }
+  /* Flipped, this control sits on an ink band, so its ring reads --focus like the rest. */
   .run-switch:focus-within .run-track {
-    outline: 2px solid var(--ink);
+    outline: 2px solid var(--focus, var(--ink));
     outline-offset: 4px;
   }
   .run-label {
@@ -676,6 +678,7 @@
 
   .tape-slot {
     overflow: clip;
+    contain-intrinsic-size: auto 92px;
   }
   /* Wider than the window, because a tilted strip would otherwise leave a bare triangle
      of page colour at each end. */
@@ -709,11 +712,36 @@
     text-transform: uppercase;
     padding-right: 0.45em;
   }
+  /* Durations scaled with the word counts above, so the speed is what it always was. */
   .tape-run {
-    animation: slide 22s linear infinite;
+    animation: slide 31s linear infinite;
   }
-  .marquee div {
-    animation: slide 26s linear infinite;
+  .marquee-track {
+    animation: slide 39s linear infinite;
+  }
+
+  /*
+    A band only runs while it is on screen.
+
+    A composited marquee costs no main-thread time and shows up nowhere in a profile, but
+    it does make the compositor produce a frame every vsync for as long as the page is
+    open. Measured with five of them running and every one below the fold: 604 frames in
+    5 seconds at the top of the home page, against 4 for a page with no animation at all.
+
+    `js-marquee` is written by the observer in reveal-on-scroll.tsx, so without JavaScript
+    - or before hydration - none of this applies and every band simply runs.
+  */
+  html.js-marquee .marquee-run .tape-run,
+  html.js-marquee .marquee-run .marquee-track,
+  html.js-marquee .marquee-run .about-tape-run,
+  html.js-marquee .marquee-run .belt-track {
+    animation-play-state: paused;
+  }
+  html.js-marquee .marquee-run.is-running .tape-run,
+  html.js-marquee .marquee-run.is-running .marquee-track,
+  html.js-marquee .marquee-run.is-running .about-tape-run,
+  html.js-marquee .marquee-run.is-running .belt-track {
+    animation-play-state: running;
   }
 
   /* --------------------------------------------------- scroll-driven motion */
@@ -806,36 +834,6 @@
       animation: rise linear both;
       animation-timeline: view();
       animation-range: entry calc(6% + var(--i) * 7%) cover calc(28% + var(--i) * 7%);
-    }
-  }
-
-  /*
-    Reduced motion wins over everything, the hero switch included. Someone who asked their
-    system for less movement gets a still page even when they flip it; the switch still
-    changes the ground, it just changes it without the slide.
-  */
-  @media (prefers-reduced-motion: reduce) {
-    .run-ball,
-    .run-track,
-    .hero-band,
-    .hero-out {
-      transition-duration: 1ms;
-    }
-    .tape-run,
-    .marquee div,
-    .drift img,
-    .rise,
-    .tilt,
-    .draw,
-    .stagger > *,
-    .belt-track,
-    .about-tape-run,
-    .about-zoom,
-    .about-tile {
-      animation: none;
-    }
-    .carousel-track {
-      scroll-behavior: auto;
     }
   }
 
@@ -1044,24 +1042,13 @@
     overflow: clip;
     padding-block: 110px 96px;
   }
-  @media (min-width: 768px) {
-    /* Four screens of runway for one sticky screen. Shorter and the card snaps. */
-    .about-stage {
-      height: 400vh;
-    }
-    .about-sticky {
-      position: sticky;
-      top: 0;
-      height: 100svh;
-      padding-block: 0;
-    }
-  }
 
   .about-tape {
     position: absolute;
-    /* Clear of the fixed header, which is 75px tall and 88% opaque - at top: 0 the band
-       sits behind it and is washed out to nothing. */
-    top: 75px;
+    /* In the flow layout the section's own 110px of top padding clears the fixed header,
+       so the band sits at the top of the section. Pinned, it moves down to 75px - see
+       the runway block at the foot of this file. */
+    top: 0;
     left: 0;
     right: 0;
     z-index: 5;
@@ -1071,10 +1058,12 @@
     background: var(--ink);
     color: var(--paper);
     border-bottom: 2px solid color-mix(in srgb, var(--paper) 34%, transparent);
+    contain-intrinsic-size: auto 48px;
   }
+  /* 50s because one cycle now covers two of the four runs; the speed is unchanged. */
   .about-tape-run {
     display: inline-block;
-    animation: slide 25s linear infinite;
+    animation: slide 50s linear infinite;
   }
   .about-tape-run > span {
     display: inline-block;
@@ -1116,6 +1105,7 @@
     position: relative;
     z-index: 2;
     width: 100%;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1155,6 +1145,12 @@
       align-items: center;
       gap: 52px;
       padding: 46px;
+      /*
+        90%, not 100%. The display type behind the card has to be wider than the card or
+        it is never seen at all, and at every desktop width from 860 to about 1294 a
+        full-width card beat it. Measured at 1440: card 1160, backdrop 1292.
+      */
+      width: min(1160px, 90%);
     }
   }
   .about-card:hover {
@@ -1184,8 +1180,9 @@
   }
 
   .about-photo {
-    width: 15rem;
-    max-width: 100%;
+    /* A flat 15rem is a 240px min-content floor, which at 320px pushed the whole stack
+       16px wider than the window and threw the card and the social row off centre. */
+    width: min(15rem, 100%);
     aspect-ratio: 250 / 300;
     padding: 10px;
     background: var(--paper-2);
@@ -1331,11 +1328,26 @@
     The 150px gradient at each end is the detail that makes the row part of the page
     rather than a cropped strip. It costs nothing and it was measured.
   */
+  /*
+    content-visibility is what keeps these from costing a compositor frame every vsync
+    for the whole session. Measured: with five infinite marquees on the page and all of
+    them below the fold, the home page produced 604 frames in 5 seconds; with this rule
+    it produces 6, and the rows still run at full rate once they are actually on screen.
+    contain-intrinsic-size is not optional - content-visibility brings size containment
+    with it, and without a remembered height the band collapses while it is skipped.
+  */
+  .belt,
+  .tape-slot,
+  .marquee,
+  .about-tape {
+    content-visibility: auto;
+  }
   .belt {
     position: relative;
     width: 100%;
     overflow: hidden;
     padding-block: 6px;
+    contain-intrinsic-size: auto 44px;
   }
   .belt::before,
   .belt::after {
@@ -1769,7 +1781,9 @@
       grid-template-columns: 1fr auto 1fr;
     }
   }
-  @media (max-width: 859px) {
+  /* .98, not 859: a fractional viewport width - page zoom, a scaled display - falls
+     between the two queries and leaves the spacer column rendered in a single-column grid. */
+  @media (max-width: 859.98px) {
     .foot-grid > [aria-hidden] {
       display: none;
     }
@@ -1845,10 +1859,45 @@
     It runs on a named view-timeline, which means no listener and nothing on the main
     thread. Where that is unsupported, the card sits at its finished size.
   */
+  /*
+    The runway and the zoom are the same decision, so they live in the same block.
+
+    They used to be separated: the 400vh of scroll sat in a plain width query while the
+    animation that justifies it sat in @supports. A browser without scroll-driven
+    animations - Safari 18, Firefox with the flag off, Chromium under 115 - therefore got
+    three full screens of scrolling past a completely frozen card, which is the opposite
+    of the "it just sits at its finished size" the comment promised.
+
+    The two conditions are the other half of the same lesson. A pinned screen is clipped,
+    not scrollable, so everything has to fit: the band's 131px strip plus the card plus
+    the social row. Measured, the card stands 813px tall at 860 wide and 671px at 1024,
+    against a box of viewport-height minus 131 - so at 800x700 the two buttons were half
+    cut off and the three links sat outside the box at every scroll position, and at
+    860x780 the social row was still 82px under the edge. 1024 x 860 is the first size
+    where the tallest case fits with room over. Below it the section falls back to
+    ordinary flow, where nothing is clipped and nothing is pinned.
+  */
   @supports (animation-timeline: view()) {
-    @media (min-width: 768px) {
+    @media (min-width: 1024px) and (min-height: 860px) and (prefers-reduced-motion: no-preference) {
+      /* Four screens of runway for one sticky screen. Shorter and the card snaps. */
       .about-stage {
+        height: 400vh;
         view-timeline: --about block;
+      }
+      /*
+        The top padding is the marquee's own strip: 75px to clear the fixed header plus
+        the 56px band. Without it, place-items centres the card into the full height
+        including that strip, and the opaque band lands on the card - measured covering
+        the whole of the card's heading at 1280x650 and 56px of the portrait at 800x700.
+      */
+      .about-sticky {
+        position: sticky;
+        top: 0;
+        height: 100svh;
+        padding-block: 131px 0;
+      }
+      .about-tape {
+        top: 75px;
       }
       .about-zoom {
         animation: about-zoom linear both;
@@ -1897,16 +1946,19 @@
       translate: 0 0;
     }
   }
+  /*
+    Scale only, on purpose. It used to start at opacity 0 and translate 50px with `both`
+    fill, which held three real links invisible - but focusable, and in the accessibility
+    tree - for the first two thirds of the section. And because an animation with `both`
+    fill outranks any normal declaration, the `translate` keyframe also silently ate the
+    tiles' own hover lift. Scale keeps the beat and costs neither.
+  */
   @keyframes tile-in {
     from {
-      opacity: 0;
       scale: 0.8;
-      translate: 0 50px;
     }
     to {
-      opacity: 1;
       scale: 1;
-      translate: 0 0;
     }
   }
 
@@ -2014,6 +2066,48 @@
     html:active-view-transition .curtain,
     html:active-view-transition .curtain span {
       animation: none;
+    }
+  }
+
+  /*
+    Reduced motion wins over everything, the hero switch included. Someone who asked
+    their system for less movement gets a still page even when they flip it; the switch
+    still changes the ground, it just changes it without the slide.
+
+    This block has to be LAST in the layer. It was written a thousand lines higher up,
+    at the same single-class specificity as the rules it means to beat, and every rule
+    declared after it won on source order - so seven of these selectors were dead. With
+    reduce on, the tools rows still ran, the About marquee still ran, the card still
+    scrubbed 2.8x to 1.0, the tiles still flew in, and the carousel still scrolled
+    smoothly, while the comment above claimed the opposite. Nothing new may be added to
+    this file below this point.
+  */
+  @media (prefers-reduced-motion: reduce) {
+    .run-ball,
+    .run-track,
+    .hero-band,
+    .hero-out,
+    html[data-run="1"] .hero-out {
+      transition-duration: 1ms;
+    }
+    .tape-run,
+    .marquee-track,
+    .drift img,
+    .rise,
+    .tilt,
+    .draw,
+    .stagger > *,
+    .belt-track,
+    .about-tape-run,
+    .about-zoom,
+    .about-tile {
+      animation: none;
+    }
+    .carousel-track {
+      scroll-behavior: auto;
+    }
+    html {
+      scroll-behavior: auto;
     }
   }
 }

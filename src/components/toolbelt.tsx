@@ -35,6 +35,15 @@ const CHAR_W = 7.68;
 const GAP = 8;
 const SPEED = 50; // px per second, measured
 
+/*
+  Four copies, not two. The keyframe translates the track by -50%, so one cycle is half
+  the track - and that half has to be at least as wide as the belt, or the row runs out
+  of chips before it wraps. Measured at 1440: one set is 1135px against a 1425px belt, so
+  the last fifth of every cycle was bare paper. Four copies make one cycle two sets, which
+  clears a 1920 window with room over. The count must stay even or the loop seams.
+*/
+const COPIES = 4;
+
 function setWidth(items: string[]) {
   return items.reduce((w, item) => w + CHIP_BASE + CHAR_W * item.length + GAP, 0);
 }
@@ -51,9 +60,10 @@ function Chip({ label }: { label: string }) {
 }
 
 function Row({ items, reverse }: { items: string[]; reverse?: boolean }) {
-  const seconds = Math.round(setWidth(items) / SPEED);
+  // One cycle covers COPIES / 2 sets, so the duration scales with it to hold 50 px/s.
+  const seconds = Math.round(((setWidth(items) * COPIES) / 2 / SPEED) * 10) / 10;
   return (
-    <div className="belt">
+    <div className="belt marquee-run">
       <div
         className="belt-track"
         style={
@@ -63,9 +73,9 @@ function Row({ items, reverse }: { items: string[]; reverse?: boolean }) {
           } as React.CSSProperties
         }
       >
-        {/* The set twice: one cycle translates by exactly half the track. */}
-        {[0, 1].map((copy) => (
-          <span className="belt-set" key={copy} aria-hidden={copy === 1 ? "true" : undefined}>
+        {/* One cycle translates by exactly half the track, which is COPIES / 2 sets. */}
+        {Array.from({ length: COPIES }, (_, copy) => (
+          <span className="belt-set" key={copy} aria-hidden={copy > 0 ? "true" : undefined}>
             {items.map((item) => (
               <Chip key={item} label={item} />
             ))}
