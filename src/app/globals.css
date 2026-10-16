@@ -1,53 +1,48 @@
 @import "tailwindcss";
 
 /*
-  Pale City.
+  Warm paper.
 
-  Six of these values are measured off reference frames rather than chosen: the ladder
-  runs #0C131D -> #142638 -> #2B4962 -> #477C9A -> #8CACC6, the light source is a cold
-  #A6B3CB, and the one warm accent is #CCA052, which appears in only two of ten sampled
-  frames and covers well under a percent of them. So the world is cold blue slate and
-  the only warm thing is the light itself.
+  Five designs were rejected before this one, all of them invented from a brief. This one
+  is not invented: it is the structure of two portfolios Ilham picked out of a list -
+  alieffauzan.com and portofolio-toik.vercel.app - measured out of a real browser and
+  filled with his own content.
 
-  The steps are saturated on purpose - 0.54 to 0.64 in HSV. A dark grey has no weather
-  in it; a dark blue does. That is what the page was missing.
+  What was measured and kept:
+    page      Alief #FFE9CF, Toriq #ECECEA   -> #FBEFD8, between the two
+    ink       Alief #270F03                  -> #241206
+    display   Anton, 160-288px, line-height 0.95-1.1, tracking -0.01 to -0.025em
+    accent    Toriq #F2B705 rather than Alief's orange, because yellow was asked for
+    motion    0.15s on Toriq, 0.2s on Alief, plain ease on both. Nothing is slow
+    rules     0.8px hairlines on Toriq; hard 2px black borders on Alief. Both are here
+    radius    Alief 6px and pills; Toriq 8px and pills
 
-  There is no pure black and no pure white, because the reference has neither.
-
-  Luminance, not size, is the hierarchy: whatever you are reading sits in a pool of light
-  and the rest recedes toward the page colour. Text itself never dims - only the pools,
-  the rules and the imagery do - so no reading pair ever drops below 4.5:1.
-
-  Measured against --void: bone 12.70:1, glow 8.82:1, ash 7.92:1, brass 7.74:1.
-  Against --soot: bone 10.52:1, ash 6.56:1. Inside the brightest light pool, about
-  luminance 0.03, bone is 8.94:1 and ash 5.58:1.
+  The one thing deliberately not borrowed: the layouts themselves. Three of the four
+  sites measured belong to PENS classmates and the same people read all of them.
 */
 :root {
-  --void: #0c131d; /* the page. the darkest step of the ladder */
-  --soot: #142638; /* panels and raised surfaces */
-  --concrete: #2b4962; /* rules, borders, and surfaces meant to be seen */
-  --stone: #477c9a; /* the lit edge of a surface; diagram strokes */
-  --pale: #8cacc6; /* the far wall under light */
-  --glow: #a6b3cb; /* the light source itself. cold, never warm */
-  --ash: #92acc4; /* secondary text. light enough to survive the brightest light pool */
-  --bone: #d9d5c8; /* primary text. the warm off-white of Mono's paper bag */
-  --brass: #cca052; /* the one accent: lamplight, and only on things you can act on */
-  --on-brass: #0c131d;
+  --paper: #fbefd8; /* the page */
+  --paper-2: #fff8ec; /* a card sitting on the page */
+  --ink: #241206; /* text, borders, the dark bands */
+  --ink-2: #5c4631; /* secondary text */
+  --slate: #4a5a6b; /* the band the project cards sit on */
+  --yellow: #f2b705; /* the one accent */
+  --on-yellow: #241206;
+  --line: rgba(36, 18, 6, 0.22);
+  --line-strong: rgba(36, 18, 6, 0.5);
 }
 
 @theme inline {
-  --color-void: var(--void);
-  --color-soot: var(--soot);
-  --color-concrete: var(--concrete);
-  --color-stone: var(--stone);
-  --color-pale: var(--pale);
-  --color-glow: var(--glow);
-  --color-ash: var(--ash);
-  --color-bone: var(--bone);
-  --color-brass: var(--brass);
-  --color-on-brass: var(--on-brass);
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-slate: var(--slate);
+  --color-yellow: var(--yellow);
+  --color-on-yellow: var(--on-yellow);
+  --color-line: var(--line);
 
-  --font-display: var(--font-display-serif), ui-serif, Georgia, serif;
+  --font-display: var(--font-anton), Impact, "Arial Narrow Bold", sans-serif;
   --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, "SFMono-Regular", monospace;
 }
@@ -55,40 +50,31 @@
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
-    background: var(--void);
+    background: var(--paper);
     overflow-x: clip;
   }
-
   @media (prefers-reduced-motion: no-preference) {
     html {
       scroll-behavior: smooth;
     }
   }
-
   body {
-    /* Transparent on purpose: the room behind it is a child of body and has to paint
-       over html's page colour. Relative so the room can span the whole document. */
-    position: relative;
-    background: transparent;
-    color: var(--bone);
+    background: var(--paper);
+    color: var(--ink);
   }
-
   ::selection {
-    background: var(--brass);
-    color: var(--on-brass);
+    background: var(--yellow);
+    color: var(--on-yellow);
   }
-
   :focus-visible {
-    outline: 2px solid var(--brass);
+    outline: 2px solid var(--ink);
     outline-offset: 3px;
   }
-
   h1,
   h2,
   h3 {
     text-wrap: balance;
   }
-
   p,
   li,
   dd {
@@ -97,1059 +83,416 @@
 }
 
 @layer components {
-  /* ---------------------------------------------------------------- layout */
+  /* ------------------------------------------------------------- layout */
 
-  /* Full-bleed page gutter, for chrome that spans the window. */
   .frame {
     width: 100%;
-    max-width: 1440px;
+    max-width: 1620px; /* Alief's container, measured */
     margin-inline: auto;
     padding-inline: 20px;
   }
   @media (min-width: 1024px) {
     .frame {
-      padding-inline: 40px;
+      padding-inline: 56px;
     }
   }
 
-  /*
-    The reading column. It used to be capped at 52vw, which is where most of the empty
-    space came from; that cap is gone. Scale now comes from the size of the things in the
-    frame, not from how much of the window is left blank.
-  */
   .column {
     width: 100%;
-    max-width: 100%;
+    max-width: 68rem;
     margin-inline: auto;
-    padding-inline: 20px;
-  }
-  @media (min-width: 768px) {
-    .column {
-      width: min(100%, 46rem);
-      padding-inline: 24px;
-    }
-  }
-  @media (min-width: 1280px) {
-    .column {
-      width: min(74vw, 64rem);
-      padding-inline: 0;
-    }
   }
 
   /*
-    Starts on the reading column's left edge and runs out to the page gutter, for
-    the one block that needs more width than the column allows.
+    Bands. The page is a sequence of full-bleed coloured bands rather than one surface:
+    paper, then ink, then paper, then slate. That alternation is the rhythm of the
+    reference and the reason its sections never blur into one another.
   */
-  .column-wide {
-    width: 100%;
-    margin-inline: auto;
-    padding-inline: 20px;
-  }
-  @media (min-width: 768px) {
-    .column-wide {
-      width: min(100%, 44rem);
-      padding-inline: 24px;
-    }
-  }
-  @media (min-width: 1280px) {
-    .column-wide {
-      width: auto;
-      margin-left: calc((100% - min(74vw, 64rem)) / 2);
-      margin-right: 40px;
-      padding-inline: 0;
-    }
-  }
-
-  /* Section rhythm: 96px on phones, 160px from tablet up. */
   .band {
     padding-block: 96px;
   }
   @media (min-width: 768px) {
     .band {
-      padding-block: 160px;
+      padding-block: 150px;
     }
   }
-
-  /* ------------------------------------------------------- light hierarchy */
-
-  /*
-    Each block carries its own pool of light. The pool brightens as the block
-    crosses the middle of the window, so the thing being read is the brightest
-    thing on the page. Anything marked .recede (imagery, rules, the hero drawing)
-    fades with it. Text is never touched.
-
-    Scroll-driven animations do the work, so there is no JavaScript and no scroll
-    listener. Where they are unsupported, in Plain mode, or under reduced motion,
-    every pool simply stays lit.
-  */
-  .lit {
-    position: relative;
-    isolation: isolate;
+  .band-ink {
+    background: var(--ink);
+    color: var(--paper);
   }
-  .lit::before {
-    content: "";
-    position: absolute;
-    inset: -10% 0;
-    z-index: -1;
-    pointer-events: none;
-    /*
-      A real pool, not a tint. The page used to be flat - its 90th percentile luminance
-      was 1.9x its median, where the reference frames run 5.7x - because the pools were
-      bone at 5%. These reach --concrete at the core, which puts the backdrop under a
-      heading around 0.03 while the unlit page stays near 0.007.
-
-      The core stops well short of --concrete's own value on purpose. A first pass at 62%
-      put the backdrop under some secondary text at luminance 0.057 and dropped 52 runs
-      below 4.5:1; at 34% the brightest backdrop under text is about 0.03, where --ash
-      clears 5.5:1. The page's bright end is meant to come from photographs, not from
-      the paper behind a paragraph.
-    */
-    background:
-      radial-gradient(52% 44% at 50% 40%, color-mix(in oklab, var(--concrete) 34%, transparent), transparent 70%),
-      radial-gradient(88% 78% at 50% 50%, color-mix(in oklab, var(--soot) 58%, transparent), transparent 76%);
+  .band-slate {
+    background: var(--slate);
+    color: var(--paper-2);
   }
 
-  @supports (animation-timeline: view()) {
-    @media (prefers-reduced-motion: no-preference) {
-      .lit::before {
-        animation: pool linear both;
-        animation-timeline: view();
-        animation-range: entry 5% exit 95%;
-      }
-      .recede {
-        animation: surface linear both;
-        animation-timeline: view();
-        animation-range: entry 5% exit 95%;
-      }
-    }
-  }
+  /* ---------------------------------------------------------- typography */
 
-  @keyframes pool {
-    0% {
-      opacity: 0.1;
-    }
-    42%,
-    58% {
-      opacity: 1;
-    }
-    100% {
-      opacity: 0.12;
-    }
-  }
-  @keyframes surface {
-    0% {
-      opacity: 0.35;
-    }
-    42%,
-    58% {
-      opacity: 1;
-    }
-    100% {
-      opacity: 0.35;
-    }
-  }
-
-  /* ------------------------------------------------------- air and texture */
-
-  /*
-    Fog and depth of field, done with gradients rather than filters: the window's
-    top and bottom edges sink back into the page colour, so content arrives out of
-    the dark instead of starting at a hard edge.
-  */
-  .fog {
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background:
-      linear-gradient(to bottom, var(--void) 0%, color-mix(in oklab, var(--void) 55%, transparent) 9%, transparent 20%),
-      linear-gradient(to top, var(--void) 0%, color-mix(in oklab, var(--void) 55%, transparent) 7%, transparent 16%);
-  }
-
-  /*
-    Surfaces.
-
-    The page was 94% below luminance 0.01 while the reference frames sit at 29-41%. The
-    difference was never the palette - it was that our frame held nothing to light. These
-    four give it something: a wall behind the page, a floor under the content, tile on the
-    case studies, and peeling paint on the panels.
-
-    Each one is a seamless 256px tile used as an alpha mask over a div filled with a ladder
-    token. The file itself carries no colour, so a surface cannot drift off-palette, and
-    masking a saturated blue lifts the page instead of greying it the way a grey overlay
-    would. Generated by tools/make-textures.py; 37KB for all four.
-  */
-  .wall,
-  .floor,
-  .tiled,
-  .plate {
-    position: relative;
-    isolation: isolate;
-  }
-  .wall::before,
-  .floor::before,
-  .tiled::before,
-  .plate::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background: var(--surface-ink);
-    opacity: var(--surface-strength);
-    -webkit-mask-image: var(--surface-tex);
-    mask-image: var(--surface-tex);
-    -webkit-mask-size: 256px 256px;
-    mask-size: 256px 256px;
-  }
-  /* The back wall of a page: poured concrete, kept faint so it reads as depth, not pattern. */
-  .wall {
-    --surface-tex: url("/tex/concrete.webp");
-    --surface-ink: var(--concrete);
-    --surface-strength: 0.34;
-  }
-  /* The plane that holds content. Boards run with the page, and this is the surface that
-     appears most often in the reference frames. */
-  .floor {
-    --surface-tex: url("/tex/wood.webp");
-    --surface-ink: var(--concrete);
-    --surface-strength: 0.3;
-  }
-  /* Case studies only, so a case study reads as a different room from the home page. */
-  .tiled {
-    --surface-tex: url("/tex/ceramic.webp");
-    --surface-ink: var(--concrete);
-    --surface-strength: 0.26;
-  }
-  /* Panels: paint that has started to let go, so a plate has an age to it. */
-  .plate {
-    --surface-tex: url("/tex/paint.webp");
-    --surface-ink: var(--stone);
-    --surface-strength: 0.17;
-  }
-
-  /*
-    The back wall of every page.
-
-    Without it the page measured a median luminance of 0.0063 - exactly the page colour,
-    meaning the median pixel was nothing at all - against 0.012 to 0.019 in the reference
-    frames. The reference is dark but it is never empty, and this is the cheapest honest
-    way to put a room behind the content.
-
-    Fixed to the window rather than stretched over the document. A mask across a 4400px
-    page is a 4400px layer for the compositor to paint, and on a throttled phone that
-    alone pushed the largest paint out by seconds. The window is all anyone sees at once.
-  */
-  .room {
-    position: fixed;
-    inset: 0;
-    z-index: -3;
-    pointer-events: none;
-    background: var(--concrete);
-    /* 0.22 puts the page's median luminance at about 0.015, inside the 0.012-0.019 the
-       reference frames measure. Higher and the page stops being dark; lower and the
-       median falls back to the page colour, which is where it was. */
-    opacity: 0.26;
-    -webkit-mask-image: var(--room-tex, url("/tex/concrete.webp"));
-    mask-image: var(--room-tex, url("/tex/concrete.webp"));
-    -webkit-mask-size: 320px 320px;
-    mask-size: 320px 320px;
-  }
-
-  /* A case study is a different room, so its wall is tile rather than poured concrete. */
-  body:has(.study-room) .room {
-    --room-tex: url("/tex/ceramic.webp");
-    opacity: 0.17;
-  }
-
-  /* The plane the hero stands on. A band rather than a surface under everything, because
-     in the reference you see the floor meet the wall, you do not stand on the whole frame. */
-  .hero-floor {
-    position: absolute;
-    inset: auto 0 0 0;
-    height: 220px;
-    z-index: -1;
-    pointer-events: none;
-    background: linear-gradient(to top, var(--soot), transparent);
-    -webkit-mask-image: url("/tex/wood.webp");
-    mask-image: url("/tex/wood.webp");
-    -webkit-mask-size: 256px 256px;
-    mask-size: 256px 256px;
-    opacity: 0.55;
-  }
-
-  /* One static grain plate: a 96px tile, repeated. Never animated. */
-  .grain {
-    position: fixed;
-    inset: 0;
-    z-index: 41;
-    pointer-events: none;
-    opacity: 0.035;
-    background-image: url("/grain.png");
-    background-repeat: repeat;
-    background-size: 96px 96px;
-  }
-
-  /* ------------------------------------------------------------ typography */
-
-  /*
-    Newsreader has an optical-size axis; 72 is its display cut. Without this the browser
-    would pick a text cut and the letterforms would look clumsy blown up.
-  */
   .display {
     font-family: var(--font-display);
     font-weight: 400;
-    font-variation-settings: "opsz" 72;
-    line-height: 0.96;
-    letter-spacing: -0.025em;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
   }
-
-  /* Metadata: small, mono, sentence case. Never a tracked-out capital eyebrow. */
+  /* Section headings sit at a fixed size on the reference, not on a fluid scale. */
+  .h-sec {
+    font-family: var(--font-display);
+    font-size: clamp(2.4rem, 6vw, 4.5rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+  }
   .meta {
     font-family: var(--font-mono);
-    font-size: 0.78rem;
-    letter-spacing: 0.01em;
-    color: var(--ash);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .lede {
+    font-size: 1.0625rem;
+    line-height: 1.65;
+  }
+  /* Keywords inside a paragraph take weight, not colour. Straight off the reference. */
+  .lede b {
+    font-weight: 700;
   }
 
-  .prose-body {
-    font-size: 1.0625rem;
-    line-height: 1.75;
+  /* -------------------------------------------------------------- parts */
+
+  /*
+    A sticker: white card, hard black border, and a solid offset shadow rather than a
+    blur. Nothing on the reference sites has a soft shadow.
+  */
+  .sticker {
+    background: var(--paper-2);
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    box-shadow: 10px 10px 0 0 var(--ink);
   }
-  .prose-body h2 {
-    margin-top: 4rem;
-    margin-bottom: 0.85rem;
+  .sticker-ink {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--paper-2);
+    box-shadow: 10px 10px 0 0 rgba(251, 239, 216, 0.22);
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 46px;
+    padding: 0.7rem 1.4rem;
+    border: 2px solid currentColor;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition:
+      background-color 150ms ease,
+      color 150ms ease,
+      transform 150ms ease;
+  }
+  .pill:hover {
+    transform: translateY(-2px);
+  }
+  .pill-solid {
+    background: var(--ink);
+    color: var(--paper-2);
+    border-color: var(--ink);
+  }
+  .pill-solid:hover {
+    background: var(--yellow);
+    color: var(--on-yellow);
+    border-color: var(--yellow);
+  }
+  .pill-yellow {
+    background: var(--yellow);
+    color: var(--on-yellow);
+    border-color: var(--ink);
+  }
+  .pill-yellow:hover {
+    background: var(--ink);
+    color: var(--paper-2);
+  }
+
+  /*
+    The highlighter: Toriq's move, one line per page.
+
+    Inline-block with a clamped line-height on purpose. As a plain inline the yellow box
+    takes Anton's em box, which at 160px is about a hundred pixels taller than the caps
+    and swallows the line underneath it.
+  */
+  .marker {
+    display: inline-block;
+    background: var(--yellow);
+    line-height: 0.76;
+    padding: 0.08em 0.08em 0.04em;
+    margin-inline: -0.08em;
+  }
+
+  /*
+    A marquee between sections, as a divider that says what is coming. Static under
+    reduced motion, and it carries no information that is not repeated beside it.
+  */
+  .marquee {
+    overflow: hidden;
+    border-block: 2px solid currentColor;
+    padding-block: 14px;
+    white-space: nowrap;
+  }
+  .marquee span {
+    display: inline-block;
     font-family: var(--font-display);
-    font-size: clamp(1.75rem, 3.5vw, 2.4rem);
-    font-weight: 400;
-    line-height: 1.16;
-    letter-spacing: -0.012em;
+    font-size: clamp(1.6rem, 3.4vw, 2.6rem);
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    padding-right: 0.4em;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .marquee div {
+      display: inline-block;
+      animation: slide 26s linear infinite;
+    }
+  }
+  @keyframes slide {
+    to {
+      translate: -50% 0;
+    }
   }
 
   /* ---------------------------------------------------------- the hero */
 
-  /*
-    A room, not a drawing. The photograph holds the first screen; the name and the
-    position line sit on the dark half beside it on a wide screen, and over the foot
-    of the room on a phone, where a portrait photograph actually works better.
-
-    Three planes move at three different speeds while you scroll: the concrete wall
-    behind, the photograph, and the text on top, which does not move at all. That is
-    the depth the dollhouse camera needs, and it costs one scroll-driven animation
-    with no listener.
-  */
   .hero {
     position: relative;
-    overflow: clip;
-  }
-  .hero::before {
-    inset: -6% 0;
-  }
-  .hero-grid {
-    position: relative;
-    display: grid;
     min-height: 100svh;
-    padding-block: 136px 80px;
-  }
-  /* On a phone both sit in the same cell, so the copy lies over the foot of the room. */
-  .hero-plate,
-  .hero-copy {
-    grid-area: 1 / 1;
-  }
-  .hero-plate {
-    position: relative;
-    overflow: clip;
-    margin-inline: -20px;
-  }
-  .hero-plate img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: 50% 44%;
-  }
-  /* The plate sinks back into the page at the edge that meets the text, so it reads as
-     one lit part of a room rather than a photograph pasted on. */
-  .hero-plate::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      to top,
-      var(--void) 1%,
-      color-mix(in oklab, var(--void) 78%, transparent) 30%,
-      transparent 64%
-    );
-  }
-  .hero-copy {
-    position: relative;
-    z-index: 1;
-    align-self: end;
-  }
-  .hero-kicker {
-    margin-bottom: 1.1rem;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    padding-block: 160px 90px;
   }
   .hero-name {
-    /* 5.75rem is 92px: the largest size that keeps the name on one line. */
-    font-size: clamp(2.5rem, 7vw, 5.75rem);
-    margin: 0;
+    /* Alief measured 160px across two lines at 1440; this is the same size, fluid. */
+    font-size: clamp(2.9rem, 11.2vw, 10rem);
   }
-  .hero-tagline {
+  .hero-role {
     margin-top: 1.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.86rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .hero-line {
+    margin-top: 1.1rem;
+    margin-inline: auto;
     max-width: 34rem;
     font-size: 1.0625rem;
-    line-height: 1.65;
-    color: var(--ash);
-  }
-
-  @media (min-width: 1024px) {
-    .hero-grid {
-      grid-template-columns: minmax(0, 1fr) 46%;
-      align-items: center;
-      gap: 56px;
-      padding-block: 168px 120px;
-    }
-    .hero-plate {
-      grid-area: 1 / 2;
-      margin-inline: 0;
-      height: min(80svh, 680px);
-    }
-    .hero-plate::after {
-      background: linear-gradient(
-        to right,
-        var(--void) 0%,
-        color-mix(in oklab, var(--void) 62%, transparent) 15%,
-        transparent 44%
-      );
-    }
-    /*
-      The copy runs across both tracks rather than staying inside the left one. The name
-      is 797px wide at 92px and the left track is about 650px, so keeping it in the track
-      would break the line we just chose. Its last two glyphs cross the dark edge of the
-      plate, where the measured local contrast is 4.96:1 - above the floor, and the reason
-      the plate's left edge dissolves into the page rather than ending on a hard line.
-    */
-    .hero-copy {
-      grid-column: 1 / -1;
-      align-self: center;
-      max-width: 54rem;
-      pointer-events: none;
-    }
-    .hero-copy a {
-      pointer-events: auto;
-    }
-  }
-
-  @supports (animation-timeline: view()) {
-    @media (prefers-reduced-motion: no-preference) {
-      .hero::before {
-        animation: plane-far linear both;
-        animation-timeline: view();
-        animation-range: entry 0% exit 100%;
-      }
-      .hero-plate img {
-        animation: plane-near linear both;
-        animation-timeline: view();
-        animation-range: entry 0% exit 100%;
-      }
-    }
-  }
-  @keyframes plane-far {
-    from {
-      translate: 0 -1.5%;
-    }
-    to {
-      translate: 0 1.5%;
-    }
-  }
-  /* Scaled up a little so the drift never pulls an edge into frame. */
-  @keyframes plane-near {
-    from {
-      scale: 1.09;
-      translate: 0 -3.2%;
-    }
-    to {
-      scale: 1.09;
-      translate: 0 3.2%;
-    }
-  }
-
-  /* --------------------------------------------------------- the dossier */
-
-  /*
-    One dense lit object: portrait, name, four facts, what I am doing now, four skill
-    groups and three links. It answers who, what I have done and what I can do without
-    the reader going anywhere, and it gives the page something to light.
-  */
-  .dossier {
-    display: grid;
-    gap: 28px;
-    padding: 24px;
-  }
-  /* A sheet of paper with him standing on it, rather than a window into another room. */
-  .dossier-portrait {
-    position: relative;
-    overflow: clip;
-    border: 1px solid var(--concrete);
-    background: var(--void);
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    isolation: isolate;
-  }
-  .dossier-portrait::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: var(--pale);
-    opacity: 0.16;
-    -webkit-mask-image: url("/tex/paper.webp");
-    mask-image: url("/tex/paper.webp");
-    -webkit-mask-size: 256px 256px;
-    mask-size: 256px 256px;
-  }
-  /* The light falls from the top left, as it does in the hero photograph. */
-  .dossier-portrait::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background: radial-gradient(68% 52% at 34% 18%, color-mix(in oklab, var(--glow) 16%, transparent), transparent 74%);
-  }
-  .dossier-portrait img {
-    position: relative;
-    width: auto;
-    max-width: 92%;
-    height: 100%;
-    object-fit: contain;
-    object-position: bottom center;
-  }
-  .dossier-body {
-    display: grid;
-    gap: 26px;
-    align-content: start;
-  }
-  .dossier-name {
-    font-size: clamp(1.7rem, 3.4vw, 2.5rem);
-    margin: 0;
-  }
-  .dossier-line {
-    margin-top: 0.9rem;
-    max-width: 44rem;
-    line-height: 1.65;
-    color: var(--ash);
-  }
-  .dossier-facts {
-    display: grid;
-    gap: 18px 32px;
-    border-top: 1px solid var(--concrete);
-    padding-top: 20px;
-  }
-  .dossier-facts dd {
-    margin-top: 0.35rem;
-    line-height: 1.45;
-  }
-  .dossier-now {
-    border-top: 1px solid var(--concrete);
-    padding-top: 20px;
-  }
-  .dossier-now p + p {
-    margin-top: 0.5rem;
     line-height: 1.6;
   }
-  .dossier-skills {
-    display: grid;
-    gap: 16px 32px;
-    border-top: 1px solid var(--concrete);
-    padding-top: 20px;
-  }
-  .dossier-skills p + p {
-    margin-top: 0.3rem;
-    line-height: 1.5;
-  }
-  .dossier-links {
+  .hero-cta {
+    margin-top: 2.4rem;
     display: flex;
     flex-wrap: wrap;
-    gap: 10px 28px;
-    border-top: 1px solid var(--concrete);
-    padding-top: 20px;
+    gap: 12px;
+    justify-content: center;
   }
-
-  @media (min-width: 640px) {
-    .dossier-facts,
-    .dossier-skills {
-      grid-template-columns: 1fr 1fr;
-    }
-    .dossier-span {
-      grid-column: 1 / -1;
-    }
-  }
-  @media (min-width: 900px) {
-    .dossier {
-      grid-template-columns: 17rem minmax(0, 1fr);
-      gap: 36px;
-      padding: 30px;
-    }
-    .dossier-portrait {
-      align-self: start;
-      aspect-ratio: 4 / 5;
-    }
-  }
-
-  /* A screen from the project, between the title and the facts. Decorative in the
-     accessibility tree, because the entry already links to the same place by name. */
-  .index-shot {
-    border: 1px solid var(--concrete);
-    overflow: clip;
-    max-width: 46rem;
-  }
-  .index-shot img {
-    display: block;
-    width: 100%;
-    height: auto;
-  }
-
-  /* --------------------------------------------------- the one television */
-
-  /*
-    A dead channel. Scan lines plus a little snow, both static: the brief bans animated
-    grain, and a 404 that flickers would be a gimmick rather than a reference. The lines
-    are a repeating gradient, so this costs no asset at all.
-  */
-  .dead-channel {
-    position: relative;
-    isolation: isolate;
-    overflow: clip;
-    max-width: 44rem;
-    padding: 44px 32px 40px;
-    border: 1px solid var(--concrete);
-    background: var(--soot);
-  }
-  /* The glow of a screen that is on but carrying nothing. */
-  .dead-channel::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -2;
-    /* Dimmer than it wants to be: at 30% the body copy measured 3.97:1 and the brass label 4.44:1 against the lit
-       part of the screen. A television that is on but empty is not a lamp. */
-    background: radial-gradient(
-      72% 58% at 50% 42%,
-      color-mix(in oklab, var(--stone) 12%, transparent),
-      transparent 76%
-    );
-  }
-  /*
-    Scan lines read; snow at any strength that reads would eat the text. The first pass
-    put the grain at half opacity and the body copy underneath it measured as unreadable,
-    so the lines carry the idea and the snow is barely there.
-  */
-  .dead-channel::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background-image:
-      repeating-linear-gradient(
-        to bottom,
-        color-mix(in oklab, var(--void) 55%, transparent) 0 1px,
-        transparent 1px 3px
-      );
-    opacity: 0.7;
-  }
-  .dead-snow {
+  /* A dotted field, the way the reference marks its empty page rather than leaving it blank. */
+  .dots {
     position: absolute;
     inset: 0;
     z-index: -1;
     pointer-events: none;
-    opacity: 0.12;
-    background-image: url("/grain.png");
-    background-size: 96px 96px;
+    background-image: radial-gradient(var(--line) 1px, transparent 1px);
+    background-size: 26px 26px;
+    mask-image: radial-gradient(70% 60% at 50% 42%, #000 20%, transparent 78%);
   }
 
-  /*
-    Not brass. Brass marks things you can act on, and this label is not one - it only
-    took the accent because it looked like a warning. On a phone the panel is narrower,
-    so the label sits closer to the middle of the screen's glow, where it measured
-    4.44:1. The button below it is the page's one accent.
-  */
-  .dead-label {
-    color: var(--bone);
+  /* --------------------------------------------------------- the header */
+
+  .site-header {
+    position: fixed;
+    inset-inline: 0;
+    top: 0;
+    z-index: 50;
+    padding-block: 18px;
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    border-bottom: 1px solid transparent;
   }
-  .dead-title {
-    margin: 14px 0 0;
-    font-size: clamp(2.4rem, 7vw, 4.6rem);
+  .nav-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 22px;
+    padding: 9px 18px;
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    background: var(--paper-2);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
   }
-  /* Bone, not ash: this sits on the brightest part of the screen. */
-  .dead-body {
-    margin-top: 1.2rem;
-    max-width: 30rem;
-    line-height: 1.65;
-    color: var(--bone);
+  .nav-pill a {
+    transition: color 150ms ease;
+  }
+  .nav-pill a:hover,
+  .nav-current {
+    color: color-mix(in srgb, var(--ink) 55%, var(--yellow));
   }
 
-  /* ----------------------------------------------------- work on the home */
+  /* ----------------------------------------------------------- the grid */
 
-  .preview-head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px 24px;
-    margin-bottom: 32px;
-  }
-  .preview-title {
-    font-size: clamp(1.9rem, 4.6vw, 3.1rem);
-    margin: 0;
-  }
-  .preview-grid {
+  .cards {
     display: grid;
-    gap: 24px;
+    gap: 22px;
   }
-  @media (min-width: 900px) {
-    .preview-grid {
+  @media (min-width: 760px) {
+    .cards-2 {
       grid-template-columns: 1fr 1fr;
     }
   }
-  .preview-card {
-    overflow: clip;
+  @media (min-width: 1100px) {
+    .cards-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
   }
-  .preview-link {
+
+  /* A project card: the screen first, because that is what is being claimed. */
+  .work-card {
     display: grid;
-    gap: 0.75rem;
-    padding: 0 20px 22px;
+    grid-template-rows: auto 1fr;
+    overflow: clip;
+    background: var(--paper-2);
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    color: var(--ink);
+    transition: transform 150ms ease;
   }
-  /* The screenshot is the point of the card, so it runs to the edges and comes first. */
-  .preview-shot {
+  .work-card:hover {
+    transform: translateY(-4px);
+  }
+  .work-shot {
     display: block;
-    margin: 0 -20px 1.1rem;
-    border-bottom: 1px solid var(--concrete);
+    border-bottom: 2px solid var(--ink);
+    background: var(--ink);
   }
-  .preview-shot img {
+  .work-shot img {
+    display: block;
+    width: 100%;
+    height: 196px;
+    object-fit: cover;
+    object-position: left top;
+  }
+  .work-body {
+    display: grid;
+    align-content: start;
+    gap: 0.7rem;
+    padding: 20px;
+  }
+  .work-title {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .chip {
+    border: 1px solid var(--line-strong);
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .chip-live {
+    background: var(--yellow);
+    border-color: var(--ink);
+  }
+
+  /* A numbered entry, for experience and education. */
+  .entry {
+    display: grid;
+    gap: 16px;
+    padding: 22px;
+  }
+  @media (min-width: 760px) {
+    .entry {
+      grid-template-columns: 58px minmax(0, 1fr);
+      gap: 24px;
+      padding: 26px 30px;
+    }
+  }
+  .entry-n {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .tool {
+    display: grid;
+    place-items: center;
+    gap: 8px;
+    padding: 18px 10px;
+    background: var(--paper-2);
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    text-align: center;
+  }
+  .tool b {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .tool span {
+    font-size: 0.82rem;
+    line-height: 1.45;
+    color: var(--ink-2);
+  }
+  .band-ink .tool,
+  .band-slate .tool {
+    color: var(--ink);
+  }
+
+  .rule {
+    height: 2px;
+    background: currentColor;
+    opacity: 0.18;
+  }
+
+  /* ---------------------------------------------------------- the frame */
+
+  /* A photograph is printed, not floated: hard border, hard offset, no blur. */
+  .photo {
+    border: 3px solid var(--ink);
+    border-radius: 4px;
+    box-shadow: 12px 12px 0 0 var(--ink);
+    overflow: clip;
+    background: var(--ink);
+  }
+  .photo img {
     display: block;
     width: 100%;
     height: auto;
   }
-  .preview-name {
-    font-size: clamp(1.3rem, 2.4vw, 1.75rem);
-    margin: 0;
-    transition: color 200ms ease;
-  }
-  .preview-sub {
-    color: var(--ash);
-    line-height: 1.6;
-  }
-  .preview-foot {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px 20px;
-    margin-top: 0.3rem;
-  }
-  .preview-link:hover .preview-name,
-  .preview-link:focus-visible .preview-name {
-    color: var(--brass);
-  }
 
+  /* ---------------------------------------------------------- the reveal */
 
-  /* ----------------------------------------------------------------- parts */
-
-  .link {
-    text-decoration-line: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 0.22em;
-    text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
-    transition: text-decoration-color 200ms ease;
-  }
-  .link:hover {
-    text-decoration-color: var(--brass);
-  }
-  .link-quiet {
-    text-decoration-line: underline;
-    text-decoration-thickness: 0.07em;
-    text-underline-offset: 0.22em;
-    text-decoration-color: transparent;
-    transition: text-decoration-color 200ms ease;
-  }
-  .link-quiet:hover {
-    text-decoration-color: var(--brass);
-  }
-
-  /* Square institutional edges: 0 radius everywhere. */
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    min-height: 48px;
-    padding: 0.7rem 1.3rem;
-    font-weight: 600;
-    border: 1px solid currentColor;
-    border-radius: 0;
-    transition:
-      background-color 200ms ease,
-      color 200ms ease,
-      border-color 200ms ease;
-  }
-  .btn-solid {
-    background: var(--brass);
-    border-color: var(--brass);
-    color: var(--on-brass);
-  }
-  .btn-solid:hover {
-    background: transparent;
-    color: var(--brass);
-  }
-  .btn-line {
-    border-color: var(--concrete);
-    color: var(--bone);
-  }
-  .btn-line:hover {
-    border-color: var(--bone);
-  }
-
-  .article-grid {
-    display: grid;
-    grid-template-columns:
-      [full-start] minmax(20px, 1fr)
-      [wide-start] minmax(0, 9rem)
-      [text-start] min(40rem, calc(100% - 40px))
-      [text-end] minmax(0, 9rem)
-      [wide-end] minmax(20px, 1fr)
-      [full-end];
-  }
-  .article-grid > * {
-    grid-column: text;
-  }
-  .article-grid > .wide {
-    grid-column: wide;
-  }
-
-  .panel {
-    background: var(--soot);
-    border: 1px solid var(--concrete);
-    border-radius: 2px;
-  }
-  /* A panel is a painted plate, so it carries the paint texture by default. */
-  .panel.plate::before {
-    inset: 1px;
-  }
-
-  /* The figure comes out of the dark rather than being cut off by a crop line. */
-  .portrait {
-    mask-image: linear-gradient(to bottom, #000 62%, transparent 97%);
-  }
-
-  /*
-    Imagery is graded, never shipped at full saturation. The screenshots are the evidence,
-    so the grade is light: enough that a white interface reads as a lit screen in a dark
-    room rather than a hole punched in the page, not so much that a chart stops being
-    readable. Saturation stays high because colour carries meaning in these interfaces.
-  */
-  .graded {
-    filter: saturate(0.82) contrast(1.03) brightness(0.84);
-  }
-  /* A screen is a light source, so it gets an edge and a little spill. */
-  .screen {
-    position: relative;
-    border: 1px solid var(--concrete);
-    box-shadow: 0 0 60px -22px color-mix(in oklab, var(--glow) 35%, transparent);
-  }
-
-  .diagram {
-    --dg-ink: var(--bone);
-    --dg-muted: var(--ash);
-    --dg-box: var(--soot);
-    --dg-line: var(--ash);
-    --dg-solid: var(--brass);
-    --dg-on-solid: var(--on-brass);
-  }
-
-  /* ------------------------------------------------------------ navigation */
-
-  .nav-current {
-    color: var(--bone);
-    text-decoration-line: underline;
-    text-decoration-thickness: 0.07em;
-    text-underline-offset: 0.22em;
-    text-decoration-color: var(--brass);
-  }
-
-  /* ------------------------------------------------------------- the shaft */
-
-  /*
-    A lift indicator rather than a table of contents: a line with four landings,
-    only the one you are on is lit and named. Pinned to the window on desktop,
-    laid on its side under the header on smaller screens.
-  */
-  .shaft {
-    position: sticky;
-    top: 0;
-    z-index: 30;
-    padding-block: 14px;
-    /* Sticky over content, so it needs a real backdrop, not a hint of one: the number
-       measured 4.14:1 over a project screenshot at 375px with a gradient here. */
-    background: var(--void);
-    box-shadow: 0 14px 18px -14px var(--void);
-  }
-  .shaft ol {
-    display: flex;
-    gap: 10px;
-  }
-  .shaft li {
-    flex: 1 1 0;
-    min-width: 0;
-  }
-
-  .shaft-stop {
-    display: block;
-    color: var(--ash);
-    transition: color 220ms ease;
-  }
-  .shaft-tick {
-    display: block;
-    height: 2px;
-    background: var(--concrete);
-    transition:
-      background-color 320ms ease,
-      box-shadow 320ms ease;
-  }
-  /*
-    No opacity on a label. Dimming --ash to 45% drops it to about 1.9:1 against the page,
-    which is well under the floor; the landing you are not on is distinguished by colour
-    and by its tick, not by being half erased.
-  */
-  .shaft-label {
-    display: flex;
-    gap: 8px;
-    margin-top: 8px;
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-  }
-  .shaft-title {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-  .shaft-stop:hover,
-  .shaft-stop:focus-visible {
-    color: var(--bone);
-  }
-  .shaft-stop[aria-current="true"] {
-    color: var(--bone);
-  }
-  .shaft-stop[aria-current="true"] .shaft-tick {
-    background: var(--brass);
-    box-shadow: 0 0 14px color-mix(in oklab, var(--brass) 55%, transparent);
-  }
-
-  @media (min-width: 1024px) {
-    .shaft {
-      position: fixed;
-      left: 40px;
-      top: 50%;
-      translate: 0 -50%;
-      width: 13rem;
-      padding-block: 0;
-      background: none;
-    }
-    .shaft ol {
-      display: grid;
-      gap: 0;
-    }
-    .shaft li {
-      flex: none;
-    }
-    .shaft-stop {
-      display: grid;
-      grid-template-columns: 2px minmax(0, 1fr);
-      align-items: center;
-      gap: 14px;
-      padding-block: 18px;
-    }
-    .shaft-tick {
-      height: 100%;
-      min-height: 26px;
-    }
-    .shaft-label {
-      margin-top: 0;
-      white-space: normal;
-    }
-    .shaft-title {
-      white-space: normal;
-    }
-    /*
-      Every landing is named, always. The titles used to appear only on hover, which meant
-      three of the four project titles did not exist for a recruiter who scrolls and never
-      touches a mouse. Hover still lights the landing; it no longer reveals it.
-    */
-    .shaft-stop .shaft-title {
-      opacity: 1;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .shaft-tick,
-    .shaft-stop {
-      transition: none;
-    }
-  }
-
-  /* ------------------------------------------------------------ flow chain */
-
-  /* A diagram made of words: it survives a narrow screen and a failed image. */
-  .flow {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px 10px;
-    margin-top: 1.75rem;
-  }
-  .flow-step {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .flow-mark {
-    width: 14px;
-    height: 1px;
-    background: var(--concrete);
-  }
-  /* Bone, not ash: a chip sits inside the light pool, where ash measured 4.1:1 against
-     the lit backdrop. The chain is a diagram made of words and deserves full weight. */
-  .flow-label {
-    font-family: var(--font-mono);
-    font-size: 0.74rem;
-    letter-spacing: 0.01em;
-    color: var(--bone);
-    border: 1px solid var(--concrete);
-    border-radius: 1px;
-    padding: 5px 9px;
-  }
-
-  .status {
-    color: var(--bone);
-  }
-
-  .cv-frame {
-    width: 100%;
-    height: min(80svh, 900px);
-    border: 1px solid var(--concrete);
-    background: var(--soot);
-  }
-
-  /* ---------------------------------------------------------------- reveal */
-
-  /*
-    Blocks arrive once, slowly, and stay. Scrolling back up does not take them
-    away again. Nothing is hidden until the observer runs, so a reader without
-    JavaScript sees the whole page.
-  */
   .reveal.is-hidden {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(12px);
   }
   .reveal {
     transition:
-      opacity 760ms cubic-bezier(0.22, 1, 0.36, 1),
-      transform 760ms cubic-bezier(0.22, 1, 0.36, 1);
+      opacity 420ms ease,
+      transform 420ms ease;
   }
   .reveal.is-revealed {
     opacity: 1;
@@ -1162,212 +505,91 @@
       transform: none;
       transition: none;
     }
+    .marquee div {
+      animation: none;
+    }
   }
 
-  /* --------------------------------------------------------- pointer light */
-
-  .pointer-light,
-  .pointer-ring,
-  .pointer-dot {
-    position: fixed;
-    left: 0;
-    top: 0;
-    pointer-events: none;
-    opacity: 0;
-    will-change: transform;
-  }
+  /* ------------------------------------------------------- the transition */
 
   /*
-    In Pale City the light source is cold, so the core of the cursor is --glow, not brass.
-    Warm light would read as a lamp from The Maw, which is a different building.
+    What Ilham asked for after the barba.js reference: a panel covers the page, the
+    destination says its own name, the panel leaves. 620ms in total.
   */
-  .pointer-light {
-    z-index: 45;
-    width: 760px;
-    height: 760px;
-    margin: -380px 0 0 -380px;
-    mix-blend-mode: screen;
-    transition: opacity 500ms ease;
-    background:
-      radial-gradient(circle, color-mix(in oklab, var(--glow) 20%, transparent) 0%, transparent 18%),
-      radial-gradient(circle, color-mix(in oklab, var(--glow) 12%, transparent) 0%, transparent 34%),
-      radial-gradient(circle, color-mix(in oklab, var(--stone) 7%, transparent) 0%, transparent 58%);
-  }
-
-  /* The ring carries the weight; it arrives a beat after the pointer stops. */
-  .pointer-ring {
-    z-index: 70;
-    width: 34px;
-    height: 34px;
-    margin: -17px 0 0 -17px;
-    border: 1px solid color-mix(in oklab, var(--bone) 55%, transparent);
-    border-radius: 999px;
-    transition:
-      opacity 300ms ease,
-      width 240ms cubic-bezier(0.22, 1, 0.36, 1),
-      height 240ms cubic-bezier(0.22, 1, 0.36, 1),
-      margin 240ms cubic-bezier(0.22, 1, 0.36, 1),
-      border-color 240ms ease;
-  }
-
-  /* The dot is exactly where the pointer is, so clicking stays precise. */
-  .pointer-dot {
-    z-index: 71;
-    width: 5px;
-    height: 5px;
-    margin: -2.5px 0 0 -2.5px;
-    border-radius: 999px;
-    background: var(--brass);
-    transition:
-      opacity 300ms ease,
-      transform 80ms linear,
-      background-color 240ms ease;
-  }
-
-  html[data-pointer="on"] .pointer-light,
-  html[data-pointer="on"] .pointer-ring,
-  html[data-pointer="on"] .pointer-dot {
-    opacity: 1;
-  }
-
-  /* Over something you can act on, the ring opens and takes the accent. */
-  html[data-pointer-over="link"] .pointer-ring {
-    width: 56px;
-    height: 56px;
-    margin: -28px 0 0 -28px;
-    border-color: var(--brass);
-  }
-  html[data-pointer-down="true"] .pointer-ring {
-    width: 24px;
-    height: 24px;
-    margin: -12px 0 0 -12px;
-  }
-
-  /* Only once the script is running, so a page without it keeps the system arrow. */
-  html[data-cursor="light"],
-  html[data-cursor="light"] * {
-    cursor: none;
-  }
-
-  @media (pointer: coarse) {
-    .pointer-light,
-    .pointer-ring,
-    .pointer-dot {
-      display: none;
-    }
-  }
-
-  /* ------------------------------------------------------- page transition */
-
-  /*
-    The lift doors, to match the shaft on the work index.
-
-    Two halves of the page colour close over the page you are leaving, meet at the
-    middle with a warm seam, then part again on the page you asked for. The whole
-    move takes 640ms: long enough to feel deliberate, short enough that a click
-    still answers immediately.
-  */
-  ::view-transition-old(.page) {
-    animation: 280ms cubic-bezier(0.55, 0, 1, 0.45) both shutter-close;
-  }
-  ::view-transition-new(.page) {
-    animation: 360ms cubic-bezier(0.22, 1, 0.36, 1) 280ms both shutter-open;
-  }
-
-  @keyframes shutter-close {
-    from {
-      clip-path: inset(0 0 0 0);
-    }
-    to {
-      clip-path: inset(50% 0 50% 0);
-    }
-  }
-  @keyframes shutter-open {
-    from {
-      clip-path: inset(50% 0 50% 0);
-    }
-    to {
-      clip-path: inset(0 0 0 0);
-    }
-  }
-
-  /* The seam. The one warm thing in the move, and the only way you see the doors meet. */
-  .shutter-seam {
+  .curtain {
     position: fixed;
-    left: 0;
-    right: 0;
-    top: 50%;
-    height: 1px;
-    z-index: 80;
+    inset: 0;
+    z-index: 90;
+    display: grid;
+    place-items: center;
+    background: var(--ink);
+    color: var(--paper);
     pointer-events: none;
+    clip-path: inset(0 0 100% 0);
+  }
+  .curtain span {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 12vw, 11rem);
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
     opacity: 0;
-    background: linear-gradient(to right, transparent, var(--brass), transparent);
   }
-  html:active-view-transition .shutter-seam {
-    animation: seam 640ms ease-out both;
+  html:active-view-transition .curtain {
+    animation: curtain 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
-  @keyframes seam {
+  html:active-view-transition .curtain span {
+    animation: curtain-word 620ms ease both;
+  }
+  @keyframes curtain {
     0% {
-      opacity: 0;
-      scale: 0.2 1;
+      clip-path: inset(0 0 100% 0);
     }
-    42% {
-      opacity: 1;
-      scale: 1 1;
-    }
-    58% {
-      opacity: 1;
-      scale: 1 1;
+    38%,
+    62% {
+      clip-path: inset(0 0 0 0);
     }
     100% {
-      opacity: 0;
-      scale: 1 1;
+      clip-path: inset(100% 0 0 0);
     }
   }
-
-  /*
-    A case-study title is the same object on both pages, so it travels rather than
-    being redrawn. The browser matches the two by name and moves one into the other.
-  */
-  ::view-transition-group(.study-title) {
-    animation-duration: 640ms;
-    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  @keyframes curtain-word {
+    0%,
+    22% {
+      opacity: 0;
+    }
+    40%,
+    60% {
+      opacity: 1;
+    }
+    82%,
+    100% {
+      opacity: 0;
+    }
   }
-  ::view-transition-old(.study-title),
-  ::view-transition-new(.study-title) {
-    height: 100%;
+  ::view-transition-old(.page),
+  ::view-transition-new(.page) {
     animation: none;
   }
-
-  /* The header is frozen to the window; the strip behind it fades so lines pass under
-     it instead of hitting an edge. */
-  .site-header {
-    view-transition-name: site-header;
-    background: linear-gradient(to bottom, var(--void) 42%, color-mix(in oklab, var(--void) 70%, transparent) 72%, transparent);
-    padding-bottom: 18px;
+  ::view-transition-new(.page) {
+    animation: page-in 1ms 300ms both;
   }
-  /*
-    Below 1024px the header wraps to two rows, so the nav sits where the scrim had already
-    faded - measured at 3.60:1 over a bright project screen. The scrim holds its full
-    value further down on narrow screens.
-  */
-  @media (max-width: 1023px) {
-    .site-header {
-      background: linear-gradient(
-        to bottom,
-        var(--void) 78%,
-        color-mix(in oklab, var(--void) 82%, transparent) 92%,
-        transparent
-      );
-      padding-bottom: 26px;
+  @keyframes page-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
     }
   }
-
   @media (prefers-reduced-motion: reduce) {
     ::view-transition-group(*),
     ::view-transition-old(*),
     ::view-transition-new(*) {
       animation: none !important;
+    }
+    html:active-view-transition .curtain,
+    html:active-view-transition .curtain span {
+      animation: none;
     }
   }
 }

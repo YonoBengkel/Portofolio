@@ -1,33 +1,39 @@
 import Link from "next/link";
 import { profile } from "@/content/site";
+import { Logo } from "./logo";
 
-const LINKS = [
-  { href: "/work", label: "Work" },
-  { href: "/about", label: "About" },
-  { href: "/about/competitions", label: "Competitions" },
-  { href: "/about/activities", label: "Organisations" },
-  { href: "/cv", label: "CV" },
-  { href: "/contact", label: "Contact" },
-];
-
+/** The last band. Dark, the name once more at size, and the three ways to reach him. */
 export function SiteFooter() {
   return (
-    <footer className="mt-24 border-t border-concrete">
-      <div className="frame grid gap-10 py-14 sm:grid-cols-[minmax(0,1fr)_auto]">
-        <p className="meta">
-          © {new Date().getFullYear()} {profile.name} · {profile.location}
-        </p>
-        <nav aria-label="Footer">
-          <ul className="grid gap-2 text-[0.95rem] sm:text-right">
-            {LINKS.map((l) => (
-              <li key={l.href}>
-                <Link href={l.href} className="link-quiet">
-                  {l.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
+    <footer className="band-ink">
+      <div className="frame py-20">
+        <div className="column">
+          <div className="flex items-center gap-3">
+            <Logo size={22} />
+            <p className="meta">{profile.label}</p>
+          </div>
+          <p className="display mt-6 text-[clamp(2rem,6.4vw,5rem)]">{profile.name}</p>
+          <p className="lede mt-6 max-w-[34rem] opacity-80">{profile.tagline}</p>
+
+          <div className="mt-10 flex flex-wrap gap-3">
+            <a href={profile.links.github} target="_blank" rel="noopener noreferrer" className="pill">
+              GitHub
+            </a>
+            <a href={profile.links.linkedin} target="_blank" rel="noopener noreferrer" className="pill">
+              LinkedIn
+            </a>
+            <a href={`mailto:${profile.email}`} className="pill">
+              Email
+            </a>
+            <Link href="/cv" className="pill" transitionTypes={["nav-forward"]}>
+              CV
+            </Link>
+          </div>
+
+          <p className="meta mt-14 opacity-60">
+            © {new Date().getFullYear()} {profile.name} · {profile.location}
+          </p>
+        </div>
       </div>
     </footer>
   );

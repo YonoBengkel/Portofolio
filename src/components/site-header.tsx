@@ -1,21 +1,18 @@
 import Link from "next/link";
-import { profile } from "@/content/site";
 import { Logo } from "./logo";
 import { NavLinks } from "./nav-links";
 
-// Sits on top of each page's first band, so it has no background of its own.
+/**
+ * A floating pill rather than a bar across the window: it is what both reference sites
+ * do, and it keeps the page colour unbroken behind it.
+ */
 export function SiteHeader() {
   return (
-    <header className="site-header fixed inset-x-0 top-0 z-50">
-      <div className="frame flex flex-col gap-2 pt-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:pt-7">
-        <Link
-          href="/"
-          className="flex w-fit items-center gap-2.5 text-[0.95rem] font-semibold tracking-[0.01em]"
-          transitionTypes={["nav-back"]}
-        >
-          {/* Clear space is two slot widths, a quarter of the mark's height: at 20px that is the 10px gap. */}
-          <Logo size={20} />
-          {profile.name}
+    <header className="site-header">
+      <div className="frame flex items-center justify-between gap-4">
+        <Link href="/" className="flex items-center gap-2.5 font-mono text-[0.72rem] uppercase tracking-[0.14em]">
+          <Logo size={18} />
+          <span className="hidden sm:inline">Ilham Bintang Satria</span>
         </Link>
         <NavLinks />
       </div>
