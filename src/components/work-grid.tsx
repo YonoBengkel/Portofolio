@@ -12,10 +12,10 @@ import type { Project } from "@/content/projects";
 export function WorkGrid({ projects }: { projects: Project[] }) {
   return (
     <div className="cards cards-2">
-      {projects.map((project) => (
-        <article key={project.slug} className="work-card reveal">
+      {projects.map((project, i) => (
+        <article key={project.slug} className="work-card tilt" style={{ "--i": i } as React.CSSProperties}>
           <Link href={`/work/${project.slug}`} className="contents" transitionTypes={["nav-forward"]}>
-            <span className="work-shot">
+            <span className="work-shot drift">
               <Image src={project.cover.src} alt={project.cover.alt} sizes="(min-width: 760px) 44vw, 100vw" />
             </span>
             <span className="work-body">

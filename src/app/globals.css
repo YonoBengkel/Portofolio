@@ -266,11 +266,8 @@
     text-transform: uppercase;
     padding-right: 0.4em;
   }
-  @media (prefers-reduced-motion: no-preference) {
-    .marquee div {
-      display: inline-block;
-      animation: slide 26s linear infinite;
-    }
+  .marquee div {
+    display: inline-block;
   }
   @keyframes slide {
     to {
@@ -560,6 +557,224 @@
     height: auto;
   }
 
+
+  /* ------------------------------------------------------- the run switch */
+
+  /*
+    Everything on the site that moves is gated behind one attribute, `data-run` on
+    <html>, which the switch writes. So the page has exactly two states and either of
+    them can be looked at on purpose: idle, where nothing moves at all, and running.
+
+    Under prefers-reduced-motion the switch starts off, and every rule below is written
+    so that "off" is the finished, readable page rather than a broken one.
+  */
+  .run {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 2.6rem;
+  }
+  .run-switch {
+    display: inline-block;
+    cursor: pointer;
+  }
+  .run-track {
+    position: relative;
+    display: block;
+    width: 132px;
+    height: 64px;
+    border: 3px solid var(--ink);
+    border-radius: 999px;
+    background: var(--paper-2);
+    box-shadow: 6px 6px 0 0 var(--ink);
+    transition: background-color 180ms ease;
+  }
+  .run-ball {
+    position: absolute;
+    left: 5px;
+    top: 5px;
+    width: 48px;
+    height: 48px;
+    border-radius: 999px;
+    background: var(--ink);
+    /* The one piece of overshoot on the site. A switch is a physical object and this is
+       the only place where a spring is honest rather than decorative. */
+    transition:
+      translate 420ms cubic-bezier(0.34, 1.56, 0.64, 1),
+      background-color 180ms ease;
+  }
+  html[data-run="1"] .run-track {
+    background: var(--yellow);
+  }
+  html[data-run="1"] .run-ball {
+    translate: 68px 0;
+  }
+  .run-switch:focus-within .run-track {
+    outline: 2px solid var(--ink);
+    outline-offset: 4px;
+  }
+  .run-label {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .run-label b {
+    color: var(--ink);
+  }
+
+  /* ---------------------------------------------------------- hazard tape */
+
+  /* Wider than the window, because a tilted strip would otherwise leave a bare triangle
+     of page colour at each end. */
+  .tape {
+    position: relative;
+    overflow: hidden;
+    width: 108vw;
+    margin-inline: -4vw;
+    padding-block: 15px;
+    white-space: nowrap;
+    color: var(--ink);
+    border-block: 3px solid var(--ink);
+    background: repeating-linear-gradient(
+      -45deg,
+      var(--yellow) 0 22px,
+      var(--ink) 22px 44px
+    );
+    margin-block: 10px;
+  }
+  /* The words ride on their own strip so the stripes stay readable behind them. */
+  .tape-run {
+    display: inline-block;
+    background: var(--yellow);
+    padding-block: 7px;
+  }
+  .tape-run span {
+    display: inline-block;
+    font-family: var(--font-display);
+    font-size: clamp(1.3rem, 2.8vw, 2.1rem);
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    padding-right: 0.45em;
+  }
+  html[data-run="1"] .tape-run {
+    animation: slide 22s linear infinite;
+  }
+  html[data-run="1"] .marquee div {
+    animation: slide 26s linear infinite;
+  }
+
+  /* --------------------------------------------------- scroll-driven motion */
+
+  /*
+    All of this is CSS scroll-driven animation: no listener, no library, nothing on the
+    main thread. Where `animation-timeline` is unsupported the elements simply sit in
+    their final state, which is the page you would have got anyway.
+  */
+  @supports (animation-timeline: view()) {
+    html[data-run="1"] .drift img {
+      animation: drift linear both;
+      animation-timeline: view();
+      animation-range: entry 0% exit 100%;
+    }
+    html[data-run="1"] .rise {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 8% cover 36%;
+    }
+    html[data-run="1"] .tilt {
+      animation: tilt linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 48%;
+    }
+    /* A rule that draws itself across the page as that section arrives. */
+    html[data-run="1"] .draw {
+      animation: draw linear both;
+      animation-timeline: view();
+      animation-range: entry 20% cover 42%;
+    }
+  }
+  /* The photograph moves a little slower than the page it sits on. */
+  @keyframes drift {
+    from {
+      scale: 1.1;
+      translate: 0 -3.5%;
+    }
+    to {
+      scale: 1.1;
+      translate: 0 3.5%;
+    }
+  }
+  @keyframes rise {
+    from {
+      opacity: 0;
+      translate: 0 42px;
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+  @keyframes tilt {
+    from {
+      rotate: -1.6deg;
+      scale: 0.965;
+    }
+    to {
+      rotate: 0deg;
+      scale: 1;
+    }
+  }
+  @keyframes draw {
+    from {
+      scale: 0 1;
+    }
+    to {
+      scale: 1 1;
+    }
+  }
+  .draw {
+    transform-origin: left center;
+  }
+  .drift {
+    overflow: clip;
+  }
+
+  /* Words that arrive one after another rather than all at once. */
+  .stagger > * {
+    --i: 0;
+  }
+  @supports (animation-timeline: view()) {
+    html[data-run="1"] .stagger > * {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry calc(6% + var(--i) * 7%) cover calc(28% + var(--i) * 7%);
+    }
+  }
+
+  /*
+    Reduced motion wins over the switch. Someone who asked their system for less movement
+    gets a still page even if they flip it, and the switch still reads as on so the label
+    is not lying to them.
+  */
+  @media (prefers-reduced-motion: reduce) {
+    .run-ball,
+    .run-track {
+      transition: none;
+    }
+    html[data-run="1"] .tape-run,
+    html[data-run="1"] .marquee div,
+    html[data-run="1"] .drift img,
+    html[data-run="1"] .rise,
+    html[data-run="1"] .tilt,
+    html[data-run="1"] .draw,
+    html[data-run="1"] .stagger > * {
+      animation: none;
+    }
+  }
+
   /* ---------------------------------------------------------- the reveal */
 
   .reveal.is-hidden {
@@ -581,9 +796,6 @@
       opacity: 1;
       transform: none;
       transition: none;
-    }
-    .marquee div {
-      animation: none;
     }
   }
 

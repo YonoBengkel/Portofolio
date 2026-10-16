@@ -15,8 +15,8 @@ import { atAGlance, profile } from "@/content/site";
  */
 export function AboutCard() {
   return (
-    <div className="sticker reveal grid gap-8 p-6 sm:p-10 md:grid-cols-[18rem_minmax(0,1fr)] md:gap-12">
-      <div className="photo self-start">
+    <div className="sticker grid gap-8 p-6 sm:p-10 md:grid-cols-[18rem_minmax(0,1fr)] md:gap-12">
+      <div className="photo drift self-start">
         <Image src={portrait} alt={profile.name} sizes="(min-width: 768px) 18rem, 70vw" placeholder="blur" />
       </div>
 

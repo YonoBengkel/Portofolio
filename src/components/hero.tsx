@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { RunSwitch } from "@/components/run-switch";
 import { openTo, profile } from "@/content/site";
 
 /**
@@ -17,6 +18,7 @@ export function Hero() {
           <br />
           <span className="marker">{profile.name.split(" ").slice(2).join(" ")}</span>
         </h1>
+        <RunSwitch />
         <p className="hero-role">{profile.label}</p>
         <p className="hero-line">{profile.tagline}</p>
         <div className="hero-cta">

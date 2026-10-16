@@ -9,9 +9,13 @@ export type Entry = { title: string; org: string; period: string; body: string }
 
 export function EntryList({ entries }: { entries: Entry[] }) {
   return (
-    <ol className="grid gap-5">
+    <ol className="stagger grid gap-5">
       {entries.map((entry, i) => (
-        <li key={`${entry.title}-${entry.period}`} className="sticker entry reveal">
+        <li
+          key={`${entry.title}-${entry.period}`}
+          className="sticker entry"
+          style={{ "--i": i } as React.CSSProperties}
+        >
           <p className="entry-n">{String(i + 1).padStart(2, "0")}</p>
           <div>
             <p className="meta opacity-70">{entry.period}</p>

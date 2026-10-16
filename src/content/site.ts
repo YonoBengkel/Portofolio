@@ -174,6 +174,29 @@ export const competitions = [
   },
 ];
 
+// Awards and certificates. Same rule as the competitions list: only what is on the CV
+// and backed by a certificate, with the awarding body named.
+export const achievements = [
+  {
+    title: "Bronze Medal, Thailand International Mathematical Olympiad",
+    org: "TIMO",
+    year: "2023",
+    body: "An international mathematics olympiad; the medal was awarded at the final round.",
+  },
+  {
+    title: "Samsung Innovation Campus Batch 7 — Python Programming",
+    org: "Samsung Electronics Indonesia",
+    year: "2025",
+    body: "A selective programme in Python and its use for data work, run with the company's own engineers.",
+  },
+  {
+    title: "TOEFL 563",
+    org: "English proficiency",
+    year: "2022",
+    body: "Upper-intermediate. Every case study on this site was written in English first.",
+  },
+];
+
 export const education = {
   degree: "Applied Data Science (D4)",
   school: "Politeknik Elektronika Negeri Surabaya (PENS)",
