@@ -1,26 +1,26 @@
 /**
- * The one list shape used by about, competitions and volunteering: a quiet
- * rule, a line of metadata, a title, and a sentence. Repeating one shape is
- * what lets the reader stop learning the layout and start reading.
+ * A list of things that each have a name, a place, a period and a line about them:
+ * competitions, volunteer roles, organisations.
+ *
+ * Numbered stickers rather than a bulleted list, because every other list on this site
+ * is numbered and a reader should be able to say "the third one" out loud.
  */
-export type Entry = {
-  title: string;
-  org?: string;
-  meta?: string;
-  body?: string;
-};
+export type Entry = { title: string; org: string; period: string; body: string };
 
 export function EntryList({ entries }: { entries: Entry[] }) {
   return (
-    <ul className="mt-10">
-      {entries.map((e) => (
-        <li key={`${e.title}-${e.meta ?? ""}`} className="recede-rule border-t border-concrete py-7 first:pt-0">
-          {e.meta && <p className="meta">{e.meta}</p>}
-          <h3 className="mt-2 text-[1.15rem] font-semibold leading-snug">{e.title}</h3>
-          {e.org && <p className="mt-1 text-ash">{e.org}</p>}
-          {e.body && <p className="mt-3 max-w-[34rem] leading-relaxed text-ash">{e.body}</p>}
+    <ol className="grid gap-5">
+      {entries.map((entry, i) => (
+        <li key={`${entry.title}-${entry.period}`} className="sticker entry reveal">
+          <p className="entry-n">{String(i + 1).padStart(2, "0")}</p>
+          <div>
+            <p className="meta opacity-70">{entry.period}</p>
+            <h3 className="work-title mt-1.5">{entry.title}</h3>
+            <p className="mt-1 opacity-80">{entry.org}</p>
+            <p className="mt-4 leading-relaxed">{entry.body}</p>
+          </div>
         </li>
       ))}
-    </ul>
+    </ol>
   );
 }

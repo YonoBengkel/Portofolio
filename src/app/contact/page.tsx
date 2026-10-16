@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { CopyButton } from "@/components/copy-button";
 import { PageHeader } from "@/components/page-header";
 import { PageTransition } from "@/components/page-transition";
-import { profile } from "@/content/site";
+import { openTo, profile } from "@/content/site";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -21,32 +21,41 @@ export default function ContactPage() {
     <PageTransition>
       <PageHeader title="Contact" lede="Email is the fastest way to reach me. Everything else is here too." />
 
-      <section className="lit">
-        <div className="column pb-24">
-          <dl className="grid gap-7">
-            {rows.map((row) => (
-              <div key={row.label} className="recede-rule border-t border-concrete pt-4">
-                <dt className="meta">{row.label}</dt>
-                <dd className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-2">
-                  {row.href ? (
-                    <a
-                      href={row.href}
-                      className="link text-[1.05rem]"
-                      {...(row.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                    >
-                      {row.value}
-                    </a>
-                  ) : (
-                    <span className="text-[1.05rem]">{row.value}</span>
-                  )}
-                  {row.copy && <CopyButton value={row.value} />}
-                </dd>
-              </div>
-            ))}
-          </dl>
-          <p className="mt-12 max-w-[34rem] leading-relaxed text-ash">
-            I am glad to walk through any of the case studies in more detail, including the parts that did not work.
-          </p>
+      <section className="band">
+        <div className="frame">
+          <div className="column">
+            <div className="sticker reveal p-7 sm:p-10">
+              <dl className="grid gap-0">
+                {rows.map((row, i) => (
+                  <div
+                    key={row.label}
+                    className={`grid gap-2 py-6 sm:grid-cols-[10rem_minmax(0,1fr)] sm:items-baseline ${
+                      i ? "border-t-2 border-line" : "pt-0"
+                    }`}
+                  >
+                    <dt className="meta opacity-70">{row.label}</dt>
+                    <dd className="flex flex-wrap items-center gap-x-5 gap-y-3 text-[1.05rem]">
+                      {row.href ? (
+                        <a
+                          href={row.href}
+                          target={row.href.startsWith("mailto:") ? undefined : "_blank"}
+                          rel={row.href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
+                          className="underline decoration-2 underline-offset-4 hover:decoration-yellow"
+                        >
+                          {row.value}
+                        </a>
+                      ) : (
+                        row.value
+                      )}
+                      {row.copy && <CopyButton value={row.value} />}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+
+            <p className="lede reveal mt-10 max-w-[38rem]">{openTo}</p>
+          </div>
         </div>
       </section>
     </PageTransition>

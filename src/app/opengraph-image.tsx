@@ -10,10 +10,10 @@ export const contentType = "image/png";
 // next/og cannot read the site's woff2 files, so it gets static TTF copies of the same
 // two faces the site uses (licences in src/assets/fonts/OFL.txt).
 const fontDir = join(process.cwd(), "src/assets/fonts");
-const serif = await readFile(join(fontDir, "Newsreader-Regular.ttf"));
+const display = await readFile(join(fontDir, "Anton-Regular.ttf"));
 const sans = await readFile(join(fontDir, "Archivo-Regular.ttf"));
 
-const colors = { void: "#0c131d", soot: "#142638", concrete: "#2b4962", ink: "#d9d5c8", ash: "#92acc4" };
+const colors = { paper: "#fbefd8", paper2: "#fff8ec", ink: "#241206", ink2: "#5c4631", yellow: "#f2b705" };
 
 // The mark: a decision diamond cut open by a vertical slot that reads as an I.
 const MARK = "M 128 26 L 230 128 L 128 230 L 26 128 Z M 110 63 L 146 63 L 146 187 L 110 187 Z";
@@ -34,12 +34,12 @@ export default function OpengraphImage() {
           flexDirection: "column",
           justifyContent: "center",
           padding: "0 84px",
-          background: colors.void,
+          background: colors.paper,
           color: colors.ink,
           fontFamily: "Archivo",
         }}
       >
-        {/* The one pool of light, behind the name rather than everywhere. */}
+        {/* One soft wash of the accent behind the name. */}
         <div
           style={{
             position: "absolute",
@@ -47,15 +47,15 @@ export default function OpengraphImage() {
             top: 110,
             width: 1200,
             height: 430,
-            background: `radial-gradient(44% 58% at 34% 50%, ${colors.concrete}, transparent 72%)`,
-            opacity: 0.5,
+            background: `radial-gradient(42% 56% at 32% 50%, ${colors.yellow}, transparent 72%)`,
+            opacity: 0.28,
           }}
         />
         <div style={{ display: "flex", alignItems: "center", gap: 18, marginBottom: 34 }}>
           <svg width={44} height={44} viewBox="0 0 256 256">
             <path d={MARK} fill={colors.ink} fillRule="evenodd" />
           </svg>
-          <div style={{ fontSize: 23, letterSpacing: "0.14em", textTransform: "uppercase", color: colors.ash }}>
+          <div style={{ fontSize: 23, letterSpacing: "0.14em", textTransform: "uppercase", color: colors.ink2 }}>
             {profile.label}
           </div>
         </div>
@@ -63,22 +63,23 @@ export default function OpengraphImage() {
         <div
           style={{
             display: "flex",
-            fontFamily: "Newsreader",
-            fontSize: 104,
-            lineHeight: 1,
-            letterSpacing: "-0.025em",
+            fontFamily: "Anton",
+            fontSize: 112,
+            lineHeight: 0.95,
+            letterSpacing: "-0.02em",
+            textTransform: "uppercase",
           }}
         >
           {profile.name}
         </div>
 
         <div
-          style={{ display: "flex", marginTop: 34, maxWidth: 820, fontSize: 28, lineHeight: 1.45, color: colors.ash }}
+          style={{ display: "flex", marginTop: 34, maxWidth: 820, fontSize: 28, lineHeight: 1.45, color: colors.ink2 }}
         >
           {profile.tagline}
         </div>
 
-        {/* The floor line, so the frame holds a room rather than a void. */}
+        {/* A dark band at the foot, the same one the page ends on. */}
         <div
           style={{
             position: "absolute",
@@ -86,7 +87,7 @@ export default function OpengraphImage() {
             bottom: 0,
             width: 1200,
             height: 92,
-            background: `linear-gradient(to top, ${colors.soot}, transparent)`,
+            background: colors.ink,
           }}
         />
       </div>
@@ -94,7 +95,7 @@ export default function OpengraphImage() {
     {
       ...size,
       fonts: [
-        { name: "Newsreader", data: serif, weight: 400, style: "normal" },
+        { name: "Anton", data: display, weight: 400, style: "normal" },
         { name: "Archivo", data: sans, weight: 400, style: "normal" },
       ],
     },

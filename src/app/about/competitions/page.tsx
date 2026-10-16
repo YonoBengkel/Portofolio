@@ -17,16 +17,13 @@ export default function CompetitionsPage() {
         lede="Every entry here was a team entry that reached the participant stage. No placements are claimed."
         back={{ href: "/about", label: "Back to about" }}
       />
-      <section className="lit">
-        <div className="column pb-24">
-          <EntryList
-            entries={competitions.map((c) => ({
-              title: c.name,
-              org: c.org,
-              meta: c.year,
-              body: c.body,
-            }))}
-          />
+      <section className="band">
+        <div className="frame">
+          <div className="column">
+            <EntryList
+              entries={competitions.map((c) => ({ title: c.name, org: c.org, period: c.year, body: c.body }))}
+            />
+          </div>
         </div>
       </section>
     </PageTransition>

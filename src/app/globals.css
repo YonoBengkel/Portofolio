@@ -17,6 +17,13 @@
     rules     0.8px hairlines on Toriq; hard 2px black borders on Alief. Both are here
     radius    Alief 6px and pills; Toriq 8px and pills
 
+  Every surface here is a flat token, so contrast is computed exactly rather than
+  sampled: ink on paper 15.84:1, ink2 on paper 7.76:1, paper on ink 15.84:1,
+  paper2 on slate 6.71:1, ink on yellow 9.92:1. Two rules fall out of that table and
+  are the only ones worth remembering: --ink2 never drops below 80% opacity, and
+  nothing on a slate band drops below 80% either. --ink on --slate is 2.55:1 and is
+  never used.
+
   The one thing deliberately not borrowed: the layouts themselves. Three of the four
   sites measured belong to PENS classmates and the same people read all of them.
 */
@@ -52,6 +59,8 @@
     -webkit-text-size-adjust: 100%;
     background: var(--paper);
     overflow-x: clip;
+    /* The header is fixed, so an anchor has to stop below it rather than under it. */
+    scroll-padding-top: 90px;
   }
   @media (prefers-reduced-motion: no-preference) {
     html {
@@ -123,6 +132,14 @@
   .band-slate {
     background: var(--slate);
     color: var(--paper-2);
+  }
+  /* Two bands of the same colour in a row are one band: no seam between them. */
+  .band-ink + .band-ink,
+  .band-slate + .band-slate {
+    padding-top: 0;
+  }
+  .band-tight {
+    padding-block: 56px;
   }
 
   /* ---------------------------------------------------------- typography */
@@ -459,6 +476,66 @@
   .band-ink .tool,
   .band-slate .tool {
     color: var(--ink);
+  }
+
+  /* The project read left to right as chips, so it survives a 375px screen. */
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 10px;
+    margin-top: 2rem;
+  }
+  .flow-step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .flow-mark {
+    width: 14px;
+    height: 2px;
+    background: currentColor;
+    opacity: 0.45;
+  }
+  .flow-label {
+    border: 2px solid currentColor;
+    border-radius: 999px;
+    padding: 6px 13px;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* The reading column inside a case study: text at 42rem, figures out to 64rem. */
+  .article-grid {
+    display: grid;
+    grid-template-columns:
+      [full-start] minmax(20px, 1fr)
+      [wide-start] minmax(0, 7rem)
+      [text-start] min(42rem, calc(100% - 40px))
+      [text-end] minmax(0, 7rem)
+      [wide-end] minmax(20px, 1fr)
+      [full-end];
+  }
+  .article-grid > * {
+    grid-column: text;
+  }
+  .article-grid > .wide {
+    grid-column: wide;
+  }
+  .prose-body {
+    font-size: 1.0625rem;
+    line-height: 1.75;
+  }
+  .prose-body h2 {
+    margin-top: 4rem;
+    margin-bottom: 0.9rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.7rem, 4vw, 2.6rem);
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    text-transform: uppercase;
   }
 
   .rule {

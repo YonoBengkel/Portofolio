@@ -17,59 +17,67 @@ export default function CvPage() {
     <PageTransition>
       <PageHeader title="CV" lede={openTo} />
 
-      <section className="lit">
-        <div className="column pb-10">
-          {hasCv ? (
-            <a href={profile.cvPath} download className="btn btn-solid">
-              Download the PDF
-            </a>
-          ) : (
-            <p className="text-ash">The PDF is not published yet. The summary below says the same thing.</p>
-          )}
-        </div>
-      </section>
+      <section className="band">
+        <div className="frame">
+          <div className="column">
+            {hasCv ? (
+              <a href={profile.cvPath} download className="pill pill-solid">
+                Download the PDF
+              </a>
+            ) : (
+              <p className="lede">The PDF is not published yet. The summary below says the same thing.</p>
+            )}
 
-      {/* The page still answers the question if the PDF fails to load or is skipped. */}
-      <section aria-labelledby="summary-title" className="lit">
-        <div className="column pb-20">
-          <h2 id="summary-title" className="display text-[clamp(1.7rem,4vw,2.5rem)]">
-            In short
-          </h2>
-          <dl className="mt-10 grid gap-7">
-            <div className="recede-rule border-t border-concrete pt-4">
-              <dt className="meta">Studying</dt>
-              <dd className="mt-2 leading-snug">
-                {education.degree}, {education.school}, {education.period}
-              </dd>
+            {/* The page still answers the question if the PDF fails to load or is skipped. */}
+            <div className="sticker reveal mt-12 p-7 sm:p-10">
+              <h2 className="h-sec">In short</h2>
+              <dl className="mt-8 grid gap-0">
+                <div className="grid gap-2 pb-6 sm:grid-cols-[10rem_minmax(0,1fr)] sm:items-baseline">
+                  <dt className="meta opacity-70">Studying</dt>
+                  <dd className="leading-snug">
+                    {education.degree}, {education.school}, {education.period}
+                  </dd>
+                </div>
+                {experience.map((e) => (
+                  <div
+                    key={e.role}
+                    className="grid gap-2 border-t-2 border-line py-6 sm:grid-cols-[10rem_minmax(0,1fr)] sm:items-baseline"
+                  >
+                    <dt className="meta opacity-70">{e.period}</dt>
+                    <dd className="leading-snug">
+                      {e.role}, {e.org}
+                    </dd>
+                  </div>
+                ))}
+                <div className="grid gap-2 border-t-2 border-line pt-6 sm:grid-cols-[10rem_minmax(0,1fr)] sm:items-baseline">
+                  <dt className="meta opacity-70">Based in</dt>
+                  <dd className="leading-snug">{profile.location}</dd>
+                </div>
+              </dl>
             </div>
-            {experience.map((e) => (
-              <div key={e.role} className="recede-rule border-t border-concrete pt-4">
-                <dt className="meta">{e.period}</dt>
-                <dd className="mt-2 leading-snug">
-                  {e.role}, {e.org}
-                </dd>
-              </div>
-            ))}
-            <div className="recede-rule border-t border-concrete pt-4">
-              <dt className="meta">Based in</dt>
-              <dd className="mt-2 leading-snug">{profile.location}</dd>
-            </div>
-          </dl>
+          </div>
         </div>
       </section>
 
       {hasCv && (
-        <section aria-label="CV preview" className="lit">
-          <div className="frame pb-24">
-            <object data={profile.cvPath} type="application/pdf" className="cv-frame recede" aria-label="CV preview">
-              <p className="p-6 text-ash">
-                Your browser will not show the PDF here.{" "}
-                <a href={profile.cvPath} className="link" download>
-                  Download it instead
-                </a>
-                .
-              </p>
-            </object>
+        <section aria-label="CV preview" className="band band-slate pt-0">
+          <div className="frame">
+            <div className="column">
+              <object
+                data={profile.cvPath}
+                type="application/pdf"
+                className="h-[min(80svh,900px)] w-full border-2 border-ink bg-paper-2"
+                aria-label="CV preview"
+              >
+                <p className="p-6">
+                  Your browser will not show the PDF here.{" "}
+                  <a href={profile.cvPath} className="underline decoration-2 underline-offset-4" download>
+                    Download it instead
+                  </a>
+                  .
+                </p>
+              </object>
+            </div>
           </div>
         </section>
       )}

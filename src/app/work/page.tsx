@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Marquee } from "@/components/marquee";
 import { PageHeader } from "@/components/page-header";
 import { PageTransition } from "@/components/page-transition";
-import { WorkIndex } from "@/components/work-index";
+import { WorkGrid } from "@/components/work-grid";
 import { projects } from "@/content/projects";
 import { otherWork } from "@/content/site";
 
@@ -16,38 +17,63 @@ export default function WorkPage() {
     <PageTransition>
       <PageHeader
         title="Work"
-        lede="Four case studies, each one a job someone actually had to do. The list stays with you while you read."
+        lede="Four case studies, each one a job someone actually had to do. Every card opens the whole thing: the problem, the decisions, and the screens."
       />
 
-      <WorkIndex projects={projects} />
+      <section className="band band-slate" aria-labelledby="studies-h">
+        <div className="frame">
+          <div className="column">
+            <h2 id="studies-h" className="sr-only">
+              Case studies
+            </h2>
+            <WorkGrid projects={projects} />
+          </div>
+        </div>
+      </section>
 
-      <section aria-labelledby="other-title" className="lit">
-        <div className="column band">
-          <h2 id="other-title" className="display text-[clamp(1.9rem,4.5vw,3rem)]">
-            Also worth a look
-          </h2>
-          <ul className="mt-10">
-            {otherWork.map((w) => (
-              <li key={w.title} className="reveal recede-rule border-t border-concrete py-7 first:pt-0">
-                <p className="meta">{w.meta}</p>
-                <h3 className="mt-2 text-[1.15rem] font-semibold leading-snug">
-                  {w.href ? (
-                    <a href={w.href} target="_blank" rel="noopener noreferrer" className="link">
-                      {w.title}
-                    </a>
-                  ) : (
-                    w.title
-                  )}
-                </h3>
-                <p className="mt-3 max-w-[34rem] leading-relaxed text-ash">{w.body}</p>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-10">
-            <Link href="/about/competitions" className="link" transitionTypes={["nav-forward"]}>
-              Competitions are listed separately
-            </Link>
-          </p>
+      <Marquee text="Also worth a look" />
+
+      <section className="band" aria-labelledby="other-h">
+        <div className="frame">
+          <div className="column">
+            <h2 id="other-h" className="h-sec reveal">
+              Also worth a look
+            </h2>
+            <p className="lede reveal mt-5 max-w-[38rem] opacity-80">
+              Smaller pieces and coursework. They are here because they are real, not because they are
+              finished.
+            </p>
+
+            <ol className="mt-12 grid gap-5">
+              {otherWork.map((w, i) => (
+                <li key={w.title} className="sticker entry reveal">
+                  <p className="entry-n">{String(i + 1).padStart(2, "0")}</p>
+                  <div>
+                    <p className="meta opacity-70">{w.meta}</p>
+                    <h3 className="work-title mt-1.5">
+                      {w.href ? (
+                        <a href={w.href} target="_blank" rel="noopener noreferrer" className="underline decoration-2 underline-offset-4 hover:decoration-yellow">
+                          {w.title} ↗
+                        </a>
+                      ) : (
+                        w.title
+                      )}
+                    </h3>
+                    <p className="mt-4 leading-relaxed">{w.body}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+
+            <div className="mt-12 flex flex-wrap gap-3">
+              <Link href="/about/competitions" className="pill pill-solid" transitionTypes={["nav-forward"]}>
+                Competitions
+              </Link>
+              <Link href="/about/activities" className="pill" transitionTypes={["nav-forward"]}>
+                Organisations &amp; volunteering
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
     </PageTransition>

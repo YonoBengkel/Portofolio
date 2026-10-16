@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { EntryList } from "@/components/entry-list";
+import { Marquee } from "@/components/marquee";
 import { PageHeader } from "@/components/page-header";
 import { PageTransition } from "@/components/page-transition";
 import { leadership, volunteering } from "@/content/site";
@@ -13,35 +14,48 @@ export default function ActivitiesPage() {
   return (
     <PageTransition>
       <PageHeader
-        title="Organisations and committees"
+        title="Organisations &amp; committees"
         lede="A seat in an organisation and a job for one event are different things, so they are listed apart."
         back={{ href: "/about", label: "Back to about" }}
       />
 
-      <section aria-labelledby="orgs-title" className="lit">
-        <div className="column pb-20">
-          <h2 id="orgs-title" className="display text-[clamp(1.7rem,4vw,2.5rem)]">
-            Seats held
-          </h2>
-          <EntryList
-            entries={leadership.map((l) => ({ title: l.role, org: l.org, meta: l.period, body: l.body }))}
-          />
+      <section className="band" aria-labelledby="seats-h">
+        <div className="frame">
+          <div className="column">
+            <h2 id="seats-h" className="h-sec reveal">
+              Seats held
+            </h2>
+            <div className="mt-12">
+              <EntryList
+                entries={leadership.map((l) => ({ title: l.role, org: l.org, period: l.period, body: l.body }))}
+              />
+            </div>
+          </div>
         </div>
       </section>
 
-      <section aria-labelledby="committees-title" className="lit">
-        <div className="column pb-24">
-          <h2 id="committees-title" className="display text-[clamp(1.7rem,4vw,2.5rem)]">
-            Event committees
-          </h2>
-          <EntryList
-            entries={volunteering.map((v) => ({
-              title: `${v.role}, ${v.event}`,
-              org: v.org,
-              meta: v.period,
-              body: v.body,
-            }))}
-          />
+      <Marquee text="Event committees" />
+
+      <section className="band band-slate" aria-labelledby="committees-h">
+        <div className="frame">
+          <div className="column">
+            <h2 id="committees-h" className="h-sec reveal">
+              Event committees
+            </h2>
+            <p className="lede reveal mt-5 max-w-[38rem] opacity-85">
+              Jobs for one event, however long that event ran.
+            </p>
+            <div className="mt-12">
+              <EntryList
+                entries={volunteering.map((v) => ({
+                  title: `${v.role}, ${v.event}`,
+                  org: v.org,
+                  period: v.period,
+                  body: v.body,
+                }))}
+              />
+            </div>
+          </div>
         </div>
       </section>
     </PageTransition>

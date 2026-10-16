@@ -1,9 +1,12 @@
 import Link from "next/link";
 
 /**
- * The opening of every page below the home page: a quiet back link, a display
- * title, and one sentence saying what the page is for. Nothing else, so each
- * page starts the same way and the reader learns where to look.
+ * The opening of every page below the home page: a back link, the title at poster size
+ * on the dark band, and one line saying what the page is for.
+ *
+ * It is a band rather than a heading so that every inner page starts with the same hard
+ * edge the home page uses between its sections, and so the fixed header always has a
+ * dark field under it instead of landing on whatever happens to be there.
  */
 export function PageHeader({
   title,
@@ -15,15 +18,17 @@ export function PageHeader({
   back?: { href: string; label: string };
 }) {
   return (
-    <header className="lit">
-      <div className="column pb-10 pt-32 sm:pb-14 sm:pt-40">
-        {back && (
-          <Link href={back.href} className="meta link-quiet hover:text-bone" transitionTypes={["nav-back"]}>
-            {back.label}
-          </Link>
-        )}
-        <h1 className="display mt-6 text-[clamp(2.6rem,7vw,5rem)]">{title}</h1>
-        <p className="mt-6 max-w-[34rem] text-[1.05rem] leading-relaxed text-ash">{lede}</p>
+    <header className="band-ink">
+      <div className="frame pb-20 pt-36 sm:pb-24 sm:pt-44">
+        <div className="column">
+          {back && (
+            <Link href={back.href} className="pill" transitionTypes={["nav-back"]}>
+              ← {back.label}
+            </Link>
+          )}
+          <h1 className={`display text-[clamp(2.6rem,9vw,7rem)] ${back ? "mt-8" : ""}`}>{title}</h1>
+          <p className="lede mt-6 max-w-[38rem] opacity-80">{lede}</p>
+        </div>
       </div>
     </header>
   );
