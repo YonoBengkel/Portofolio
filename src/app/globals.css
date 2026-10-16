@@ -336,13 +336,13 @@
     frames. The reference is dark but it is never empty, and this is the cheapest honest
     way to put a room behind the content.
 
-    It spans the document rather than the window, so the wall runs the length of the page
-    instead of resetting at every screen.
+    Fixed to the window rather than stretched over the document. A mask across a 4400px
+    page is a 4400px layer for the compositor to paint, and on a throttled phone that
+    alone pushed the largest paint out by seconds. The window is all anyone sees at once.
   */
   .room {
-    position: absolute;
+    position: fixed;
     inset: 0;
-    min-height: 100%;
     z-index: -3;
     pointer-events: none;
     background: var(--concrete);
@@ -829,9 +829,20 @@
     mask-image: linear-gradient(to bottom, #000 62%, transparent 97%);
   }
 
-  /* Imagery is graded, never shipped at full saturation. */
+  /*
+    Imagery is graded, never shipped at full saturation. The screenshots are the evidence,
+    so the grade is light: enough that a white interface reads as a lit screen in a dark
+    room rather than a hole punched in the page, not so much that a chart stops being
+    readable. Saturation stays high because colour carries meaning in these interfaces.
+  */
   .graded {
-    filter: saturate(0.45) contrast(1.06) brightness(0.9);
+    filter: saturate(0.82) contrast(1.03) brightness(0.84);
+  }
+  /* A screen is a light source, so it gets an edge and a little spill. */
+  .screen {
+    position: relative;
+    border: 1px solid var(--concrete);
+    box-shadow: 0 0 60px -22px color-mix(in oklab, var(--glow) 35%, transparent);
   }
 
   .diagram {

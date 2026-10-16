@@ -11,14 +11,14 @@ function Img({ figure, preload = false }: { figure: Figure; preload?: boolean })
   return (
     <a
       href={figure.src.src}
-      className={`block cursor-zoom-in rounded-[2px] ${figure.narrow ? "mx-auto max-w-[28rem]" : ""}`}
+      className={`screen block cursor-zoom-in rounded-[2px] ${figure.narrow ? "mx-auto max-w-[28rem]" : ""}`}
     >
       <Image
         src={figure.src}
         alt={figure.alt}
         preload={preload}
         sizes={figure.narrow ? "(min-width: 640px) 28rem, 100vw" : "(min-width: 1080px) 1024px, 100vw"}
-        className="h-auto w-full rounded-[2px] border border-concrete bg-soot"
+        className="graded h-auto w-full rounded-[2px] bg-soot"
       />
       <span className="sr-only"> (opens the full-size image)</span>
     </a>

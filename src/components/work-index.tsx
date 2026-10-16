@@ -46,7 +46,7 @@ export function WorkIndex({ projects }: { projects: Project[] }) {
 
             <Link
               href={`/work/${project.slug}`}
-              className="index-shot recede mt-8 block"
+              className="index-shot screen recede mt-8 block"
               tabIndex={-1}
               aria-hidden="true"
               transitionTypes={["nav-forward"]}

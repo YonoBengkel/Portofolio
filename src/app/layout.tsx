@@ -20,7 +20,9 @@ import "./globals.css";
 const newsreader = Newsreader({
   variable: "--font-display-serif",
   subsets: ["latin"],
-  style: ["normal", "italic"],
+  // Upright only. The italic is a second variable file of about 129KB and nothing on the
+  // site sets display type in italic; preloading it was costing more than the hero image.
+  style: ["normal"],
   axes: ["opsz"],
   display: "swap",
 });

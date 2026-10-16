@@ -31,7 +31,7 @@ export function WorkPreview({ projects }: { projects: Project[] }) {
           {projects.map((project) => (
             <article key={project.slug} className="preview-card panel plate reveal">
               <Link href={`/work/${project.slug}`} className="preview-link" transitionTypes={["nav-forward"]}>
-                <span className="preview-shot">
+                <span className="preview-shot screen">
                   <Image
                     src={project.cover.src}
                     alt={project.cover.alt}
