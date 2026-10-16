@@ -4,6 +4,9 @@ PDFs are rendered at page 1 only - a certificate's second page is a score sheet 
 syllabus, and this site does not print scores. Everything is capped at 1400px wide, which
 is twice the widest slot the belt ever gives a card, and saved as WebP at quality 80.
 
+Anything in REDACT is painted over before the page is rendered, so the identifier never
+reaches the WebP at all rather than being hidden by a layer somebody could peel off.
+
 Run it with the source folder as an argument:
 
     python tools/certs-to-webp.py "D:/KULIAH/Sertifikat"
@@ -22,12 +25,20 @@ from PIL import Image
 MAX_W = 1400
 QUALITY = 80
 
+# Text to paint over before saving, keyed by output name. PyMuPDF is asked where the
+# string actually sits on the page rather than a box being guessed at, so a layout change
+# cannot silently move the redaction off the thing it is covering.
+REDACT = {
+    # Ilham's own, plus the two signatories'. He said his own was fine to show; the other
+    # two are not his to publish, and the letter names all three.
+    "opp": ["3324600041", "3123600039", "3323600060"],
+}
+
 # source (relative to the folder passed in) -> output name.
 #
-# Two certificates in that folder are deliberately NOT here, and must not be added:
+# One certificate in that folder is deliberately NOT here, and must not be added:
 # "PPU Suksesi.pdf" is a committee decree listing about seventy students' full names
-# against their NRP, and "Surat_Lulus_OPP_...pdf" carries Ilham's own NRP and class.
-# Both roles are on the site; neither document can be.
+# against their NRP. The role is on the site; the document cannot be.
 FILES = {
     # awards and courses
     "Non-Linear/SIC 7.pdf": "sic-7",
@@ -48,16 +59,20 @@ FILES = {
     "Non-Linear/Panitia LKMM.pdf": "lkmm-lo",
     "Non-Linear/Mentoring UKKI.pdf": "mentoring-ukki",
     # training and seminars attended
+    "Non-Linear/Surat_Lulus_OPP_Ilham Bintang Satria.pdf": "opp",
     "Non-Linear/Peserta LKMM TD.pdf": "lkmm-dasar",
     "Non-Linear/Peserta LKMM Pra-TD.pdf": "lkmm-pra-dasar",
     "Non-Linear/Mentoring Mas Ody.png": "ieee-seminar",
 }
 
 
-def load(path: Path) -> Image.Image:
+def load(path: Path, redact: list[str] | None = None) -> Image.Image:
     if path.suffix.lower() == ".pdf":
         with fitz.open(path) as doc:
             page = doc[0]
+            for needle in redact or []:
+                for rect in page.search_for(needle):
+                    page.draw_rect(rect + (-2, -2, 2, 2), color=None, fill=(0.14, 0.07, 0.02))
             # Render at whatever zoom lands near MAX_W, so a small page is not upscaled
             # from a 72dpi raster and a large one is not rendered at 300dpi for nothing.
             zoom = min(4.0, max(1.5, MAX_W / page.rect.width))
@@ -76,7 +91,7 @@ def main() -> int:
         if not path.exists():
             print(f"missing  {rel}")
             continue
-        img = load(path)
+        img = load(path, REDACT.get(name))
         if img.width > MAX_W:
             img = img.resize((MAX_W, round(img.height * MAX_W / img.width)), Image.LANCZOS)
         dest = out / f"{name}.webp"

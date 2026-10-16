@@ -18,6 +18,7 @@ import mentoringCert from "@/assets/images/certs/mentoring-ukki.webp";
 import lkmmDasarCert from "@/assets/images/certs/lkmm-dasar.webp";
 import lkmmPraDasarCert from "@/assets/images/certs/lkmm-pra-dasar.webp";
 import ieeeSeminarCert from "@/assets/images/certs/ieee-seminar.webp";
+import oppCert from "@/assets/images/certs/opp.webp";
 
 /**
  * A scan of the certificate itself, where there is one. Rendered from his own folder by
@@ -69,25 +70,6 @@ export const howIWork = [
 export type OtherWork = { title: string; body: string; meta: string; href?: string };
 
 export const otherWork: OtherWork[] = [
-  /*
-    The first two here are case studies waiting on their evidence rather than on their
-    writing. Rule 6 of this site is that a case study carries a real screenshot of the
-    thing working, and neither has one yet: the fall-detection repo holds its architecture
-    and state-machine diagrams but not a single frame of the running dashboard, and the
-    competition repo is private. They are listed honestly in the meantime rather than
-    written up from a README.
-  */
-  {
-    title: "Fall detection for a nursing home",
-    body: "Four cameras read each frame into a posture, and a state machine decides whether what it is seeing is a fall. The hard part is the frames where nobody is detected at all - someone lying on the floor who gets covered by a blanket or hidden behind a chair stops being visible exactly when the situation is most dangerous - so losing the person holds the timer open instead of resetting it, and the timer belongs to the person who started it rather than to the frame.",
-    meta: "Team of 3, Intelligent Systems Project course",
-    href: "https://github.com/0Raja0-RA/nursing-home-fall-detection",
-  },
-  {
-    title: "Waste-image classification, Satria Data",
-    body: "A national competition where the team's first move was to doubt the labels they had been given, and then go and show they were wrong: quarantining corrupt images, finding mislabelled ones with confident learning, and catching thousands of brochures and documents sitting inside the organic class. Near-duplicate images were grouped before the split, so the validation score stopped flattering the model.",
-    meta: "Team, national competition",
-  },
   {
     title: "Air-quality index forecasting for East Java",
     body: "A dashboard that projects each district's pollutant levels a day ahead, turns raw hourly readings into the official government index including its rule that a day only counts when enough of its hours were measured, and checks every earlier forecast against the reading that later arrived.",
@@ -212,6 +194,16 @@ export const training = [
     period: "May 2026",
     body: "A seminar on how an engineer's work reads to the people outside engineering.",
     scan: ieeeSeminarCert,
+  },
+  {
+    title: "Departmental orientation (OPP)",
+    org: "HIMIT PENS",
+    period: "Feb 2025",
+    body: "The department's own introduction programme for first-year students.",
+    // Three student numbers are painted out of this one before it is rendered: his own,
+    // which he said he did not mind showing, and the two signatories', which are not his
+    // to publish. The redaction is burnt into the pixels, not an overlay.
+    scan: oppCert,
   },
 ];
 
