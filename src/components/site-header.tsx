@@ -12,7 +12,9 @@ export function SiteHeader() {
       <div className="frame flex items-center justify-between gap-4">
         <Link href="/" className="flex items-center gap-2.5 font-mono text-[0.72rem] uppercase tracking-[0.14em]">
           <Logo size={18} />
-          <span className="hidden sm:inline">Ilham Bintang Satria</span>
+          {/* The mark alone is decorative, so below the small breakpoint the link would
+              have no accessible name at all; the name is hidden visually, not removed. */}
+          <span className="sr-only sm:not-sr-only">Ilham Bintang Satria</span>
         </Link>
         <NavLinks />
       </div>
