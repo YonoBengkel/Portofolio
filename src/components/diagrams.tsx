@@ -1,9 +1,10 @@
-// Diagrams for the data-warehouse case study. All colours come from --dg-* variables
-// (see globals.css), so the same drawing works on the page, in dark mode, and on the gold tile.
+// Diagrams for the data-warehouse case study. All colours come from --dg-* variables,
+// which the .diagram wrapper in globals.css defines - so the drawing follows the palette
+// instead of carrying its own, and the same SVG works on any band.
 // Layers are told apart by line style, not colour: raw is dashed, clean is solid, the star schema
 // has a double outline, and the data marts are filled.
 
-const font = "var(--font-jakarta), ui-sans-serif, system-ui, sans-serif";
+const font = "var(--font-sans), ui-sans-serif, system-ui, sans-serif";
 const text = { fill: "var(--dg-ink)", fontFamily: font };
 const box = { fill: "var(--dg-box)", stroke: "var(--dg-line)", strokeWidth: 1.4 };
 

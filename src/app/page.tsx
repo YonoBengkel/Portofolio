@@ -1,21 +1,23 @@
 import Link from "next/link";
 import { AboutCard } from "@/components/about-card";
-import { EntryList } from "@/components/entry-list";
+import { Certificates } from "@/components/certificates";
 import { Hero } from "@/components/hero";
 import { Tape } from "@/components/tape";
 import { PageTransition } from "@/components/page-transition";
+import { Toolbelt } from "@/components/toolbelt";
 import { WorkGrid } from "@/components/work-grid";
 import { projects } from "@/content/projects";
 import { Timeline, buildTimeline } from "@/components/timeline";
-import { achievements, competitions, education, experience, leadership, toolbox } from "@/content/site";
+import { competitions, education, experience, leadership } from "@/content/site";
 
 /**
  * The order is the reference's, and Ilham asked for it by name: who he is, what he has
  * done and why, what he works with, what he built, then what he has been given.
  *
- * Every band is full bleed and alternates paper / ink / paper / slate, so no section
- * ever blurs into the one above it. The hazard tape between them is the only thing that
- * moves without being scrolled, and even that waits for the switch.
+ * Every band is full bleed and alternates paper and ink, so no section ever blurs into
+ * the one above it. The projects band is ink rather than the slate it used to be: the
+ * reference puts its own grid on #5A6F84 and this site's slate is #4A5A6B, which is the
+ * same colour to anyone who opens both - and the same lecturers will open both.
  */
 export default function Home() {
   // Work, then the organisation seats, then the degree. The full list lives on /about;
@@ -26,19 +28,8 @@ export default function Home() {
     <PageTransition>
       <Hero />
 
-      <Tape text="About me" />
-
-      {/* 1 — who he is */}
-      <section className="band" aria-labelledby="about-h">
-        <div className="frame">
-          <div className="column tilt">
-            <h2 id="about-h" className="sr-only">
-              About
-            </h2>
-            <AboutCard />
-          </div>
-        </div>
-      </section>
+      {/* 1 — who he is. Carries its own marquee band, so it needs no divider above it. */}
+      <AboutCard />
 
       {/* 2 — what he has done, and why it mattered */}
       <section className="band band-ink" aria-labelledby="exp-h">
@@ -68,37 +59,36 @@ export default function Home() {
               Tools &amp; skills
             </h2>
             <div className="draw rule mt-6" />
-            <div className="stagger cards cards-2 cards-3 mt-12">
-              {toolbox.map((group, i) => (
-                <div key={group.group} className="tool" style={{ "--i": i } as React.CSSProperties}>
-                  <b>{group.group}</b>
-                  <span>{group.items.join(" · ")}</span>
-                </div>
-              ))}
-            </div>
           </div>
+        </div>
+        {/* Full bleed: the rows run past the edge of the page, not inside a column. */}
+        <div className="mt-12">
+          <Toolbelt />
         </div>
       </section>
 
       <Tape text="Projects" tilt={1.6} />
 
       {/* 4 — what he built */}
-      <section className="band band-slate" aria-labelledby="work-h">
+      <section className="band band-ink" aria-labelledby="work-h">
         <div className="frame">
-          <div className="column">
-            <h2 id="work-h" className="h-sec rise">
-              Projects
-            </h2>
-            <p className="lede rise mt-5 max-w-[38rem] opacity-85">
+          <div className="pwide">
+            <div className="plaque-row">
+              <h2 id="work-h" className="plaque">
+                Projects
+              </h2>
+              <p className="plaque-tag">Business process · Data · Applied AI</p>
+            </div>
+            <p className="lede rise mt-8 max-w-[38rem] opacity-85">
               Four case studies, each written from what it actually does rather than from the stack it was
               built with.
             </p>
-            <div className="mt-12">
+            <div className="mt-14">
               <WorkGrid projects={projects} />
             </div>
-            <p className="mt-12">
+            <p className="mt-14">
               <Link href="/work" className="pill pill-yellow" transitionTypes={["nav-forward"]}>
-                See all four in full
+                See all {projects.length} in full
               </Link>
             </p>
           </div>
@@ -114,20 +104,18 @@ export default function Home() {
             <h2 id="awards-h" className="h-sec rise">
               Certificates &amp; achievements
             </h2>
-            <p className="lede rise mt-5 max-w-[38rem]">
+            <div className="draw rule mt-6" />
+            <p className="lede rise mt-6 max-w-[38rem]">
               Awards and certificates with the body that gave them. Competitions are listed separately,
               because every one of those was a team entry at participant level.
             </p>
-            <div className="mt-12">
-              <EntryList
-                entries={achievements.map((a) => ({
-                  title: a.title,
-                  org: a.org,
-                  period: a.year,
-                  body: a.body,
-                }))}
-              />
-            </div>
+          </div>
+        </div>
+        <div className="mt-12">
+          <Certificates />
+        </div>
+        <div className="frame">
+          <div className="column">
             <p className="mt-12">
               <Link href="/about/competitions" className="pill pill-solid" transitionTypes={["nav-forward"]}>
                 {competitions.length} competitions

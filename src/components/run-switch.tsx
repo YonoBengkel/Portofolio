@@ -3,40 +3,41 @@
 import { useEffect, useState } from "react";
 
 /**
- * The switch that starts the page.
+ * The switch in the middle of the hero.
  *
- * Off, the site is still: no tape running, no drift, no tilt. On, everything moves. It
- * is the same gag as the reference's toggle, with a different job and a different label:
- * this one reads as a machine being started, which is what the rest of the site is about
- * - processes that run - rather than a generic on/off.
+ * It swaps the first screen between two grounds: his name on paper, or three ink bands
+ * carrying the three things he actually does. Nothing else on the site is behind it -
+ * the scroll-driven motion runs on its own, gated only by prefers-reduced-motion, which
+ * is the thing that should gate it.
  *
- * It writes `data-run` on <html>, so every effect on the site is one CSS selector away
- * and there is no state threaded through the tree. The choice is remembered, because a
- * reader who turned the motion off does not want to turn it off again on the next page.
+ * It writes `data-run` on <html>, so the hero's whole alternate state is one CSS selector
+ * away and no state is threaded through the tree. It starts on the name, always: flipping
+ * it has to start something, and a page that arrives already flipped turns the gesture
+ * into switching things off.
  *
- * It starts off on a first visit, so flipping it is the moment. Under
- * `prefers-reduced-motion` every effect behind it stays still even when it is on, and
- * nothing that carries information is behind it either way.
+ * The choice is remembered inside a session rather than forever. A reader coming back a
+ * week later should get the name first - that is the thing the page is for - but somebody
+ * who flipped it and then opened a case study should not have to flip it again.
  */
 export function RunSwitch() {
-  const [on, setOn] = useState(false);
+  const [alt, setAlt] = useState(false);
 
   useEffect(() => {
-    // Off on a first visit, always. The point of the switch is that flipping it starts
-    // something; a page that is already running turns the gesture into switching things
-    // off, which is the wrong direction for the one moment this is here to create.
-    const saved = localStorage.getItem("run");
-    if (saved === "1") setOn(true);
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.dataset.run = on ? "1" : "0";
     try {
-      localStorage.setItem("run", on ? "1" : "0");
+      if (sessionStorage.getItem("hero") === "alt") setAlt(true);
     } catch {
       /* private window: the switch still works, it just will not be remembered */
     }
-  }, [on]);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.run = alt ? "1" : "0";
+    try {
+      sessionStorage.setItem("hero", alt ? "alt" : "name");
+    } catch {
+      /* as above */
+    }
+  }, [alt]);
 
   return (
     <div className="run">
@@ -44,16 +45,18 @@ export function RunSwitch() {
         <input
           type="checkbox"
           className="sr-only"
-          checked={on}
-          onChange={(e) => setOn(e.target.checked)}
-          aria-label="Start the page: turn the animation on"
+          checked={alt}
+          onChange={(e) => setAlt(e.target.checked)}
+          aria-label="Swap the first screen between my name and the three steps of the work"
         />
         <span className="run-track" aria-hidden="true">
           <span className="run-ball" />
         </span>
       </label>
       <p className="run-label" aria-live="polite">
-        Pipeline <b>{on ? "running" : "idle"}</b>
+        <span className={alt ? "" : "is-on"}>Name</span>
+        <span aria-hidden="true"> / </span>
+        <span className={alt ? "is-on" : ""}>Method</span>
       </p>
     </div>
   );

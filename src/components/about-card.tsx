@@ -2,51 +2,130 @@ import Image from "next/image";
 import Link from "next/link";
 import portrait from "@/assets/images/portrait-bw.webp";
 import { atAGlance, profile } from "@/content/site";
+import { SocialIcon } from "./social-icons";
 
 /**
- * The sticker.
+ * About me, built to the reference's structure because Ilham asked for it by name.
  *
- * One white card on the paper, hard black border, solid offset shadow, the photograph
- * printed in a frame beside the text. This is the reference's "about me" card, and it
- * is the only place on the home page where the whole of who he is sits in one object.
+ * The section is a four-screen scroll runway holding one sticky screen. Behind
+ * everything, the words ABOUT ME are set at display size and never move. A card starts
+ * zoomed in at 2.8x and un-zooms toward the reader until it fills the frame and covers
+ * them. The scale curve is not invented: it is the reference's own, sampled at thirteen
+ * scroll positions and written back out as keyframes - a fast ease-out from 2.8 to 1.2,
+ * then a linear tail from 1.2 to 1.0. Opacity never changes; the reveal is scale alone.
  *
- * The portrait is hard monochrome because a colour photograph of a dim room reads as a
- * mistake on a cream page - both reference sites print theirs the same way.
+ * All of it is CSS scroll-driven animation on a named view-timeline, so there is no
+ * listener, no library and nothing on the main thread. Where that is unsupported, and
+ * under prefers-reduced-motion, the card simply sits at its finished size - which is the
+ * page you would have wanted anyway.
+ *
+ * Below 768px there is no runway and no zoom. A sticky four-screen section on a phone
+ * costs four flicks of scrolling to deliver one card, and the card is the point.
+ *
+ * What is deliberately not the reference's: the card is paper rather than white, the
+ * borders are 2px rather than 4px, the emphasised nouns are set in mono rather than
+ * uppercase-bold-black, and the one filled button is the accent. Those four changes are
+ * what keep this his page rather than a copy of a classmate's.
  */
 export function AboutCard() {
   return (
-    <div className="sticker grid gap-8 p-6 sm:p-10 md:grid-cols-[18rem_minmax(0,1fr)] md:gap-12">
-      <div className="photo drift self-start">
-        <Image src={portrait} alt={profile.name} sizes="(min-width: 768px) 18rem, 70vw" placeholder="blur" />
-      </div>
+    <section id="about" className="about-stage" aria-labelledby="about-h">
+      <div className="about-sticky">
+        <div className="about-tape" aria-hidden="true">
+          <div className="about-tape-run">
+            {Array.from({ length: 2 }, (_, t) => (
+              <span key={t}>
+                {Array.from({ length: 8 }, (_, i) => (
+                  <b key={i}>About me</b>
+                ))}
+              </span>
+            ))}
+          </div>
+        </div>
 
-      <div>
-        <h2 className="h-sec">About me</h2>
-        <p className="lede mt-5 max-w-[42rem]">
-          <b>{profile.name}</b> is an <b>Applied Data Science</b> student at{" "}
-          <b>Politeknik Elektronika Negeri Surabaya</b> and an <b>AI Engineer intern</b> at Ideola, a digital
-          marketing agency for SMEs. He maps how a business runs, organizes its data, and turns both into
-          practical recommendations and tools.
+        <p className="about-back display" aria-hidden="true">
+          About me
         </p>
 
-        <dl className="mt-8 grid gap-5 sm:grid-cols-2">
-          {atAGlance.map((item) => (
-            <div key={item.label}>
-              <dt className="meta opacity-70">{item.label}</dt>
-              <dd className="mt-1.5 leading-snug">{item.value}</dd>
-            </div>
-          ))}
-        </dl>
+        <div className="about-stack">
+          <div className="about-zoom">
+            <div className="about-card">
+              <span className="about-br about-br-a" aria-hidden="true" />
+              <span className="about-br about-br-b" aria-hidden="true" />
 
-        <div className="mt-9 flex flex-wrap gap-3">
-          <Link href="/contact" className="pill pill-solid" transitionTypes={["nav-forward"]}>
-            Contact me
-          </Link>
-          <Link href="/cv" className="pill" transitionTypes={["nav-forward"]}>
-            Download CV
-          </Link>
+              <div className="about-photo">
+                <div className="about-photo-in">
+                  <Image src={portrait} alt={profile.name} sizes="(min-width: 768px) 15rem, 60vw" placeholder="blur" />
+                </div>
+              </div>
+
+              <div className="about-text">
+                <h2 id="about-h" className="about-name display">
+                  {profile.name}
+                </h2>
+                <p className="about-role">{profile.label}</p>
+
+                <div className="about-say">
+                  <p>
+                    Applied Data Science student at <b>Politeknik Elektronika Negeri Surabaya</b> and{" "}
+                    <b>AI Engineer intern</b> at <b>Ideola</b>, a digital marketing agency for SMEs. He maps how a
+                    business runs, organizes its data, and turns both into practical recommendations and tools.
+                  </p>
+                </div>
+
+                <dl className="about-facts">
+                  {atAGlance.map((item) => (
+                    <div key={item.label}>
+                      <dt>{item.label}</dt>
+                      <dd>{item.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+
+                <div className="about-cta">
+                  <Link href="/contact" className="stamp stamp-fill" transitionTypes={["nav-forward"]}>
+                    Contact me
+                  </Link>
+                  <Link href="/cv" className="stamp" transitionTypes={["nav-forward"]}>
+                    Download CV
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <nav className="about-social" aria-label="Elsewhere">
+            <a
+              href={profile.links.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="about-tile"
+              style={{ "--i": 0 } as React.CSSProperties}
+              aria-label="Ilham Bintang Satria on GitHub"
+            >
+              <SocialIcon name="github" size={24} />
+            </a>
+            <a
+              href={profile.links.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="about-tile"
+              style={{ "--i": 1 } as React.CSSProperties}
+              aria-label="Ilham Bintang Satria on LinkedIn"
+            >
+              <SocialIcon name="linkedin" size={24} />
+            </a>
+            <a
+              href={`mailto:${profile.email}`}
+              className="about-tile"
+              style={{ "--i": 2 } as React.CSSProperties}
+              aria-label={`Email ${profile.email}`}
+            >
+              <SocialIcon name="email" size={24} />
+            </a>
+          </nav>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

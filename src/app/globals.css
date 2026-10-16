@@ -39,6 +39,26 @@
   --line-strong: rgba(36, 18, 6, 0.5);
 }
 
+/*
+  The case-study diagrams carry their own --dg-* tokens so one SVG can sit on any band.
+  They were orphaned when the palette was rewritten: diagrams.tsx still asked for tokens
+  that no longer existed, and an invalid var() in an SVG presentation attribute does not
+  fall back - fill reverts to black and stroke to none, so every box printed as a solid
+  black slab with black type on it.
+
+  `.diagram` is already on the <svg> elements themselves, which is where these belong:
+  the surface around them is the .sticker the case study already wraps them in, so this
+  rule defines colour and nothing else.
+*/
+.diagram {
+  --dg-ink: var(--ink);
+  --dg-box: var(--paper-2);
+  --dg-line: var(--line-strong);
+  --dg-solid: var(--ink);
+  --dg-on-solid: var(--paper-2);
+  --dg-muted: var(--ink-2);
+}
+
 @theme inline {
   --color-paper: var(--paper);
   --color-paper-2: var(--paper-2);
@@ -668,10 +688,10 @@
     text-transform: uppercase;
     padding-right: 0.45em;
   }
-  html[data-run="1"] .tape-run {
+  .tape-run {
     animation: slide 22s linear infinite;
   }
-  html[data-run="1"] .marquee div {
+  .marquee div {
     animation: slide 26s linear infinite;
   }
 
@@ -681,25 +701,30 @@
     All of this is CSS scroll-driven animation: no listener, no library, nothing on the
     main thread. Where `animation-timeline` is unsupported the elements simply sit in
     their final state, which is the page you would have got anyway.
+
+    None of it is behind the hero switch any more. That switch now does one job - it
+    swaps the first screen - and a reader three sections down should not have had to find
+    it to see the page move. The only thing that gates motion here is the one that should:
+    prefers-reduced-motion.
   */
   @supports (animation-timeline: view()) {
-    html[data-run="1"] .drift img {
+    .drift img {
       animation: drift linear both;
       animation-timeline: view();
       animation-range: entry 0% exit 100%;
     }
-    html[data-run="1"] .rise {
+    .rise {
       animation: rise linear both;
       animation-timeline: view();
       animation-range: entry 8% cover 36%;
     }
-    html[data-run="1"] .tilt {
+    .tilt {
       animation: tilt linear both;
       animation-timeline: view();
       animation-range: entry 0% cover 48%;
     }
     /* A rule that draws itself across the page as that section arrives. */
-    html[data-run="1"] .draw {
+    .draw {
       animation: draw linear both;
       animation-timeline: view();
       animation-range: entry 20% cover 42%;
@@ -756,7 +781,7 @@
     --i: 0;
   }
   @supports (animation-timeline: view()) {
-    html[data-run="1"] .stagger > * {
+    .stagger > * {
       animation: rise linear both;
       animation-timeline: view();
       animation-range: entry calc(6% + var(--i) * 7%) cover calc(28% + var(--i) * 7%);
@@ -764,23 +789,1089 @@
   }
 
   /*
-    Reduced motion wins over the switch. Someone who asked their system for less movement
-    gets a still page even if they flip it, and the switch still reads as on so the label
-    is not lying to them.
+    Reduced motion wins over everything, the hero switch included. Someone who asked their
+    system for less movement gets a still page even when they flip it; the switch still
+    changes the ground, it just changes it without the slide.
   */
   @media (prefers-reduced-motion: reduce) {
     .run-ball,
-    .run-track {
-      transition: none;
+    .run-track,
+    .hero-band,
+    .hero-out {
+      transition-duration: 1ms;
     }
-    html[data-run="1"] .tape-run,
-    html[data-run="1"] .marquee div,
-    html[data-run="1"] .drift img,
-    html[data-run="1"] .rise,
-    html[data-run="1"] .tilt,
-    html[data-run="1"] .draw,
-    html[data-run="1"] .stagger > * {
+    .tape-run,
+    .marquee div,
+    .drift img,
+    .rise,
+    .tilt,
+    .draw,
+    .stagger > *,
+    .belt-track,
+    .about-tape-run,
+    .about-zoom,
+    .about-tile {
       animation: none;
+    }
+    .carousel-track {
+      scroll-behavior: auto;
+    }
+  }
+
+  /* ======================================================= the hero ground */
+
+  /*
+    What the switch does. Three full-bleed bands slide in from alternating sides and the
+    name leaves downward; flipping back reverses it exactly. The reference uses five
+    bands at angles re-rolled randomly up to 30 degrees; three at fixed shallow angles is
+    the calmer version of the same idea, and because they carry his own three words
+    rather than a stack list, the alternate state says something.
+
+    The bands sit at 100vw rather than inside the frame, because a tilted strip clipped
+    at the gutter leaves a bare triangle of page colour at each end.
+  */
+  .hero-alt {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    translate: -50% 0;
+    width: 100vw;
+    z-index: 0;
+    overflow: clip;
+    display: grid;
+    align-content: center;
+    gap: clamp(4px, 1vw, 14px);
+    pointer-events: none;
+  }
+  .hero-band {
+    --from: -132%;
+    --tilt: -5deg;
+    width: 132%;
+    margin-inline: -16%;
+    overflow: hidden;
+    padding-block: 0.3rem;
+    background: var(--ink);
+    color: var(--paper);
+    rotate: var(--tilt);
+    translate: var(--from) 0;
+    transition: translate 1250ms cubic-bezier(0.16, 1, 0.3, 1);
+    transition-delay: calc(var(--i) * 110ms);
+  }
+  .hero-band:nth-child(2) {
+    --from: 132%;
+    --tilt: 9deg;
+  }
+  .hero-band:nth-child(3) {
+    --tilt: -12deg;
+  }
+  html[data-run="1"] .hero-band {
+    translate: 0 0;
+  }
+  .hero-band-run {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    white-space: nowrap;
+  }
+  .hero-band-run span {
+    font-family: var(--font-display);
+    /* Big enough that three bands cover most of the screen. At 10vw they read as three
+       stripes on a cream field rather than as a changed ground, which is the thing the
+       switch is for. */
+    font-size: clamp(2.6rem, 13.5vw, 11rem);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+  }
+
+  .hero-copy {
+    position: relative;
+    z-index: 2;
+  }
+  /*
+    The copy leaves rather than fades under the bands. visibility goes with it, so none of
+    these links can be tabbed to while they are off-screen.
+  */
+  .hero-out {
+    transition:
+      opacity 450ms ease,
+      translate 650ms cubic-bezier(0.16, 1, 0.3, 1),
+      visibility 0s;
+  }
+  html[data-run="1"] .hero-out {
+    opacity: 0;
+    visibility: hidden;
+    translate: 0 36px;
+    transition:
+      opacity 450ms ease,
+      translate 650ms cubic-bezier(0.16, 1, 0.3, 1),
+      visibility 0s linear 650ms;
+  }
+  .dots {
+    transition: opacity 400ms ease;
+  }
+  html[data-run="1"] .dots {
+    opacity: 0;
+  }
+  /* The switch is the only control on this screen and must stay readable in both states. */
+  .run {
+    position: relative;
+    z-index: 3;
+  }
+  /*
+    The readout rides on its own plate. It has to sit over both grounds - half of it can
+    land on an ink band while the other half is still on paper - so it carries its own
+    background rather than switching colour with the state.
+
+    Which half is live is shown by weight and a rule, not by dimming: at 40% opacity the
+    inactive word measured 1.97:1 against the page, and it is the only thing on screen
+    that says what the switch just did.
+  */
+  .run-label {
+    padding: 7px 14px;
+    background: var(--paper-2);
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    color: var(--ink-2);
+  }
+  .run-label span {
+    color: var(--ink-2);
+    transition: color 150ms ease;
+  }
+  .run-label .is-on {
+    color: var(--ink);
+    border-bottom: 2px solid var(--ink);
+  }
+
+  /* =========================================================== the stamp */
+
+  /*
+    A button with a hard offset rather than a blur, sitting 3px up and left of its own
+    shadow so that pressing it closes the gap. Both references land on 150ms for this,
+    and so does this site's own rule.
+  */
+  .stamp {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 13px 24px;
+    border: 2px solid var(--ink);
+    border-radius: 4px;
+    background: var(--paper-2);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    box-shadow: 6px 6px 0 0 var(--ink);
+    translate: -3px -3px;
+    transition:
+      translate 150ms ease,
+      box-shadow 150ms ease,
+      background-color 150ms ease,
+      color 150ms ease;
+  }
+  .stamp:hover {
+    translate: 0 0;
+    box-shadow: 3px 3px 0 0 var(--ink);
+  }
+  .stamp-fill {
+    background: var(--yellow);
+    color: var(--on-yellow);
+  }
+  .stamp-ink {
+    background: var(--ink);
+    color: var(--paper-2);
+  }
+  .stamp-ink:hover {
+    background: var(--yellow);
+    color: var(--on-yellow);
+  }
+  .stamp-sm {
+    padding: 10px 14px;
+    font-size: 0.66rem;
+  }
+  /*
+    Nothing deployed is an absence, not an error: no red, and it says which. Dimmed with
+    opacity it measured 2.70:1, so it is restated in the secondary ink instead - 7.76:1,
+    and it still reads as switched off.
+  */
+  .stamp:disabled {
+    translate: 0 0;
+    background: var(--paper);
+    color: var(--ink-2);
+    border-color: var(--line-strong);
+    box-shadow: 3px 3px 0 0 var(--line-strong);
+    cursor: not-allowed;
+  }
+
+  /* ========================================================== about me */
+
+  .about-stage {
+    position: relative;
+  }
+  .about-sticky {
+    position: relative;
+    display: grid;
+    place-items: center;
+    overflow: clip;
+    padding-block: 110px 96px;
+  }
+  @media (min-width: 768px) {
+    /* Four screens of runway for one sticky screen. Shorter and the card snaps. */
+    .about-stage {
+      height: 400vh;
+    }
+    .about-sticky {
+      position: sticky;
+      top: 0;
+      height: 100svh;
+      padding-block: 0;
+    }
+  }
+
+  .about-tape {
+    position: absolute;
+    /* Clear of the fixed header, which is 75px tall and 88% opaque - at top: 0 the band
+       sits behind it and is washed out to nothing. */
+    top: 75px;
+    left: 0;
+    right: 0;
+    z-index: 5;
+    overflow: hidden;
+    padding-block: 11px;
+    white-space: nowrap;
+    background: var(--ink);
+    color: var(--paper);
+    border-bottom: 2px solid color-mix(in srgb, var(--paper) 34%, transparent);
+  }
+  .about-tape-run {
+    display: inline-block;
+    animation: slide 25s linear infinite;
+  }
+  .about-tape-run > span {
+    display: inline-block;
+  }
+  .about-tape-run b {
+    display: inline-block;
+    padding-inline: 1.5rem;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 1.35rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* The words the card grows over. Static on purpose: it is a backdrop, not an effect. */
+  .about-back {
+    position: absolute;
+    z-index: 1;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    /* Measured: this face sets "About me" at 3.52px of width per px of size, so it has
+       to be about 370px at a 1440 viewport to be wider than the 1160px card. Narrower
+       than the card and the backdrop is never seen at all. */
+    font-size: clamp(4rem, 25.5vw, 23rem);
+    line-height: 1;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  @media (max-width: 767px) {
+    .about-back {
+      display: none;
+    }
+  }
+
+  .about-stack {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    padding-inline: 20px;
+  }
+  @media (min-width: 1024px) {
+    .about-stack {
+      padding-inline: 56px;
+    }
+  }
+  .about-zoom {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .about-card {
+    position: relative;
+    display: grid;
+    gap: 28px;
+    width: min(1160px, 100%);
+    padding: 26px;
+    background: var(--paper-2);
+    color: var(--ink);
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    box-shadow: 12px 12px 0 0 var(--ink);
+    translate: -6px -6px;
+    transition:
+      translate 150ms ease,
+      box-shadow 150ms ease;
+  }
+  @media (min-width: 860px) {
+    .about-card {
+      grid-template-columns: 15rem minmax(0, 1fr);
+      align-items: center;
+      gap: 52px;
+      padding: 46px;
+    }
+  }
+  .about-card:hover {
+    translate: 0 0;
+    box-shadow: 6px 6px 0 0 var(--ink);
+  }
+  /* Two brackets, two borders each. They cost nothing and do most of the work. */
+  .about-br {
+    position: absolute;
+    width: 56px;
+    height: 56px;
+    pointer-events: none;
+  }
+  .about-br-a {
+    top: -18px;
+    left: 0;
+    border-top: 2px solid var(--ink);
+    border-left: 2px solid var(--ink);
+    rotate: 3deg;
+  }
+  .about-br-b {
+    bottom: -18px;
+    right: 0;
+    border-right: 2px solid var(--ink);
+    border-bottom: 2px solid var(--ink);
+    rotate: -3deg;
+  }
+
+  .about-photo {
+    width: 15rem;
+    max-width: 100%;
+    aspect-ratio: 250 / 300;
+    padding: 10px;
+    background: var(--paper-2);
+    border: 2px solid var(--ink);
+    box-shadow: 8px 8px 0 0 var(--ink);
+    rotate: -3deg;
+    transition:
+      rotate 400ms cubic-bezier(0.175, 0.885, 0.32, 1.275),
+      scale 400ms cubic-bezier(0.175, 0.885, 0.32, 1.275),
+      box-shadow 400ms ease;
+  }
+  .about-card:hover .about-photo {
+    rotate: 0deg;
+    scale: 1.02;
+    box-shadow: 12px 12px 0 0 var(--ink);
+  }
+  .about-photo-in {
+    height: 100%;
+    overflow: clip;
+    border: 1px solid var(--ink);
+    background: var(--ink);
+  }
+  .about-photo-in img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: scale 500ms ease;
+  }
+  .about-card:hover .about-photo-in img {
+    scale: 1.1;
+  }
+
+  .about-name {
+    font-size: clamp(1.8rem, 3.4vw, 2.8rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+  .about-role {
+    margin-top: 10px;
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  /* The left rule is what makes the paragraph read as a statement rather than filler. */
+  .about-say {
+    margin-top: 22px;
+    border-left: 5px solid var(--ink);
+    padding-left: 22px;
+  }
+  .about-say p {
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    color: var(--ink-2);
+  }
+  /*
+    The proper nouns. The reference sets them uppercase, 700 and pure black inside a
+    sentence-case grey paragraph, which is distinctive enough to be recognised; mono does
+    the same scanning job and is already this site's label voice.
+  */
+  .about-say b {
+    font-family: var(--font-mono);
+    font-weight: 400;
+    font-size: 0.94em;
+    color: var(--ink);
+  }
+  .about-facts {
+    margin-top: 22px;
+    display: grid;
+    gap: 13px 26px;
+  }
+  @media (min-width: 640px) {
+    .about-facts {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .about-facts dt {
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .about-facts dd {
+    margin-top: 4px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+  .about-cta {
+    margin-top: 26px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .about-social {
+    display: flex;
+    gap: 18px;
+  }
+  .about-tile {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border: 2px solid var(--ink);
+    border-radius: 4px;
+    color: var(--ink);
+    transition:
+      background-color 150ms ease,
+      color 150ms ease,
+      translate 150ms ease;
+  }
+  .about-tile:hover {
+    background: var(--yellow);
+    color: var(--on-yellow);
+    translate: 0 -2px;
+  }
+
+  /* ===================================================== tools and skills */
+
+  .belts {
+    display: grid;
+    gap: 26px;
+  }
+  /*
+    A grid item's automatic minimum size is its content, and the track inside is
+    max-content wide - so without this the row stretches the document to the width of
+    every chip laid end to end.
+  */
+  .belts > * {
+    min-width: 0;
+  }
+  .belt-label {
+    margin-bottom: 10px;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  /*
+    The 150px gradient at each end is the detail that makes the row part of the page
+    rather than a cropped strip. It costs nothing and it was measured.
+  */
+  .belt {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    padding-block: 6px;
+  }
+  .belt::before,
+  .belt::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    /* 150px is the measured width and it is right on a desktop. On a 375px phone two of
+       them would cover 300 of the 375, so almost every chip would be read through a
+       fade; it scales down instead. */
+    width: clamp(40px, 12vw, 150px);
+    z-index: 2;
+    pointer-events: none;
+  }
+  .belt::before {
+    left: 0;
+    background: linear-gradient(to right, var(--paper), transparent);
+  }
+  .belt::after {
+    right: 0;
+    background: linear-gradient(to left, var(--paper), transparent);
+  }
+  .belt-track {
+    display: flex;
+    width: max-content;
+    animation-name: slide;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    will-change: transform;
+  }
+  .belt-set {
+    display: flex;
+    gap: 8px;
+    padding-right: 8px;
+  }
+  .chip-tool {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    flex: none;
+    min-height: 30px;
+    padding: 4px 10px;
+    background: var(--paper-2);
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1.6;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .chip-badge {
+    display: grid;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    flex: none;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    background: var(--paper);
+    font-size: 0.58rem;
+    line-height: 1;
+  }
+
+  /* ========================================================== projects */
+
+  .pwide {
+    width: 100%;
+    max-width: 84rem;
+    margin-inline: auto;
+  }
+  .plaque-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 20px 26px;
+  }
+  /* The reversed title block. On an ink band that means a paper plaque, not a black one. */
+  .plaque {
+    display: inline-block;
+    padding: 16px 30px;
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow: 8px 8px 0 0 var(--yellow);
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 4.2vw, 3rem);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  /* A mono line with a rule, rather than the reference's second boxed chip. */
+  .plaque-tag {
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--yellow);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .pgrid {
+    display: grid;
+    gap: 28px;
+  }
+  @media (min-width: 860px) {
+    .pgrid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .pgrid > * {
+      display: flex;
+    }
+  }
+  .pcard {
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    width: 100%;
+    overflow: clip;
+    background: var(--paper-2);
+    color: var(--ink);
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    box-shadow: 10px 10px 0 0 rgba(251, 239, 216, 0.14);
+    transition:
+      translate 150ms ease,
+      box-shadow 150ms ease;
+  }
+  /*
+    A straight lift. The reference straightens a tilted card, scales it 5% and nudges its
+    neighbours' hit areas; this is the same gesture without resampling the screenshot.
+  */
+  .pcard:hover {
+    translate: -4px -4px;
+    box-shadow: 14px 14px 0 0 rgba(251, 239, 216, 0.22);
+  }
+  .pcard-shot {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: clip;
+    background: var(--ink);
+    border-bottom: 2px solid var(--ink);
+  }
+  .pcard-shot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: left top;
+    transition: scale 150ms ease;
+  }
+  .pcard:hover .pcard-shot img {
+    scale: 1.06;
+  }
+  .pcard-flag {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    padding: 4px 10px;
+    background: var(--paper-2);
+    border: 2px solid var(--ink);
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .pcard-flag-on {
+    background: var(--yellow);
+  }
+  .pcard-head {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    align-items: start;
+    gap: 14px;
+    padding: 18px 18px 0;
+  }
+  .pcard-no {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    background: var(--ink);
+    color: var(--paper-2);
+    border-radius: 4px;
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    line-height: 1;
+  }
+  .pcard-title {
+    font-family: var(--font-display);
+    font-size: 1.45rem;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+  }
+  .pcard-sub {
+    margin-top: 6px;
+    font-size: 0.92rem;
+    line-height: 1.45;
+    color: var(--ink-2);
+  }
+  .pcard-body {
+    display: grid;
+    align-content: start;
+    gap: 14px;
+    padding: 18px;
+  }
+  .pcard-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 26px;
+  }
+  .pcard-meta dt {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .pcard-meta dd {
+    margin-top: 3px;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+  }
+  /* Normal weight. The reference runs its whole paragraph at 700, which reads as shouting. */
+  .pcard-say {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--ink-2);
+  }
+  .pcard-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .pcard-chips li {
+    padding: 3px 9px;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 0.64rem;
+    letter-spacing: 0.04em;
+  }
+  .pcard-chip-more {
+    background: var(--paper);
+  }
+  .pcard-acts {
+    display: grid;
+    gap: 10px;
+    padding: 0 18px 18px;
+  }
+  .pcard-open {
+    width: 100%;
+  }
+  .pcard-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  /* ============================================ certificates and achievements */
+
+  /*
+    A scroll-snap track rather than a JavaScript carousel: the dots are real anchors into
+    it, so the control works with the keyboard, works before hydration, works with
+    JavaScript off, and the reader can also just swipe. The padding on both sides is what
+    centres one card and leaves its neighbours sliced at the edges.
+  */
+  .carousel-track {
+    display: flex;
+    gap: 24px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    padding-block: 10px 26px;
+    padding-inline: max(20px, calc(50vw - 26rem));
+    scroll-padding-inline: max(20px, calc(50vw - 26rem));
+  }
+  .carousel-track::-webkit-scrollbar {
+    display: none;
+  }
+  .carousel-slide {
+    flex: 0 0 min(52rem, 86vw);
+    scroll-snap-align: center;
+  }
+  .cert {
+    position: relative;
+    display: grid;
+    gap: 20px;
+    height: 100%;
+    padding: 26px;
+    overflow: clip;
+    background: var(--paper-2);
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    box-shadow: 10px 10px 0 0 var(--ink);
+  }
+  @media (min-width: 760px) {
+    .cert {
+      grid-template-columns: minmax(0, 1fr) 12rem;
+      align-items: center;
+      gap: 36px;
+      padding: 40px;
+    }
+  }
+  .cert-kind {
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .cert-title {
+    margin-top: 12px;
+    font-size: clamp(1.4rem, 3.2vw, 2.3rem);
+    line-height: 1.04;
+    letter-spacing: -0.02em;
+  }
+  .cert-say {
+    margin-top: 14px;
+    font-size: 0.97rem;
+    line-height: 1.6;
+    color: var(--ink-2);
+  }
+  /*
+    The year, standing in for the certificate scan until there is one. Set in ink with a
+    hard yellow offset rather than in yellow with an ink outline: yellow on paper is
+    1.72:1, and an outline is not something a contrast checker - or a reader with low
+    vision - can count on. This way it is 17.09:1 and the accent still does the work.
+  */
+  .cert-year {
+    font-size: clamp(3.2rem, 9vw, 6.5rem);
+    line-height: 0.9;
+    text-align: right;
+    color: var(--ink);
+    text-shadow: 6px 6px 0 var(--yellow);
+  }
+  .carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+  }
+  .carousel-dot {
+    width: 44px;
+    height: 10px;
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    transition: background-color 150ms ease;
+  }
+  .carousel-dot:hover,
+  .carousel-dot:focus-visible {
+    background: var(--yellow);
+  }
+
+  /* ============================================================ the footer */
+
+  /*
+    A hard seam: the band above stops dead and this one starts, with no rule, gradient or
+    shadow between them. Row one splits the name from a short bio and closes with a
+    hairline; row two is a three-column grid whose first column is empty, so the links sit
+    optically centre while the credit still pins right.
+  */
+  .foot {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 360px;
+    padding-top: 32px;
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .foot-frame {
+    width: 100%;
+    max-width: 1152px;
+    margin-inline: auto;
+    padding-inline: 20px;
+  }
+  .foot-row {
+    margin-top: 32px;
+    padding-bottom: 32px;
+  }
+  .foot-split {
+    display: grid;
+    gap: 28px;
+    border-bottom: 1px solid color-mix(in srgb, var(--paper) 30%, transparent);
+  }
+  @media (min-width: 860px) {
+    .foot-split {
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+    }
+  }
+  .foot-name-w {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+  }
+  .foot-name {
+    font-size: clamp(2.1rem, 5.4vw, 4.2rem);
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+  }
+  .foot-bio {
+    max-width: 357px;
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+  @media (min-width: 860px) {
+    .foot-bio {
+      justify-self: end;
+    }
+  }
+  .foot-grid {
+    display: grid;
+    gap: 24px;
+    align-items: end;
+  }
+  @media (min-width: 860px) {
+    .foot-grid {
+      grid-template-columns: 1fr auto 1fr;
+    }
+  }
+  @media (max-width: 859px) {
+    .foot-grid > [aria-hidden] {
+      display: none;
+    }
+  }
+  .foot-centre {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+  .foot-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+  }
+  /*
+    The reference's own link buttons carry a border and a hard shadow in the band colour,
+    so both are invisible. Here the offset is the accent, which is the same mechanic with
+    a payoff: pressing the button closes the gap onto the yellow.
+  */
+  .foot-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 12px 22px;
+    background: var(--paper);
+    color: var(--ink);
+    border: 2px solid var(--paper);
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    box-shadow: 6px 6px 0 0 var(--yellow);
+    translate: -3px -3px;
+    transition:
+      translate 150ms ease,
+      box-shadow 150ms ease,
+      background-color 150ms ease,
+      border-color 150ms ease;
+  }
+  .foot-link:hover {
+    translate: 0 0;
+    box-shadow: 3px 3px 0 0 var(--yellow);
+    background: var(--yellow);
+    border-color: var(--yellow);
+  }
+  .foot-fine {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--paper) 70%, transparent);
+  }
+  .foot-credit {
+    font-size: 0.82rem;
+    color: color-mix(in srgb, var(--paper) 70%, transparent);
+  }
+  @media (min-width: 860px) {
+    .foot-credit {
+      text-align: right;
+    }
+  }
+
+  /* ------------------------------------ the about card's scroll-driven zoom */
+
+  /*
+    The curve is the reference's own, sampled at thirteen scroll positions and written
+    back out as keyframes: a fast ease-out from 2.8 to 1.2 over the first 61% of the
+    runway, then a linear tail to 1.0. Opacity is never touched - the reveal is scale.
+
+    It runs on a named view-timeline, which means no listener and nothing on the main
+    thread. Where that is unsupported, the card sits at its finished size.
+  */
+  @supports (animation-timeline: view()) {
+    @media (min-width: 768px) {
+      .about-stage {
+        view-timeline: --about block;
+      }
+      .about-zoom {
+        animation: about-zoom linear both;
+        animation-timeline: --about;
+        animation-range: contain 0% contain 62%;
+        will-change: transform;
+      }
+      .about-tile {
+        animation: tile-in linear both;
+        animation-timeline: --about;
+        animation-range: contain calc(64% + var(--i) * 6%) contain calc(79% + var(--i) * 6%);
+      }
+    }
+  }
+  @keyframes about-zoom {
+    0% {
+      scale: 2.8;
+      translate: 0 200px;
+    }
+    10% {
+      scale: 2.5092;
+      translate: 0 164px;
+    }
+    20% {
+      scale: 2.0549;
+      translate: 0 107px;
+    }
+    30% {
+      scale: 1.697;
+      translate: 0 62px;
+    }
+    40% {
+      scale: 1.4356;
+      translate: 0 30px;
+    }
+    50% {
+      scale: 1.2707;
+      translate: 0 9px;
+    }
+    61% {
+      scale: 1.2;
+      translate: 0 0;
+    }
+    100% {
+      scale: 1;
+      translate: 0 0;
+    }
+  }
+  @keyframes tile-in {
+    from {
+      opacity: 0;
+      scale: 0.8;
+      translate: 0 50px;
+    }
+    to {
+      opacity: 1;
+      scale: 1;
+      translate: 0 0;
     }
   }
 
