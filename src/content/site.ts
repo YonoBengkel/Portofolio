@@ -1,5 +1,22 @@
 // Everything about the person lives here. Edit text in this file; the pages pick it up.
 
+import type { StaticImageData } from "next/image";
+import araCert from "@/assets/images/certs/ara-7.webp";
+import compfestCert from "@/assets/images/certs/compfest-18.webp";
+import dqlabCert from "@/assets/images/certs/dqlab-sql.webp";
+import gammafestCert from "@/assets/images/certs/gammafest-2026.webp";
+import gelarRasa24Cert from "@/assets/images/certs/gelar-rasa-2024.webp";
+import gelarRasa25Cert from "@/assets/images/certs/gelar-rasa-2025.webp";
+import sicCert from "@/assets/images/certs/sic-7.webp";
+
+/**
+ * A scan of the certificate itself, where there is one. Rendered from his own folder by
+ * tools/certs-to-webp.py; page 1 only, because a second page is a score sheet and this
+ * site does not print scores. Every one was read before it was committed: none carries a
+ * student number of his, only the committee's own.
+ */
+export type Scan = StaticImageData;
+
 export const profile = {
   name: "Ilham Bintang Satria",
   label: "Business process · Data · Applied AI",
@@ -147,30 +164,41 @@ export const competitions = [
     org: "HMIT, Institut Teknologi Sepuluh Nopember",
     year: "2026",
     body: "Finding road damage in field photographs, including paving-block surfaces where the damage barely shows.",
+    scan: araCert,
   },
   {
     name: "Gelar Rasa",
     org: "HIMASADA, UPN Veteran Jawa Timur",
     year: "2025",
     body: "A personal-care sales dataset: demand over time, and products taking sales from each other.",
+    scan: gelarRasa25Cert,
   },
   {
     name: "Gelar Rasa",
     org: "HIMASADA, UPN Veteran Jawa Timur",
     year: "2024",
     body: "Finding fraudulent transactions in sales records.",
+    scan: gelarRasa24Cert,
   },
   {
     name: "Gammafest",
     org: "Institut Pertanian Bogor",
     year: "2026",
     body: "Predicting match results from team form and ranking history.",
+    scan: gammafestCert,
   },
   {
     name: "Datathon by RISTEK",
     org: "Fasilkom, Universitas Indonesia",
     year: "2026",
     body: "Forecasting traffic across a city road network from the way its roads connect.",
+  },
+  {
+    name: "Data Analytics Dash",
+    org: "COMPFEST 18, Universitas Indonesia",
+    year: "2026",
+    body: "An analytics round run over August and September, against teams from across the country.",
+    scan: compfestCert,
   },
 ];
 
@@ -188,6 +216,14 @@ export const achievements = [
     org: "Samsung Electronics Indonesia",
     year: "2025",
     body: "A selective programme in Python and its use for data work, run with the company's own engineers.",
+    scan: sicCert,
+  },
+  {
+    title: "Guide to Learn SQL with AI",
+    org: "DQLab, with Universitas Multimedia Nusantara",
+    year: "2025",
+    body: "A course on querying with SQL and on where a language model helps with that work and where it does not.",
+    scan: dqlabCert,
   },
   {
     title: "TOEFL 563",

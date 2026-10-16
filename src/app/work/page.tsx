@@ -68,10 +68,10 @@ export default function WorkPage() {
             </ol>
 
             <div className="mt-12 flex flex-wrap gap-3">
-              <Link href="/about/competitions" className="pill pill-solid" transitionTypes={["nav-forward"]}>
+              <Link href="/about/competitions" className="pill pill-solid">
                 Competitions
               </Link>
-              <Link href="/about/activities" className="pill" transitionTypes={["nav-forward"]}>
+              <Link href="/about/activities" className="pill">
                 Organisations &amp; volunteering
               </Link>
             </div>

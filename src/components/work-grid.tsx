@@ -77,7 +77,7 @@ function Card({ project }: { project: Project }) {
       </div>
 
       <div className="pcard-acts">
-        <Link href={`/work/${project.slug}`} className="stamp stamp-ink pcard-open" transitionTypes={["nav-forward"]}>
+        <Link href={`/work/${project.slug}`} className="stamp stamp-ink pcard-open">
           Read the case study
         </Link>
         <div className="pcard-pair">

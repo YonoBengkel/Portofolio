@@ -43,7 +43,7 @@ export default function Home() {
               <Timeline entries={timeline} dark />
             </div>
             <p className="mt-10">
-              <Link href="/about" className="pill" transitionTypes={["nav-forward"]}>
+              <Link href="/about" className="pill">
                 The rest of it
               </Link>
             </p>
@@ -54,11 +54,11 @@ export default function Home() {
       {/* 3 — what he works with */}
       <section className="band" aria-labelledby="tools-h">
         <div className="frame">
-          <div className="column">
+          <div className="column text-center">
             <h2 id="tools-h" className="h-sec rise">
               Tools &amp; skills
             </h2>
-            <div className="draw rule mt-6" />
+            <div className="draw rule mx-auto mt-6 w-[min(34rem,100%)]" />
           </div>
         </div>
         {/* Full bleed: the rows run past the edge of the page, not inside a column. */}
@@ -86,7 +86,7 @@ export default function Home() {
               <WorkGrid projects={projects} />
             </div>
             <p className="mt-14">
-              <Link href="/work" className="pill pill-yellow" transitionTypes={["nav-forward"]}>
+              <Link href="/work" className="pill pill-yellow">
                 See all {projects.length} in full
               </Link>
             </p>
@@ -105,8 +105,9 @@ export default function Home() {
             </h2>
             <div className="draw rule mt-6" />
             <p className="lede rise mt-6 max-w-[38rem]">
-              Awards and certificates with the body that gave them. Competitions are listed separately,
-              because every one of those was a team entry at participant level.
+              Awards, courses and the competitions he entered, each with the body that gave them and the
+              certificate where there is one. Every competition card reads <b>Participant</b>, because that
+              is what every one of them was.
             </p>
           </div>
         </div>
@@ -116,7 +117,7 @@ export default function Home() {
         <div className="frame">
           <div className="column">
             <p className="mt-12">
-              <Link href="/about/competitions" className="pill pill-solid" transitionTypes={["nav-forward"]}>
+              <Link href="/about/competitions" className="pill pill-solid">
                 {competitions.length} competitions
               </Link>
             </p>

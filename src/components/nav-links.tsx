@@ -10,7 +10,11 @@ const NAV = [
   { href: "/contact", label: "Contact" },
 ];
 
-/** A pill of four links. The page you are on is the one in the accent. */
+/**
+ * A pill of four links, with the page you are on filled in - the same read as the hero's
+ * switch when it is on, which is what Ilham asked for. The fill is the accessible state,
+ * not a decoration: `aria-current="page"` carries it to anyone not looking at the page.
+ */
 export function NavLinks() {
   const pathname = usePathname();
 
@@ -24,7 +28,7 @@ export function NavLinks() {
             href={item.href}
             aria-current={current ? "page" : undefined}
             className={current ? "nav-current" : undefined}
-            transitionTypes={["nav-forward"]}
+            data-current={current ? "" : undefined}
           >
             {item.label}
           </Link>

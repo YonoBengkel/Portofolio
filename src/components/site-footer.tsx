@@ -65,7 +65,7 @@ export function SiteFooter() {
                 <SocialIcon name="email" />
                 Email
               </a>
-              <Link href="/cv" className="foot-link" transitionTypes={["nav-forward"]}>
+              <Link href="/cv" className="foot-link">
                 CV
               </Link>
             </nav>

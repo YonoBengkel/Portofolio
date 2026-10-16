@@ -1,20 +1,16 @@
-import { ViewTransition } from "react";
 import type { ReactNode } from "react";
 
 /**
- * Wraps a page so the doors close on it and part on the next one. Direction is
- * carried by the case-study title that travels, not by the doors, because a lift
- * door closes the same way whichever floor you asked for.
+ * Was a View Transitions boundary; now a passthrough.
  *
- * This has to sit inside each page rather than the layout, because layouts persist
- * across navigation and so never enter or exit. Browsers without the View
- * Transitions API simply swap the page, and the CSS turns it off under
- * prefers-reduced-motion.
+ * The page change is the curtain in curtain.tsx, which is an ordinary element with an
+ * ordinary animation. Naming the whole page as a transition group made the browser
+ * capture a 10,000px-tall element into a texture on every navigation, and the API's
+ * snapshots render in the top layer - above the curtain, so the curtain was never seen.
+ *
+ * The component stays so that every page keeps one place to wrap its content, and so
+ * that bringing a real page-level transition back is one file rather than twelve.
  */
 export function PageTransition({ children }: { children: ReactNode }) {
-  return (
-    <ViewTransition enter="page" exit="page" default="none">
-      {children}
-    </ViewTransition>
-  );
+  return <>{children}</>;
 }

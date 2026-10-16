@@ -378,8 +378,8 @@
   .nav-pill {
     display: inline-flex;
     align-items: center;
-    gap: 22px;
-    padding: 9px 18px;
+    gap: 4px;
+    padding: 5px 6px;
     border: 2px solid var(--ink);
     border-radius: 999px;
     background: var(--paper-2);
@@ -388,12 +388,27 @@
     letter-spacing: 0.14em;
     text-transform: uppercase;
   }
+  /*
+    The page you are on is filled in, the way the hero's switch is filled in when it is
+    on - which is what Ilham asked for. The fill is state, not decoration: aria-current
+    carries the same fact to anyone who is not looking at it.
+  */
   .nav-pill a {
-    transition: color 150ms ease;
+    padding: 7px 13px;
+    border-radius: 999px;
+    transition:
+      background-color 150ms ease,
+      color 150ms ease;
   }
-  .nav-pill a:hover,
-  .nav-current {
-    color: color-mix(in srgb, var(--ink) 55%, var(--yellow));
+  .nav-pill a:hover {
+    background: color-mix(in srgb, var(--ink) 10%, transparent);
+  }
+  .nav-pill a[data-current] {
+    background: var(--ink);
+    color: var(--paper-2);
+  }
+  .nav-pill a[data-current]:hover {
+    background: var(--ink);
   }
 
   /* ----------------------------------------------------------- the grid */
@@ -734,14 +749,24 @@
   html.js-marquee .marquee-run .tape-run,
   html.js-marquee .marquee-run .marquee-track,
   html.js-marquee .marquee-run .about-tape-run,
+  html.js-marquee .marquee-run .certbelt-track,
+  html.js-marquee .marquee-run .hero-band-run,
   html.js-marquee .marquee-run .belt-track {
     animation-play-state: paused;
   }
   html.js-marquee .marquee-run.is-running .tape-run,
   html.js-marquee .marquee-run.is-running .marquee-track,
   html.js-marquee .marquee-run.is-running .about-tape-run,
+  html.js-marquee .marquee-run.is-running .certbelt-track,
+  html.js-marquee .marquee-run.is-running .hero-band-run,
   html.js-marquee .marquee-run.is-running .belt-track {
     animation-play-state: running;
+  }
+  /* Last, so it beats the rule above: the bands are off-screen when the switch is off,
+     and an animation nobody can see is a frame a phone pays for anyway. */
+  html:not([data-run="1"]) .marquee-run .hero-band-run,
+  html:not([data-run="1"]) .marquee-run.is-running .hero-band-run {
+    animation-play-state: paused;
   }
 
   /* --------------------------------------------------- scroll-driven motion */
@@ -863,47 +888,87 @@
     gap: clamp(4px, 1vw, 14px);
     pointer-events: none;
   }
+  /*
+    Each band comes up out of the floor and sinks back into it, rather than sliding in
+    from the side. A strip set at nine degrees that travels horizontally reads as a
+    mistake, because the eye expects a tilted thing to move along its own line; rising has
+    no such expectation to break. The travel is a whole viewport, so they really do come
+    from below the page rather than from just off the edge of their own box.
+
+    The stagger runs bottom-up on the way in and top-down on the way out, so the wall
+    assembles from the floor and then falls back into it.
+  */
   .hero-band {
-    --from: -132%;
-    --tilt: -5deg;
-    width: 132%;
-    margin-inline: -16%;
+    --tilt: -8deg;
+    width: 138%;
+    margin-inline: -19%;
     overflow: hidden;
-    padding-block: 0.3rem;
+    padding-block: 0.18rem;
     background: var(--ink);
     color: var(--paper);
     rotate: var(--tilt);
-    translate: var(--from) 0;
-    transition: translate 1250ms cubic-bezier(0.16, 1, 0.3, 1);
-    transition-delay: calc(var(--i) * 110ms);
+    translate: 0 calc(100svh + var(--i) * 40px);
+    transition: translate 760ms cubic-bezier(0.22, 1, 0.3, 1);
+    transition-delay: calc(var(--i) * 45ms);
   }
   .hero-band:nth-child(2) {
-    --from: 132%;
-    --tilt: 9deg;
+    --tilt: 6deg;
   }
   .hero-band:nth-child(3) {
     --tilt: -12deg;
   }
+  .hero-band:nth-child(4) {
+    --tilt: 9deg;
+  }
+  .hero-band:nth-child(5) {
+    --tilt: -5deg;
+  }
+  .hero-band:nth-child(6) {
+    --tilt: 11deg;
+  }
   html[data-run="1"] .hero-band {
     translate: 0 0;
+    transition-delay: calc((5 - var(--i)) * 55ms);
   }
   /* Flipped, the switch sits on ink; its focus ring has to come with it. */
   html[data-run="1"] .hero {
     --focus: var(--yellow);
   }
+
+  /* The words run along the band. A police line with still lettering is a picture of one. */
   .hero-band-run {
-    display: flex;
-    justify-content: center;
-    gap: 2rem;
+    display: inline-flex;
     white-space: nowrap;
+    animation: slide var(--dur, 64s) linear infinite;
   }
-  .hero-band-run span {
+  .hero-band:nth-child(2n) .hero-band-run {
+    animation-direction: reverse;
+  }
+  .hero-band:nth-child(2) .hero-band-run {
+    --dur: 52s;
+  }
+  .hero-band:nth-child(3) .hero-band-run {
+    --dur: 76s;
+  }
+  .hero-band:nth-child(4) .hero-band-run {
+    --dur: 58s;
+  }
+  .hero-band:nth-child(5) .hero-band-run {
+    --dur: 70s;
+  }
+  .hero-band:nth-child(6) .hero-band-run {
+    --dur: 46s;
+  }
+  .hero-band-set {
+    display: inline-flex;
+    gap: 2.4rem;
+    padding-right: 2.4rem;
+  }
+  .hero-band-run b {
     font-family: var(--font-display);
-    /* Big enough that three bands cover most of the screen. At 10vw they read as three
-       stripes on a cream field rather than as a changed ground, which is the thing the
-       switch is for. */
-    font-size: clamp(2.6rem, 13.5vw, 11rem);
-    line-height: 1.08;
+    font-weight: 400;
+    font-size: clamp(2rem, 9vw, 7rem);
+    line-height: 1.12;
     letter-spacing: -0.02em;
     text-transform: uppercase;
   }
@@ -1316,13 +1381,9 @@
   .belts > * {
     min-width: 0;
   }
-  .belt-label {
-    margin-bottom: 10px;
-    font-family: var(--font-mono);
-    font-size: 0.66rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--ink-2);
+  /* A brand mark inside a chip, monochrome so the row keeps the page's one accent. */
+  .chip-mark {
+    flex: 0 0 auto;
   }
   /*
     The 150px gradient at each end is the detail that makes the row part of the page
@@ -1471,6 +1532,7 @@
     }
   }
   .pcard {
+    --tilt: -1.8deg;
     display: grid;
     grid-template-rows: auto auto 1fr auto;
     width: 100%;
@@ -1480,15 +1542,29 @@
     border: 2px solid var(--ink);
     border-radius: 6px;
     box-shadow: 10px 10px 0 0 rgba(251, 239, 216, 0.14);
+    rotate: var(--tilt);
     transition:
+      rotate 220ms cubic-bezier(0.22, 1, 0.3, 1),
       translate 150ms ease,
       box-shadow 150ms ease;
   }
   /*
-    A straight lift. The reference straightens a tilted card, scales it 5% and nudges its
-    neighbours' hit areas; this is the same gesture without resampling the screenshot.
+    The cards sit crooked and straighten under the cursor - the move Ilham pointed at.
+    The angles are uneven on purpose rather than a strict plus-and-minus alternation:
+    the reference's metronome is the most recognisable thing in its grid, and four
+    different angles read as a pile of paper instead of a pattern.
   */
+  .pgrid > *:nth-child(4n + 2) .pcard {
+    --tilt: 1.2deg;
+  }
+  .pgrid > *:nth-child(4n + 3) .pcard {
+    --tilt: -0.9deg;
+  }
+  .pgrid > *:nth-child(4n) .pcard {
+    --tilt: 2deg;
+  }
   .pcard:hover {
+    rotate: 0deg;
     translate: -4px -4px;
     box-shadow: 14px 14px 0 0 rgba(251, 239, 216, 0.22);
   }
@@ -1619,96 +1695,100 @@
   /* ============================================ certificates and achievements */
 
   /*
-    A scroll-snap track rather than a JavaScript carousel: the dots are real anchors into
-    it, so the control works with the keyboard, works before hydration, works with
-    JavaScript off, and the reader can also just swipe. The padding on both sides is what
-    centres one card and leaves its neighbours sliced at the edges.
+    One belt that never stops, because Ilham asked for it to run slowly and continuously
+    rather than wait to be clicked. Same mechanism as the tools rows - the set twice,
+    translated by half the track - at 28 px/s rather than 50, because these cards carry a
+    document to look at rather than a word to read.
   */
-  .carousel-track {
-    display: flex;
-    gap: 24px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    scrollbar-width: none;
-    padding-block: 10px 26px;
-    padding-inline: max(20px, calc(50vw - 26rem));
-    scroll-padding-inline: max(20px, calc(50vw - 26rem));
-  }
-  .carousel-track::-webkit-scrollbar {
-    display: none;
-  }
-  .carousel-slide {
-    flex: 0 0 min(52rem, 86vw);
-    scroll-snap-align: center;
-  }
-  .cert {
+  .certbelt {
     position: relative;
-    display: grid;
+    width: 100%;
+    overflow: hidden;
+    padding-block: 10px 26px;
+    contain-intrinsic-size: auto 420px;
+  }
+  /* The same edge fade as the tools rows, so the belt dissolves into the page rather
+     than being cut off at the window. */
+  .certbelt::before,
+  .certbelt::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: clamp(40px, 12vw, 150px);
+    z-index: 2;
+    pointer-events: none;
+  }
+  .certbelt::before {
+    left: 0;
+    background: linear-gradient(to right, var(--paper), transparent);
+  }
+  .certbelt::after {
+    right: 0;
+    background: linear-gradient(to left, var(--paper), transparent);
+  }
+  .certbelt-track {
+    display: flex;
+    width: max-content;
+    animation: slide linear infinite;
+    will-change: transform;
+  }
+  .certbelt-set {
+    display: flex;
     gap: 20px;
-    height: 100%;
-    padding: 26px;
-    overflow: clip;
+    padding-right: 20px;
+  }
+  .cert-card {
+    flex: 0 0 384px;
+    display: grid;
+    grid-template-rows: auto auto auto 1fr;
+    gap: 10px;
+    padding: 16px;
     background: var(--paper-2);
     border: 2px solid var(--ink);
     border-radius: 6px;
-    box-shadow: 10px 10px 0 0 var(--ink);
+    box-shadow: 8px 8px 0 0 var(--ink);
   }
-  @media (min-width: 760px) {
-    .cert {
-      grid-template-columns: minmax(0, 1fr) 12rem;
-      align-items: center;
-      gap: 36px;
-      padding: 40px;
-    }
+  /* A fixed slot, so a portrait scan, a landscape scan and a card with no scan at all
+     all come out the same height and the row does not jump. */
+  .cert-shot {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 4 / 3;
+    overflow: clip;
+    background: var(--paper);
+    border: 1px solid var(--line-strong);
+    border-radius: 3px;
   }
-  .cert-kind {
-    font-family: var(--font-mono);
-    font-size: 0.66rem;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--ink-2);
+  .cert-shot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
   }
-  .cert-title {
-    margin-top: 12px;
-    font-size: clamp(1.4rem, 3.2vw, 2.3rem);
-    line-height: 1.04;
-    letter-spacing: -0.02em;
-  }
-  .cert-say {
-    margin-top: 14px;
-    font-size: 0.97rem;
-    line-height: 1.6;
-    color: var(--ink-2);
-  }
-  /*
-    The year, standing in for the certificate scan until there is one. Set in ink with a
-    hard yellow offset rather than in yellow with an ink outline: yellow on paper is
-    1.72:1, and an outline is not something a contrast checker - or a reader with low
-    vision - can count on. This way it is 17.09:1 and the accent still does the work.
-  */
-  .cert-year {
-    font-size: clamp(3.2rem, 9vw, 6.5rem);
-    line-height: 0.9;
-    text-align: right;
+  /* The year, where there is no scan to show. Not a placeholder graphic: the fact. */
+  .cert-noscan {
+    font-size: 3.6rem;
+    line-height: 1;
     color: var(--ink);
-    text-shadow: 6px 6px 0 var(--yellow);
+    text-shadow: 5px 5px 0 var(--yellow);
   }
-  .carousel-dots {
+  .cert-meta {
     display: flex;
-    justify-content: center;
-    gap: 12px;
+    align-items: center;
+    gap: 10px;
   }
-  .carousel-dot {
-    width: 44px;
-    height: 10px;
-    border: 2px solid var(--ink);
-    border-radius: 999px;
-    transition: background-color 150ms ease;
+  .cert-name {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
   }
-  .carousel-dot:hover,
-  .carousel-dot:focus-visible {
-    background: var(--yellow);
+  .cert-org {
+    font-size: 0.86rem;
+    line-height: 1.4;
+    color: var(--ink-2);
   }
 
   /* ============================================================ the footer */
@@ -1989,8 +2069,15 @@
   /* ------------------------------------------------------- the transition */
 
   /*
-    What Ilham asked for after the barba.js reference: a panel covers the page, the
-    destination says its own name, the panel leaves. 620ms in total.
+    The page change, as Ilham asked for it after the barba.js reference: a panel rises
+    over the page, the destination says its own name, the panel carries on upward and off.
+
+    It is a plain element with a plain animation, driven by curtain.tsx, and not the View
+    Transitions API. That API renders its snapshots in the top layer, above every element
+    on the page - so this panel was being drawn underneath them and was never actually
+    seen, which is why the change read as a hard cut. And naming the whole page as a
+    transition group made the browser capture a 10,000px element into a texture on every
+    navigation, which is where the lag came from.
   */
   .curtain {
     position: fixed;
@@ -2001,71 +2088,65 @@
     background: var(--ink);
     color: var(--paper);
     pointer-events: none;
-    clip-path: inset(0 0 100% 0);
+    clip-path: inset(100% 0 0 0);
   }
   .curtain span {
     font-family: var(--font-display);
-    font-size: clamp(3rem, 12vw, 11rem);
+    font-size: clamp(2.6rem, 11vw, 9rem);
     letter-spacing: -0.03em;
     text-transform: uppercase;
     opacity: 0;
   }
-  html:active-view-transition .curtain {
-    animation: curtain 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  /* While it is over the page it also takes the clicks, so a second link cannot be
+     started inside the first one's transition. */
+  .curtain-covering,
+  .curtain-clearing {
+    pointer-events: auto;
   }
-  html:active-view-transition .curtain span {
-    animation: curtain-word 620ms ease both;
+  .curtain-covering {
+    animation: curtain-up 380ms cubic-bezier(0.76, 0, 0.24, 1) both;
   }
-  @keyframes curtain {
-    0% {
-      clip-path: inset(0 0 100% 0);
-    }
-    38%,
-    62% {
-      clip-path: inset(0 0 0 0);
-    }
-    100% {
+  .curtain-covering span {
+    animation: curtain-word-in 300ms ease 140ms both;
+  }
+  .curtain-clearing {
+    animation: curtain-off 420ms cubic-bezier(0.76, 0, 0.24, 1) both;
+  }
+  .curtain-clearing span {
+    animation: curtain-word-out 200ms ease both;
+  }
+  @keyframes curtain-up {
+    from {
       clip-path: inset(100% 0 0 0);
     }
-  }
-  @keyframes curtain-word {
-    0%,
-    22% {
-      opacity: 0;
-    }
-    40%,
-    60% {
-      opacity: 1;
-    }
-    82%,
-    100% {
-      opacity: 0;
+    to {
+      clip-path: inset(0 0 0 0);
     }
   }
-  ::view-transition-old(.page),
-  ::view-transition-new(.page) {
-    animation: none;
+  @keyframes curtain-off {
+    from {
+      clip-path: inset(0 0 0 0);
+    }
+    to {
+      clip-path: inset(0 0 100% 0);
+    }
   }
-  ::view-transition-new(.page) {
-    animation: page-in 1ms 300ms both;
-  }
-  @keyframes page-in {
+  @keyframes curtain-word-in {
     from {
       opacity: 0;
+      translate: 0 18px;
     }
     to {
       opacity: 1;
+      translate: 0 0;
     }
   }
-  @media (prefers-reduced-motion: reduce) {
-    ::view-transition-group(*),
-    ::view-transition-old(*),
-    ::view-transition-new(*) {
-      animation: none !important;
+  @keyframes curtain-word-out {
+    from {
+      opacity: 1;
     }
-    html:active-view-transition .curtain,
-    html:active-view-transition .curtain span {
-      animation: none;
+    to {
+      opacity: 0;
     }
   }
 
@@ -2078,9 +2159,8 @@
     at the same single-class specificity as the rules it means to beat, and every rule
     declared after it won on source order - so seven of these selectors were dead. With
     reduce on, the tools rows still ran, the About marquee still ran, the card still
-    scrubbed 2.8x to 1.0, the tiles still flew in, and the carousel still scrolled
-    smoothly, while the comment above claimed the opposite. Nothing new may be added to
-    this file below this point.
+    scrubbed 2.8x to 1.0 and the tiles still flew in, while the comment above claimed the
+    opposite. Nothing new may be added to this file below this point.
   */
   @media (prefers-reduced-motion: reduce) {
     .run-ball,
@@ -2099,12 +2179,15 @@
     .stagger > *,
     .belt-track,
     .about-tape-run,
+    .certbelt-track,
+    .hero-band-run,
     .about-zoom,
     .about-tile {
       animation: none;
     }
-    .carousel-track {
-      scroll-behavior: auto;
+    .curtain,
+    .curtain span {
+      animation: none;
     }
     html {
       scroll-behavior: auto;

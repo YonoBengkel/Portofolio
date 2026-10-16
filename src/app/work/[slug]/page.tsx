@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ViewTransition } from "react";
 import { CaseStudyBody, CoverFigure, ProjectFacts } from "@/components/case-study";
 import { FlowChain } from "@/components/flow-chain";
 import { PageTransition } from "@/components/page-transition";
@@ -44,15 +43,13 @@ export default async function CaseStudyPage(props: PageProps<"/work/[slug]">) {
         <header className="band-ink">
           <div className="frame pb-20 pt-36 sm:pt-44">
             <div className="column">
-              <Link href="/work" className="pill" transitionTypes={["nav-back"]}>
+              <Link href="/work" className="pill">
                 ← All work
               </Link>
               <p className="meta mt-8 opacity-70">
                 {project.number} · {project.category}
               </p>
-              <ViewTransition name={`study-${project.slug}`} share="study-title" default="none">
-                <h1 className="display mt-4 text-[clamp(2.2rem,6.4vw,5rem)]">{project.title}</h1>
-              </ViewTransition>
+              <h1 className="display mt-4 text-[clamp(2.2rem,6.4vw,5rem)]">{project.title}</h1>
               <p className="lede mt-6 max-w-[38rem] opacity-80">{project.subtitle}</p>
               <FlowChain steps={project.flow} />
             </div>
@@ -76,7 +73,6 @@ export default async function CaseStudyPage(props: PageProps<"/work/[slug]">) {
               <Link
                 href={`/work/${next.slug}`}
                 className="display mt-4 block text-[clamp(2rem,6vw,4.4rem)] hover:text-yellow"
-                transitionTypes={["nav-forward"]}
               >
                 {next.cardTitle}
               </Link>

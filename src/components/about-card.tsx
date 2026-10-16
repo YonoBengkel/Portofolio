@@ -88,10 +88,10 @@ export function AboutCard() {
                 </dl>
 
                 <div className="about-cta">
-                  <Link href="/contact" className="stamp stamp-fill" transitionTypes={["nav-forward"]}>
+                  <Link href="/contact" className="stamp stamp-fill">
                     Contact me
                   </Link>
-                  <Link href="/cv" className="stamp" transitionTypes={["nav-forward"]}>
+                  <Link href="/cv" className="stamp">
                     Download CV
                   </Link>
                 </div>

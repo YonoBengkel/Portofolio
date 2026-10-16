@@ -68,7 +68,7 @@ export default function AboutPage() {
               list above; these are not the same thing and are not counted as one.
             </p>
             <p className="mt-12">
-              <Link href="/about/activities" className="pill pill-solid" transitionTypes={["nav-forward"]}>
+              <Link href="/about/activities" className="pill pill-solid">
                 See all {volunteering.length}
               </Link>
             </p>
@@ -91,7 +91,7 @@ export default function AboutPage() {
               ))}
             </div>
             <p className="mt-12">
-              <Link href="/about/competitions" className="pill pill-yellow" transitionTypes={["nav-forward"]}>
+              <Link href="/about/competitions" className="pill pill-yellow">
                 Competitions
               </Link>
             </p>

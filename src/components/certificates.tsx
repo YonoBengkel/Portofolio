@@ -1,45 +1,99 @@
-import { achievements } from "@/content/site";
-import { CarouselDots } from "./carousel-dots";
+import Image from "next/image";
+import { achievements, competitions } from "@/content/site";
+import type { Scan } from "@/content/site";
 
 /**
- * Certificates and achievements, in the reference's format: one card at a time on a
- * track, the neighbours sliced off at the edges so the eye is told there is more without
- * being offered a second thing to read, and a row of dots under it.
+ * Certificates and achievements, as one belt that never stops.
  *
- * It is a native scroll-snap track rather than a JavaScript carousel. The dots are real
- * anchors into the track, so the control works with the keyboard, works before the page
- * hydrates, works with JavaScript off, and the reader can also just swipe. The reference
- * drives its own with a drag handler and gives the arrows no hover or focus state at all;
- * this costs less and behaves better.
+ * Ilham asked for it to run slowly and continuously rather than wait to be clicked, so
+ * it is the same mechanism as the tools rows: a track holding the set twice, translated
+ * by half its width, at a measured speed. 28 px/s, slower than the tools' 50, because
+ * these cards carry a document to look at rather than a word to read.
  *
- * Open point, and it is a content one rather than a code one: the reference's card is
- * roughly 45% certificate image, and there are no scans of these three in the repo. Until
- * there are, the right-hand column carries the year at display size - which is his own
- * card's watermark, promoted to the thing it was sitting behind. Drop a scan into each
- * entry and the column becomes the certificate, with the year going back behind it.
+ * It shows the awards and the competitions together, because that is what a certificate
+ * folder is - but each card says which it is. A competition card is labelled Participant,
+ * not Competition, because that is what every one of them was: the site used to make that
+ * point in a sentence beside a separate list, and the point has to survive the merge.
+ *
+ * Where there is a scan, the card is the scan. Where there is not - the olympiad medal,
+ * the language test, two of the competitions - the slot carries the year at display size
+ * instead, so every card is the same height and nothing pretends to a document it does
+ * not have.
  */
-export function Certificates() {
-  return (
-    <div className="carousel">
-      <ol className="carousel-track">
-        {achievements.map((a, i) => (
-          <li key={a.title} id={`cert-${i + 1}`} className="carousel-slide">
-            <article className="cert">
-              <div className="cert-text">
-                <p className="cert-kind">{a.org}</p>
-                <h3 className="cert-title display">{a.title}</h3>
-                <p className="cert-say">{a.body}</p>
-              </div>
-              <p className="cert-year display" aria-hidden="true">
-                {a.year}
-              </p>
-              <span className="sr-only">Awarded {a.year}</span>
-            </article>
-          </li>
-        ))}
-      </ol>
 
-      <CarouselDots items={achievements.map((a, i) => ({ id: `cert-${i + 1}`, label: a.title }))} />
+export type Certificate = {
+  kind: "Award" | "Course" | "Participant";
+  title: string;
+  org: string;
+  year: string;
+  note: string;
+  scan?: Scan;
+};
+
+// The two frozen lists, read as one. Neither is re-worded here: the card shows the same
+// strings the competitions page shows, so there is nothing to drift apart.
+export function buildCertificates(): Certificate[] {
+  const awards: Certificate[] = achievements.map((a) => ({
+    kind: a.scan && a.org.includes("DQLab") ? "Course" : "Award",
+    title: a.title,
+    org: a.org,
+    year: a.year,
+    note: a.body,
+    scan: a.scan,
+  }));
+  const entered: Certificate[] = competitions.map((c) => ({
+    kind: "Participant",
+    title: c.name,
+    org: c.org,
+    year: c.year,
+    note: c.body,
+    scan: c.scan,
+  }));
+  return [...awards, ...entered];
+}
+
+const SPEED = 28; // px per second
+const CARD = 384; // .cert-card width in px, kept in step with globals.css
+const GAP = 20;
+
+function Card({ item }: { item: Certificate }) {
+  return (
+    <article className="cert-card">
+      <div className="cert-shot">
+        {item.scan ? (
+          <Image src={item.scan} alt={`Certificate: ${item.title}, ${item.org}, ${item.year}`} sizes="384px" />
+        ) : (
+          <p className="cert-noscan display" aria-hidden="true">
+            {item.year}
+          </p>
+        )}
+      </div>
+      <div className="cert-meta">
+        <span className={`chip ${item.kind === "Award" ? "chip-live" : ""}`}>{item.kind}</span>
+        <span className="meta opacity-70">{item.year}</span>
+      </div>
+      <h3 className="cert-name">{item.title}</h3>
+      <p className="cert-org">{item.org}</p>
+    </article>
+  );
+}
+
+export function Certificates() {
+  const items = buildCertificates();
+  // One cycle covers one set, so the duration is the set's own width over the speed.
+  const seconds = Math.round((items.length * (CARD + GAP)) / SPEED);
+
+  return (
+    <div className="certbelt marquee-run">
+      <div className="certbelt-track" style={{ animationDuration: `${seconds}s` }}>
+        {[0, 1].map((copy) => (
+          <div className="certbelt-set" key={copy} aria-hidden={copy === 1 ? "true" : undefined}>
+            {items.map((item) => (
+              <Card key={`${item.title}-${item.year}`} item={item} />
+            ))}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

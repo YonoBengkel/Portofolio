@@ -1,0 +1,69 @@
+"""Turn certificate scans into web images for the certificates belt.
+
+PDFs are rendered at page 1 only - a certificate's second page is a score sheet or a
+syllabus, and this site does not print scores. Everything is capped at 1400px wide, which
+is twice the widest slot the belt ever gives a card, and saved as WebP at quality 80.
+
+Run it with the source folder as an argument:
+
+    python tools/certs-to-webp.py "D:/KULIAH/Sertifikat"
+
+Nothing here reads the originals from the repo: the scans stay in his own folder and only
+the rendered WebP lands in src/assets. Check each output by eye before committing one -
+certificates often carry a student number, and this script cannot tell.
+"""
+
+import sys
+from pathlib import Path
+
+import fitz  # PyMuPDF
+from PIL import Image
+
+MAX_W = 1400
+QUALITY = 80
+
+# source (relative to the folder passed in) -> output name
+FILES = {
+    "Non-Linear/SIC 7.pdf": "sic-7",
+    "Non-Linear/certificate-DQLABAI003WBCLJD.pdf": "dqlab-sql",
+    "Linear/ARA ITS 2026.png": "ara-7",
+    "Linear/Sertifikat Gammafest 2026 - Peserta DSC-4.pdf": "gammafest-2026",
+    "Non-Linear/Compfest.pdf": "compfest-18",
+    "Non-Linear/Gelar Rasa 2024.pdf": "gelar-rasa-2024",
+    "Non-Linear/Gelar Rasa 2025.png": "gelar-rasa-2025",
+}
+
+
+def load(path: Path) -> Image.Image:
+    if path.suffix.lower() == ".pdf":
+        with fitz.open(path) as doc:
+            page = doc[0]
+            # Render at whatever zoom lands near MAX_W, so a small page is not upscaled
+            # from a 72dpi raster and a large one is not rendered at 300dpi for nothing.
+            zoom = min(4.0, max(1.5, MAX_W / page.rect.width))
+            pix = page.get_pixmap(matrix=fitz.Matrix(zoom, zoom), alpha=False)
+            return Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
+    return Image.open(path).convert("RGB")
+
+
+def main() -> int:
+    src = Path(sys.argv[1] if len(sys.argv) > 1 else "D:/KULIAH/Sertifikat")
+    out = Path(__file__).resolve().parent.parent / "src" / "assets" / "images" / "certs"
+    out.mkdir(parents=True, exist_ok=True)
+
+    for rel, name in FILES.items():
+        path = src / rel
+        if not path.exists():
+            print(f"missing  {rel}")
+            continue
+        img = load(path)
+        if img.width > MAX_W:
+            img = img.resize((MAX_W, round(img.height * MAX_W / img.width)), Image.LANCZOS)
+        dest = out / f"{name}.webp"
+        img.save(dest, "WEBP", quality=QUALITY, method=6)
+        print(f"{dest.name:24} {img.width}x{img.height}  {dest.stat().st_size // 1024} KB")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -22,7 +22,7 @@ export function PageHeader({
       <div className="frame pb-20 pt-36 sm:pb-24 sm:pt-44">
         <div className="column">
           {back && (
-            <Link href={back.href} className="pill" transitionTypes={["nav-back"]}>
+            <Link href={back.href} className="pill">
               ← {back.label}
             </Link>
           )}

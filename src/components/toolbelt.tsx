@@ -1,4 +1,5 @@
 import { toolbox } from "@/content/site";
+import { ToolMark } from "./tool-marks";
 
 /**
  * Tools and skills: the reference's movement carrying the other reference's object,
@@ -10,15 +11,14 @@ import { toolbox } from "@/content/site";
  * it was measured, not guessed, and it reads as drift rather than as a ticker.
  *
  * The object is Toriq's - a pill chip, one hairline rule, mono at 12px, brand casing
- * kept, with a small round badge carrying the first letter. His own chips fall back to
- * that badge whenever a tool has no brand glyph; here every chip uses it, because the
- * alternative is importing twenty vendor logos, which drags foreign colour onto a page
- * that allows one accent and makes the claim "I know these logos" rather than "I use
- * these tools".
+ * kept, with a small mark on the left. His chips carry a brand glyph where one exists and
+ * fall back to a circled first letter where it does not; both happen here, for the same
+ * reason (see tool-marks.tsx).
  *
- * What is NOT the reference's: his tile is a 100x100 square with a 2px border and a hard
- * offset shadow, and his heading is centred over the band. The heading here stays left
- * with the rule under it, like every other section on this site.
+ * The rows are not labelled. Ilham asked for one set rather than two named groups, so the
+ * sixteen tools are dealt into two rows of eight and the heading above speaks for all of
+ * them. The deal is by position, not by category, so the two rows stay the same length
+ * however the list in site.ts grows.
  *
  * The animation is a plain CSS keyframe over a track holding the set twice, so one cycle
  * is exactly one set and the seam never shows. The duration is computed per row from the
@@ -51,9 +51,7 @@ function setWidth(items: string[]) {
 function Chip({ label }: { label: string }) {
   return (
     <span className="chip-tool">
-      <span className="chip-badge" aria-hidden="true">
-        {label[0]}
-      </span>
+      <ToolMark tool={label} />
       {label}
     </span>
   );
@@ -87,24 +85,17 @@ function Row({ items, reverse }: { items: string[]; reverse?: boolean }) {
 }
 
 export function Toolbelt() {
-  // The four groups, paired into two rows the way the reference splits its own: what the
-  // work is analysed and shown with on top, what it is built and shipped with underneath.
-  const rows = [
-    { label: `${toolbox[0].group} · ${toolbox[1].group}`, items: [...toolbox[0].items, ...toolbox[1].items] },
-    { label: `${toolbox[2].group} · ${toolbox[3].group}`, items: [...toolbox[2].items, ...toolbox[3].items] },
-  ];
+  // One list, dealt alternately into two rows so both stay the same length whatever the
+  // content file holds. The group names stay in site.ts for the about page, which still
+  // shows them as what they are: four kinds of work rather than one heap.
+  const all = toolbox.flatMap((group) => group.items);
+  const rows: string[][] = [[], []];
+  all.forEach((item, i) => rows[i % 2].push(item));
 
   return (
     <div className="belts">
-      {rows.map((row, i) => (
-        <div key={row.label}>
-          <div className="frame">
-            <div className="column">
-              <p className="belt-label">{row.label}</p>
-            </div>
-          </div>
-          <Row items={row.items} reverse={i === 1} />
-        </div>
+      {rows.map((items, i) => (
+        <Row key={i} items={items} reverse={i === 1} />
       ))}
     </div>
   );

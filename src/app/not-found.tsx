@@ -11,10 +11,10 @@ export default function NotFound() {
             The link may be outdated. The case studies are still here.
           </p>
           <div className="mt-10 flex flex-wrap gap-3">
-            <Link href="/work" className="pill pill-yellow" transitionTypes={["nav-forward"]}>
+            <Link href="/work" className="pill pill-yellow">
               See the work
             </Link>
-            <Link href="/" className="pill" transitionTypes={["nav-back"]}>
+            <Link href="/" className="pill">
               Home
             </Link>
           </div>
