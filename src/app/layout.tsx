@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Archivo, IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
+import { Archivo, IBM_Plex_Mono, Newsreader } from "next/font/google";
 import { Pointer } from "@/components/pointer";
 import { RevealOnScroll } from "@/components/reveal-on-scroll";
 import { SiteFooter } from "@/components/site-footer";
@@ -8,15 +8,20 @@ import { profile } from "@/content/site";
 import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
 
-// Three faces with three jobs. Instrument Serif is a single-weight display serif: narrow,
-// slightly condensed, more film title than fashion masthead. It has one weight on purpose,
-// so size and spacing have to do the work instead of boldness. Archivo is a plain grotesque
-// that stays legible light-on-dark. IBM Plex Mono carries metadata only.
-const instrument = Instrument_Serif({
+// Three faces with three jobs. Newsreader replaced Instrument Serif after measuring both
+// at the hero's size: the stems came out 9.0px against 6.0px, so Instrument Serif is a
+// third thinner and loses that much more of itself to a near-black page. Their hairlines
+// are identical at 3.0px, so the old reason - "the hairlines vanish" - was wrong; it is
+// the stems. Newsreader also reads as something printed, which suits a site whose job is
+// handing over evidence. Archivo is a plain grotesque that stays legible light-on-dark.
+// IBM Plex Mono carries metadata only.
+// Loaded as a variable font, which is what lets the optical-size axis through; the weight
+// it is actually set at lives in .display.
+const newsreader = Newsreader({
   variable: "--font-display-serif",
   subsets: ["latin"],
-  weight: "400",
   style: ["normal", "italic"],
+  axes: ["opsz"],
   display: "swap",
 });
 const archivo = Archivo({ variable: "--font-archivo", subsets: ["latin"], style: ["normal"], display: "swap" });
@@ -50,7 +55,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${instrument.variable} ${archivo.variable} ${plexMono.variable} h-full antialiased`}
+      className={`${newsreader.variable} ${archivo.variable} ${plexMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col font-sans">
         <a

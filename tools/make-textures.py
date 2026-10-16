@@ -39,13 +39,23 @@ def norm(a, lo=0.0, hi=1.0):
     return lo + a * (hi - lo)
 
 
-def save(a, name, q=78):
-    """WebP, not PNG: PNG cannot compress noise, and these are multiply layers at low
-    opacity where a lossy codec is invisible. Grayscale is stored as RGB by the encoder,
-    which costs nothing at this size."""
-    img = Image.fromarray(np.clip(a * 255, 0, 255).astype(np.uint8), "L").convert("RGB")
+def save(a, name, q=78, floor=0.0, levels=24):
+    """Write the tile as alpha, not as grey.
+
+    The file carries no colour at all: RGB is white and the texture lives in the alpha
+    channel. The page then uses it as a CSS mask over a div filled with a ladder token,
+    so the visible surface is always a palette colour at varying opacity. Painting a grey
+    texture over a blue page would wash the blue out, which is the opposite of what this
+    palette is for.
+    """
+    alpha = np.clip((a - floor) / max(1e-6, 1 - floor), 0, 1)
+    rgba = np.zeros((N, N, 4), dtype=np.uint8)
+    rgba[..., :3] = 255
+    # A couple of dozen levels is past what the eye resolves at these opacities, and flat steps
+    # are what lets the codec get the file down to a few KB.
+    rgba[..., 3] = (np.round(alpha * (levels - 1)) / (levels - 1) * 255).astype(np.uint8)
     path = os.path.join(OUT, name)
-    img.save(path, "WEBP", quality=q, method=6)
+    Image.fromarray(rgba, "RGBA").save(path, "WEBP", quality=q, alpha_quality=42, method=6)
     print(f"{name:16s} {N}x{N}  {os.path.getsize(path) / 1024:5.1f} KB")
 
 
@@ -134,7 +144,7 @@ def paint():
 
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
-    save(concrete(), "concrete.webp")
-    save(wood(), "wood.webp", q=62)
-    save(ceramic(), "ceramic.webp")
-    save(paint(), "paint.webp")
+    save(concrete(), "concrete.webp", floor=0.30)
+    save(wood(), "wood.webp", q=62, floor=0.22, levels=12)
+    save(ceramic(), "ceramic.webp", floor=0.18)
+    save(paint(), "paint.webp", floor=0.26)
