@@ -18,9 +18,9 @@
   and the rest recedes toward the page colour. Text itself never dims - only the pools,
   the rules and the imagery do - so no reading pair ever drops below 4.5:1.
 
-  Measured against --void: bone 12.70:1, glow 8.82:1, brass 7.74:1, ash 6.51:1.
-  Against --soot: bone 10.48:1, ash 5.38:1. On --concrete only bone clears the floor,
-  at 6.41:1, so secondary text never sits on a concrete surface.
+  Measured against --void: bone 12.70:1, glow 8.82:1, ash 7.92:1, brass 7.74:1.
+  Against --soot: bone 10.52:1, ash 6.56:1. Inside the brightest light pool, about
+  luminance 0.03, bone is 8.94:1 and ash 5.58:1.
 */
 :root {
   --void: #0c131d; /* the page. the darkest step of the ladder */
@@ -29,7 +29,7 @@
   --stone: #477c9a; /* the lit edge of a surface; diagram strokes */
   --pale: #8cacc6; /* the far wall under light */
   --glow: #a6b3cb; /* the light source itself. cold, never warm */
-  --ash: #7e9cb8; /* secondary text */
+  --ash: #92acc4; /* secondary text. light enough to survive the brightest light pool */
   --bone: #d9d5c8; /* primary text. the warm off-white of Mono's paper bag */
   --brass: #cca052; /* the one accent: lamplight, and only on things you can act on */
   --on-brass: #0c131d;
@@ -66,7 +66,10 @@
   }
 
   body {
-    background: var(--void);
+    /* Transparent on purpose: the room behind it is a child of body and has to paint
+       over html's page colour. Relative so the room can span the whole document. */
+    position: relative;
+    background: transparent;
     color: var(--bone);
   }
 
@@ -189,9 +192,21 @@
     inset: -10% 0;
     z-index: -1;
     pointer-events: none;
+    /*
+      A real pool, not a tint. The page used to be flat - its 90th percentile luminance
+      was 1.9x its median, where the reference frames run 5.7x - because the pools were
+      bone at 5%. These reach --concrete at the core, which puts the backdrop under a
+      heading around 0.03 while the unlit page stays near 0.007.
+
+      The core stops well short of --concrete's own value on purpose. A first pass at 62%
+      put the backdrop under some secondary text at luminance 0.057 and dropped 52 runs
+      below 4.5:1; at 34% the brightest backdrop under text is about 0.03, where --ash
+      clears 5.5:1. The page's bright end is meant to come from photographs, not from
+      the paper behind a paragraph.
+    */
     background:
-      radial-gradient(55% 50% at 50% 42%, color-mix(in oklab, var(--bone) 5%, transparent), transparent 72%),
-      radial-gradient(95% 85% at 50% 50%, color-mix(in oklab, var(--bone) 2%, transparent), transparent 78%);
+      radial-gradient(52% 44% at 50% 40%, color-mix(in oklab, var(--concrete) 34%, transparent), transparent 70%),
+      radial-gradient(88% 78% at 50% 50%, color-mix(in oklab, var(--soot) 58%, transparent), transparent 76%);
   }
 
   @supports (animation-timeline: view()) {
@@ -211,7 +226,7 @@
 
   @keyframes pool {
     0% {
-      opacity: 0.12;
+      opacity: 0.1;
     }
     42%,
     58% {
@@ -313,6 +328,56 @@
     --surface-strength: 0.17;
   }
 
+  /*
+    The back wall of every page.
+
+    Without it the page measured a median luminance of 0.0063 - exactly the page colour,
+    meaning the median pixel was nothing at all - against 0.012 to 0.019 in the reference
+    frames. The reference is dark but it is never empty, and this is the cheapest honest
+    way to put a room behind the content.
+
+    It spans the document rather than the window, so the wall runs the length of the page
+    instead of resetting at every screen.
+  */
+  .room {
+    position: absolute;
+    inset: 0;
+    min-height: 100%;
+    z-index: -3;
+    pointer-events: none;
+    background: var(--concrete);
+    /* 0.22 puts the page's median luminance at about 0.015, inside the 0.012-0.019 the
+       reference frames measure. Higher and the page stops being dark; lower and the
+       median falls back to the page colour, which is where it was. */
+    opacity: 0.26;
+    -webkit-mask-image: var(--room-tex, url("/tex/concrete.webp"));
+    mask-image: var(--room-tex, url("/tex/concrete.webp"));
+    -webkit-mask-size: 320px 320px;
+    mask-size: 320px 320px;
+  }
+
+  /* A case study is a different room, so its wall is tile rather than poured concrete. */
+  body:has(.study-room) .room {
+    --room-tex: url("/tex/ceramic.webp");
+    opacity: 0.17;
+  }
+
+  /* The plane the hero stands on. A band rather than a surface under everything, because
+     in the reference you see the floor meet the wall, you do not stand on the whole frame. */
+  .hero-floor {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 220px;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(to top, var(--soot), transparent);
+    -webkit-mask-image: url("/tex/wood.webp");
+    mask-image: url("/tex/wood.webp");
+    -webkit-mask-size: 256px 256px;
+    mask-size: 256px 256px;
+    opacity: 0.55;
+  }
+
   /* One static grain plate: a 96px tile, repeated. Never animated. */
   .grain {
     position: fixed;
@@ -361,116 +426,322 @@
     letter-spacing: -0.012em;
   }
 
-  /* Giant section words. They still bite into the block below. */
-  .big-word {
+  /* ---------------------------------------------------------- the hero */
+
+  /*
+    A room, not a drawing. The photograph holds the first screen; the name and the
+    position line sit on the dark half beside it on a wide screen, and over the foot
+    of the room on a phone, where a portrait photograph actually works better.
+
+    Three planes move at three different speeds while you scroll: the concrete wall
+    behind, the photograph, and the text on top, which does not move at all. That is
+    the depth the dollhouse camera needs, and it costs one scroll-driven animation
+    with no listener.
+  */
+  .hero {
+    position: relative;
+    overflow: clip;
+  }
+  .hero::before {
+    inset: -6% 0;
+  }
+  .hero-grid {
+    position: relative;
+    display: grid;
+    min-height: 100svh;
+    padding-block: 136px 80px;
+  }
+  /* On a phone both sit in the same cell, so the copy lies over the foot of the room. */
+  .hero-plate,
+  .hero-copy {
+    grid-area: 1 / 1;
+  }
+  .hero-plate {
+    position: relative;
+    overflow: clip;
+    margin-inline: -20px;
+  }
+  .hero-plate img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 44%;
+  }
+  /* The plate sinks back into the page at the edge that meets the text, so it reads as
+     one lit part of a room rather than a photograph pasted on. */
+  .hero-plate::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      var(--void) 1%,
+      color-mix(in oklab, var(--void) 78%, transparent) 30%,
+      transparent 64%
+    );
+  }
+  .hero-copy {
     position: relative;
     z-index: 1;
-    font-family: var(--font-display);
-    font-size: clamp(3rem, 11vw, 9.5rem);
-    font-weight: 400;
-    line-height: 0.88;
-    letter-spacing: -0.02em;
-    margin-bottom: -0.08em;
+    align-self: end;
   }
-  .big-word .stop {
-    margin-left: -0.03em;
+  .hero-kicker {
+    margin-bottom: 1.1rem;
+  }
+  .hero-name {
+    /* 5.75rem is 92px: the largest size that keeps the name on one line. */
+    font-size: clamp(2.5rem, 7vw, 5.75rem);
+    margin: 0;
+  }
+  .hero-tagline {
+    margin-top: 1.6rem;
+    max-width: 34rem;
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    color: var(--ash);
+  }
+
+  @media (min-width: 1024px) {
+    .hero-grid {
+      grid-template-columns: minmax(0, 1fr) 46%;
+      align-items: center;
+      gap: 56px;
+      padding-block: 168px 120px;
+    }
+    .hero-plate {
+      grid-area: 1 / 2;
+      margin-inline: 0;
+      height: min(80svh, 680px);
+    }
+    .hero-plate::after {
+      background: linear-gradient(
+        to right,
+        var(--void) 0%,
+        color-mix(in oklab, var(--void) 62%, transparent) 15%,
+        transparent 44%
+      );
+    }
+    /*
+      The copy runs across both tracks rather than staying inside the left one. The name
+      is 797px wide at 92px and the left track is about 650px, so keeping it in the track
+      would break the line we just chose. Its last two glyphs cross the dark edge of the
+      plate, where the measured local contrast is 4.96:1 - above the floor, and the reason
+      the plate's left edge dissolves into the page rather than ending on a hard line.
+    */
+    .hero-copy {
+      grid-column: 1 / -1;
+      align-self: center;
+      max-width: 54rem;
+      pointer-events: none;
+    }
+    .hero-copy a {
+      pointer-events: auto;
+    }
+  }
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .hero::before {
+        animation: plane-far linear both;
+        animation-timeline: view();
+        animation-range: entry 0% exit 100%;
+      }
+      .hero-plate img {
+        animation: plane-near linear both;
+        animation-timeline: view();
+        animation-range: entry 0% exit 100%;
+      }
+    }
+  }
+  @keyframes plane-far {
+    from {
+      translate: 0 -1.5%;
+    }
+    to {
+      translate: 0 1.5%;
+    }
+  }
+  /* Scaled up a little so the drift never pulls an edge into frame. */
+  @keyframes plane-near {
+    from {
+      scale: 1.09;
+      translate: 0 -3.2%;
+    }
+    to {
+      scale: 1.09;
+      translate: 0 3.2%;
+    }
+  }
+
+  /* --------------------------------------------------------- the dossier */
+
+  /*
+    One dense lit object: portrait, name, four facts, what I am doing now, four skill
+    groups and three links. It answers who, what I have done and what I can do without
+    the reader going anywhere, and it gives the page something to light.
+  */
+  .dossier {
+    display: grid;
+    gap: 28px;
+    padding: 24px;
+  }
+  .dossier-portrait {
+    position: relative;
+    overflow: clip;
+    border: 1px solid var(--concrete);
+  }
+  .dossier-portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .dossier-body {
+    display: grid;
+    gap: 26px;
+    align-content: start;
+  }
+  .dossier-name {
+    font-size: clamp(1.7rem, 3.4vw, 2.5rem);
+    margin: 0;
+  }
+  .dossier-line {
+    margin-top: 0.9rem;
+    max-width: 44rem;
+    line-height: 1.65;
+    color: var(--ash);
+  }
+  .dossier-facts {
+    display: grid;
+    gap: 18px 32px;
+    border-top: 1px solid var(--concrete);
+    padding-top: 20px;
+  }
+  .dossier-facts dd {
+    margin-top: 0.35rem;
+    line-height: 1.45;
+  }
+  .dossier-now {
+    border-top: 1px solid var(--concrete);
+    padding-top: 20px;
+  }
+  .dossier-now p + p {
+    margin-top: 0.5rem;
+    line-height: 1.6;
+  }
+  .dossier-skills {
+    display: grid;
+    gap: 16px 32px;
+    border-top: 1px solid var(--concrete);
+    padding-top: 20px;
+  }
+  .dossier-skills p + p {
+    margin-top: 0.3rem;
+    line-height: 1.5;
+  }
+  .dossier-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 28px;
+    border-top: 1px solid var(--concrete);
+    padding-top: 20px;
+  }
+
+  @media (min-width: 640px) {
+    .dossier-facts,
+    .dossier-skills {
+      grid-template-columns: 1fr 1fr;
+    }
+    .dossier-span {
+      grid-column: 1 / -1;
+    }
+  }
+  @media (min-width: 900px) {
+    .dossier {
+      grid-template-columns: 17rem minmax(0, 1fr);
+      gap: 36px;
+      padding: 30px;
+    }
+    .dossier-portrait {
+      align-self: start;
+      aspect-ratio: 4 / 5;
+    }
+  }
+
+  /* A screen from the project, between the title and the facts. Decorative in the
+     accessibility tree, because the entry already links to the same place by name. */
+  .index-shot {
+    border: 1px solid var(--concrete);
+    overflow: clip;
+    max-width: 46rem;
+  }
+  .index-shot img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  /* ----------------------------------------------------- work on the home */
+
+  .preview-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px 24px;
+    margin-bottom: 32px;
+  }
+  .preview-title {
+    font-size: clamp(1.9rem, 4.6vw, 3.1rem);
+    margin: 0;
+  }
+  .preview-grid {
+    display: grid;
+    gap: 24px;
+  }
+  @media (min-width: 900px) {
+    .preview-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .preview-card {
+    overflow: clip;
+  }
+  .preview-link {
+    display: grid;
+    gap: 0.75rem;
+    padding: 0 20px 22px;
+  }
+  /* The screenshot is the point of the card, so it runs to the edges and comes first. */
+  .preview-shot {
+    display: block;
+    margin: 0 -20px 1.1rem;
+    border-bottom: 1px solid var(--concrete);
+  }
+  .preview-shot img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .preview-name {
+    font-size: clamp(1.3rem, 2.4vw, 1.75rem);
+    margin: 0;
+    transition: color 200ms ease;
+  }
+  .preview-sub {
+    color: var(--ash);
+    line-height: 1.6;
+  }
+  .preview-foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 20px;
+    margin-top: 0.3rem;
+  }
+  .preview-link:hover .preview-name,
+  .preview-link:focus-visible .preview-name {
     color: var(--brass);
   }
 
-  /* -------------------------------------------------------------- the hero */
-
-  .hero-art {
-    container-type: inline-size;
-    position: relative;
-    aspect-ratio: 1100 / 530;
-    width: min(100%, 1100px, calc((100svh - 360px) * 2.075));
-    min-width: min(100%, 300px);
-    margin-inline: auto;
-  }
-  .hero-name {
-    position: absolute;
-    inset: 0;
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: max(1.9rem, 9cqi);
-    font-weight: 400;
-    line-height: 1;
-    letter-spacing: -0.02em;
-  }
-  .hero-name span {
-    position: absolute;
-    white-space: nowrap;
-  }
-  .hero-name .w1 {
-    left: -1%;
-    top: 17%;
-  }
-  .hero-name .w2 {
-    left: 50%;
-    top: 45%;
-    translate: -50% 0;
-  }
-  .hero-name .w3 {
-    right: -1%;
-    top: 73%;
-  }
-
-  .route {
-    fill: none;
-    stroke: var(--concrete);
-    stroke-width: 1.35;
-    stroke-linejoin: round;
-  }
-
-  /*
-    The one load moment: the route draws itself once, slowly and without bounce,
-    the way the reference moves something heavy.
-  */
-  @media (prefers-reduced-motion: no-preference) {
-    .route-draw path {
-      stroke-dasharray: 1 1;
-      stroke-dashoffset: 1;
-      animation: route-draw var(--t) cubic-bezier(0.22, 1, 0.36, 1) var(--d) forwards;
-    }
-  }
-  @keyframes route-draw {
-    to {
-      stroke-dashoffset: 0;
-    }
-  }
-
-  /*
-    The one warm human thing, and the only flicker on the site: the decision
-    diamond settles into the accent once, after the drawing finishes.
-  */
-  .lamp {
-    stroke: var(--brass);
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .lamp {
-      animation: lamp 2.6s cubic-bezier(0.22, 1, 0.36, 1) 1.9s both;
-    }
-  }
-  @keyframes lamp {
-    0% {
-      opacity: 0;
-    }
-    18% {
-      opacity: 1;
-    }
-    26% {
-      opacity: 0.25;
-    }
-    34% {
-      opacity: 0.9;
-    }
-    44% {
-      opacity: 0.4;
-    }
-    100% {
-      opacity: 1;
-    }
-  }
 
   /* ----------------------------------------------------------------- parts */
 
@@ -594,7 +865,10 @@
     top: 0;
     z-index: 30;
     padding-block: 14px;
-    background: linear-gradient(to bottom, var(--void) 72%, transparent);
+    /* Sticky over content, so it needs a real backdrop, not a hint of one: the number
+       measured 4.14:1 over a project screenshot at 375px with a gradient here. */
+    background: var(--void);
+    box-shadow: 0 14px 18px -14px var(--void);
   }
   .shaft ol {
     display: flex;
@@ -719,11 +993,13 @@
     height: 1px;
     background: var(--concrete);
   }
+  /* Bone, not ash: a chip sits inside the light pool, where ash measured 4.1:1 against
+     the lit backdrop. The chain is a diagram made of words and deserves full weight. */
   .flow-label {
     font-family: var(--font-mono);
     font-size: 0.74rem;
     letter-spacing: 0.01em;
-    color: var(--ash);
+    color: var(--bone);
     border: 1px solid var(--concrete);
     border-radius: 1px;
     padding: 5px 9px;
@@ -950,6 +1226,22 @@
     view-transition-name: site-header;
     background: linear-gradient(to bottom, var(--void) 42%, color-mix(in oklab, var(--void) 70%, transparent) 72%, transparent);
     padding-bottom: 18px;
+  }
+  /*
+    Below 1024px the header wraps to two rows, so the nav sits where the scrim had already
+    faded - measured at 3.60:1 over a bright project screen. The scrim holds its full
+    value further down on narrow screens.
+  */
+  @media (max-width: 1023px) {
+    .site-header {
+      background: linear-gradient(
+        to bottom,
+        var(--void) 78%,
+        color-mix(in oklab, var(--void) 82%, transparent) 92%,
+        transparent
+      );
+      padding-bottom: 26px;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

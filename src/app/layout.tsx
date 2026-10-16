@@ -75,6 +75,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Pointer />
         {/* The warm seam where the doors meet during a page change. */}
         <div className="shutter-seam" aria-hidden="true" />
+        {/* The back wall. Everything else in the page stands in front of it. */}
+        <div className="room" aria-hidden="true" />
         {/* Fog: the top and bottom edges of the window sink back into the page colour. */}
         <div className="fog" aria-hidden="true" />
         {/* One static grain plate, never animated. */}

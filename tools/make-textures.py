@@ -144,7 +144,7 @@ def paint():
 
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
-    save(concrete(), "concrete.webp", floor=0.30)
+    save(concrete(), "concrete.webp", floor=0.32)
     save(wood(), "wood.webp", q=62, floor=0.22, levels=12)
     save(ceramic(), "ceramic.webp", floor=0.18)
     save(paint(), "paint.webp", floor=0.26)

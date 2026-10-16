@@ -34,27 +34,39 @@ export default async function CaseStudyPage(props: PageProps<"/work/[slug]">) {
 
   return (
     <PageTransition>
+      {/* Marks this page as a different room: the wall behind it is tile, not concrete. */}
+      <div className="study-room" hidden />
       <article>
-        {/* The page opens in the dark: name the work, say what it is, show the shape of it. */}
+        {/*
+          Name the work, then show it. The title used to sit alone above a screen and a
+          half of nothing - the first project image was 238px below the fold on a laptop
+          and 550px below it on a phone - which is the wrong order for a reader who came
+          here for depth. The facts and the chain now come after the evidence, not before.
+        */}
         <header className="lit">
-          <div className="column pb-12 pt-32 sm:pt-40">
+          <div className="column pb-10 pt-28 sm:pt-32">
             <Link href="/work" className="meta link-quiet hover:text-bone" transitionTypes={["nav-back"]}>
               All work
             </Link>
-            <p className="meta mt-8">
+            <p className="meta mt-7">
               {project.number} {project.category}
             </p>
             <ViewTransition name={`study-${project.slug}`} share="study-title" default="none">
-              <h1 className="display mt-3 text-[clamp(2.3rem,5.6vw,4.4rem)]">{project.title}</h1>
+              <h1 className="display mt-3 text-[clamp(2.1rem,4.8vw,3.6rem)]">{project.title}</h1>
             </ViewTransition>
-            <p className="mt-6 max-w-[34rem] text-[1.1rem] leading-relaxed">{project.subtitle}</p>
-            <FlowChain steps={project.flow} />
+            <p className="mt-5 max-w-[36rem] text-[1.08rem] leading-relaxed">{project.subtitle}</p>
           </div>
         </header>
 
-        <ProjectFacts project={project} />
-
         <CoverFigure project={project} />
+
+        <div className="lit">
+          <div className="column pb-4">
+            <FlowChain steps={project.flow} />
+          </div>
+        </div>
+
+        <ProjectFacts project={project} />
 
         <div className="lit">
           <div className="article-grid prose-body pb-24">

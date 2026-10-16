@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ViewTransition } from "react";
 import type { Project } from "@/content/projects";
@@ -7,6 +8,10 @@ import { WorkIndexNav } from "./work-index-nav";
 /**
  * The shaft runs down the edge of the window while the entries scroll past it,
  * so the reading column keeps the whole page to itself.
+ *
+ * Each entry carries a real screen from its project. Without them this page was the
+ * flattest thing on the site - a list of titles over an empty wall - and a reader
+ * scanning it had nothing to look at before deciding whether to open anything.
  */
 export function WorkIndex({ projects }: { projects: Project[] }) {
   const items = projects.map((p) => ({
@@ -38,6 +43,16 @@ export function WorkIndex({ projects }: { projects: Project[] }) {
               </h2>
             </ViewTransition>
             <p className="mt-4 max-w-[34rem] text-[1.05rem] leading-relaxed">{project.subtitle}</p>
+
+            <Link
+              href={`/work/${project.slug}`}
+              className="index-shot recede mt-8 block"
+              tabIndex={-1}
+              aria-hidden="true"
+              transitionTypes={["nav-forward"]}
+            >
+              <Image src={project.cover.src} alt="" sizes="(min-width: 1024px) 46rem, 100vw" className="graded" />
+            </Link>
 
             <FlowChain steps={project.flow} />
 
