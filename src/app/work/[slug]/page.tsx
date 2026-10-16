@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CaseStudyBody, CoverFigure, ProjectFacts } from "@/components/case-study";
-import { projectColors } from "@/components/project-card";
+import { FlowChain } from "@/components/flow-chain";
+import { PageTransition } from "@/components/page-transition";
 import { getProject, projects } from "@/content/projects";
 
 export const dynamicParams = false;
@@ -31,36 +32,55 @@ export default async function CaseStudyPage(props: PageProps<"/work/[slug]">) {
   const next = projects[(index + 1) % projects.length];
 
   return (
-    <article>
-      {/* The band takes the project's colour; data-band-ink tells the header which ink to use. */}
-      <header data-band-ink={project.color.ink} className="tile" style={projectColors(project)}>
-        <div className="frame pb-[clamp(8rem,17vw,13rem)] pt-32 sm:pt-40">
-          <Link href="/#work" className="link font-semibold">
-            All case studies
-          </Link>
-          <h1 className="mx-auto mt-8 max-w-[22ch] text-[clamp(2.3rem,6vw,4.75rem)] font-extrabold leading-[1.03] tracking-[-0.035em]">
-            {project.title}
-          </h1>
-          <p className="mx-auto mt-6 max-w-[40rem] text-lg leading-relaxed sm:text-xl">{project.subtitle}</p>
-          <ProjectFacts project={project} />
-        </div>
-      </header>
+    <PageTransition>
+      <article>
+        {/*
+          Name the work on the dark band, then show it on the slate one. The title used
+          to sit alone above a screen and a half of nothing - the first project image was
+          238px below the fold on a laptop - so the facts and the chain come after the
+          evidence rather than before it.
+        */}
+        <header className="band-ink">
+          <div className="frame pb-20 pt-36 sm:pt-44">
+            <div className="column">
+              <Link href="/work" className="pill">
+                ← All work
+              </Link>
+              <p className="meta mt-8 opacity-70">
+                {project.number} · {project.category}
+              </p>
+              <h1 className="display mt-4 text-[clamp(2.2rem,6.4vw,5rem)]">{project.title}</h1>
+              <p className="lede mt-6 max-w-[38rem] opacity-80">{project.subtitle}</p>
+              <FlowChain steps={project.flow} />
+            </div>
+          </div>
+        </header>
 
-      <div className="article-grid prose-body pb-24">
         <CoverFigure project={project} />
-        <CaseStudyBody project={project} />
-      </div>
 
-      <nav aria-label="Next case study">
-        <Link href={`/work/${next.slug}`} className="tile group block" style={projectColors(next)}>
-          <span className="frame block py-20 sm:py-28">
-            <span className="block text-[0.95rem] font-bold">Next case study</span>
-            <span className="mx-auto mt-4 block max-w-[24ch] text-[clamp(2rem,5vw,3.75rem)] font-extrabold leading-[1.05] tracking-[-0.03em] underline decoration-transparent decoration-[0.07em] underline-offset-[0.14em] transition-colors group-hover:decoration-current">
-              {next.cardTitle}
-            </span>
-          </span>
-        </Link>
-      </nav>
-    </article>
+        <ProjectFacts project={project} />
+
+        <div className="band">
+          <div className="article-grid prose-body">
+            <CaseStudyBody project={project} />
+          </div>
+        </div>
+
+        <nav aria-label="Next case study" className="band band-ink">
+          <div className="frame">
+            <div className="column">
+              <p className="meta opacity-70">Next</p>
+              <Link
+                href={`/work/${next.slug}`}
+                className="display mt-4 block text-[clamp(2rem,6vw,4.4rem)] hover:text-yellow"
+              >
+                {next.cardTitle}
+              </Link>
+              <p className="lede mt-5 max-w-[34rem] opacity-80">{next.summary}</p>
+            </div>
+          </div>
+        </nav>
+      </article>
+    </PageTransition>
   );
 }

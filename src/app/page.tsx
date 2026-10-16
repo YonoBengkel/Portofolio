@@ -1,166 +1,148 @@
-import fs from "node:fs";
-import path from "node:path";
+import Link from "next/link";
+import { AboutCard } from "@/components/about-card";
+import { Certificates } from "@/components/certificates";
 import { Hero } from "@/components/hero";
-import { ProjectCard } from "@/components/project-card";
+import { Tape } from "@/components/tape";
+import { PageTransition } from "@/components/page-transition";
+import { Toolbelt } from "@/components/toolbelt";
+import { WorkGrid } from "@/components/work-grid";
 import { projects } from "@/content/projects";
-import { atAGlance, education, experience, leadership, otherWork, profile, toolbox } from "@/content/site";
+import { Timeline, buildTimeline } from "@/components/timeline";
+import { competitions, education, experience, leadership } from "@/content/site";
 
-function BigWord({ id, children }: { id: string; children: string }) {
-  return (
-    <h2 id={id} className="big-word">
-      {children}
-      <span className="stop">.</span>
-    </h2>
-  );
-}
+/**
+ * The order is the reference's, and Ilham asked for it by name: who he is, what he has
+ * done and why, what he works with, what he built, then what he has been given.
+ *
+ * Every band is full bleed and alternates paper and ink, so no section ever blurs into
+ * the one above it. The projects band is ink rather than the slate it used to be: the
+ * reference puts its own grid on #5A6F84 and this site's slate is #4A5A6B, which is the
+ * same colour to anyone who opens both - and the same lecturers will open both.
+ */
+/*
+  The six Ilham picked for the front page, in the order he gave them. The rest of the
+  work is on /work; this is not a ranking, it is a front page, and a front page is
+  allowed to be a choice.
+*/
+const FRONT = [
+  "warungku",
+  "vault-retrieval",
+  "supplier-decision-support",
+  "fall-detection",
+  "quality-early-warning",
+  "air-quality-index",
+];
 
 export default function Home() {
-  // The "Download CV" button only appears once public/cv.pdf exists.
-  const hasCv = fs.existsSync(path.join(process.cwd(), "public", profile.cvPath));
-  const [emailName, emailDomain] = profile.email.split("@");
+  const front = FRONT.map((slug) => projects.find((p) => p.slug === slug)).filter(
+    (p): p is (typeof projects)[number] => Boolean(p),
+  );
+
+  // Work, then the organisation seats, then the degree. The full list lives on /about;
+  // the home page shows the four most recent so the section stays one screen deep.
+  const timeline = buildTimeline(experience, leadership, education).slice(0, 4);
 
   return (
-    <>
-      <Hero hasCv={hasCv} />
+    <PageTransition>
+      <Hero />
 
-      <section id="work" aria-labelledby="work-title" className="frame scroll-mt-6 pt-24 sm:pt-32">
-        <BigWord id="work-title">Case studies</BigWord>
-        <div className="mosaic">
-          {projects.map((p, i) => (
-            <ProjectCard key={p.slug} project={p} wide={i === 0 || i === projects.length - 1} />
-          ))}
-        </div>
+      {/* 1 — who he is. Carries its own marquee band, so it needs no divider above it. */}
+      <AboutCard />
 
-        <div className="mt-20 sm:mt-24">
-          <h3 className="text-[1.75rem] font-extrabold tracking-[-0.025em] sm:text-4xl">Other projects</h3>
-          <ul className="mt-8 grid gap-10 md:grid-cols-3 md:gap-8">
-            {otherWork.map((w) => (
-              <li key={w.title} className="border-t-2 border-ink pt-5">
-                <h4 className="text-lg font-bold leading-snug">
-                  {w.href ? (
-                    <a href={w.href} target="_blank" rel="noopener noreferrer" className="link">
-                      {w.title}
-                    </a>
-                  ) : (
-                    w.title
-                  )}
-                </h4>
-                <p className="mt-2 leading-relaxed text-graphite">{w.body}</p>
-                <p className="mt-3 text-[0.95rem] font-semibold">{w.meta}</p>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      <section id="experience" aria-labelledby="experience-title" className="frame scroll-mt-6 pt-28 sm:pt-40">
-        <BigWord id="experience-title">Experience</BigWord>
-        {experience.map((e) => (
-          <article
-            key={e.role}
-            className="grid gap-8 bg-cobalt px-6 pb-12 pt-16 text-on-cobalt sm:px-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16 lg:px-16 lg:pb-20 lg:pt-24"
-          >
-            <div>
-              <h3 className="text-[2rem] font-extrabold leading-[1.08] tracking-[-0.03em] sm:text-[2.6rem]">{e.role}</h3>
-              <p className="mt-4 text-lg font-semibold">{e.org}</p>
-              <p className="mt-1">{e.period}</p>
+      {/* 2 — what he has done, and why it mattered */}
+      <section className="band band-ink" aria-labelledby="exp-h">
+        <div className="frame">
+          <div className="column">
+            <h2 id="exp-h" className="h-sec rise">
+              Experience &amp; education
+            </h2>
+            <div className="draw rule mt-6" />
+            <div className="mt-12">
+              <Timeline entries={timeline} dark />
             </div>
-            <ul className="space-y-5 text-lg leading-relaxed lg:pt-2">
-              {e.points.map((pt) => (
-                <li key={pt}>{pt}</li>
-              ))}
-            </ul>
-          </article>
-        ))}
-
-        <div className="mt-20 sm:mt-24">
-          <h3 className="text-[1.75rem] font-extrabold tracking-[-0.025em] sm:text-4xl">Leadership</h3>
-          <ul className="mt-8 grid gap-10 md:grid-cols-3 md:gap-8">
-            {leadership.map((l) => (
-              <li key={l.role} className="border-t-2 border-ink pt-5">
-                <p className="text-[0.95rem] text-graphite">{l.period}</p>
-                <h4 className="mt-2 text-lg font-bold leading-snug">{l.role}</h4>
-                <p className="mt-1 font-semibold">{l.org}</p>
-                <p className="mt-3 leading-relaxed text-graphite">{l.body}</p>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="mt-20 grid gap-14 sm:mt-24 lg:grid-cols-2 lg:gap-8">
-          <div>
-            <h3 className="text-[1.75rem] font-extrabold tracking-[-0.025em] sm:text-4xl">Education</h3>
-            <div className="mt-8 border-t-2 border-ink pt-5">
-              <p className="text-lg font-bold">{education.degree}</p>
-              <p className="mt-1 font-semibold">{education.school}</p>
-              <p className="mt-1 text-[0.95rem] text-graphite">{education.period}</p>
-              <p className="mt-4 max-w-[36rem] leading-relaxed text-graphite">
-                <span className="font-bold text-ink">Coursework: </span>
-                {education.coursework}
-              </p>
-            </div>
-          </div>
-          <div>
-            <h3 className="text-[1.75rem] font-extrabold tracking-[-0.025em] sm:text-4xl">Toolbox</h3>
-            <dl className="mt-8 grid gap-x-8 gap-y-6 border-t-2 border-ink pt-5 sm:grid-cols-2">
-              {toolbox.map((t) => (
-                <div key={t.group}>
-                  <dt className="font-bold">{t.group}</dt>
-                  <dd className="mt-1 leading-relaxed text-graphite">{t.items.join(", ")}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-        </div>
-      </section>
-
-      <section id="contact" aria-labelledby="contact-title" className="frame scroll-mt-6 pb-16 pt-28 sm:pt-40">
-        <BigWord id="contact-title">Contact</BigWord>
-        <div className="grid lg:grid-cols-2">
-          <div className="bg-cobalt px-6 pb-14 pt-16 text-on-cobalt sm:px-10 lg:px-16 lg:pb-20 lg:pt-24">
-            <a
-              href={`mailto:${profile.email}`}
-              aria-label={profile.email}
-              className="link-quiet block text-[clamp(1.55rem,3.7vw,3.1rem)] font-extrabold leading-[1.12] tracking-[-0.03em]"
-            >
-              {emailName}@
-              <br />
-              {emailDomain}
-            </a>
-            <p className="mt-10 max-w-[34rem] text-lg font-semibold leading-relaxed">
-              I would be glad to walk through any of these projects in more detail.
+            <p className="mt-10">
+              <Link href="/about" className="pill">
+                The rest of it
+              </Link>
             </p>
-            <p className="mt-4 max-w-[34rem] leading-relaxed">{profile.intro}</p>
-            <ul className="mt-10 flex flex-wrap gap-x-7 gap-y-2 font-bold">
-              <li>
-                <a href={profile.links.linkedin} target="_blank" rel="noopener noreferrer" className="link">
-                  LinkedIn
-                </a>
-              </li>
-              <li>
-                <a href={profile.links.github} target="_blank" rel="noopener noreferrer" className="link">
-                  GitHub
-                </a>
-              </li>
-              {hasCv && (
-                <li>
-                  <a href={profile.cvPath} className="link">
-                    Download CV
-                  </a>
-                </li>
-              )}
-            </ul>
           </div>
-          <dl className="space-y-7 bg-mist px-6 py-14 sm:px-10 lg:px-16 lg:py-24">
-            {atAGlance.map((item) => (
-              <div key={item.label}>
-                <dt className="text-[0.95rem] font-bold text-graphite">{item.label}</dt>
-                <dd className="mt-1 text-lg font-semibold leading-snug">{item.value}</dd>
-              </div>
-            ))}
-          </dl>
         </div>
       </section>
-    </>
+
+      {/* 3 — what he works with */}
+      <section className="band" aria-labelledby="tools-h">
+        <div className="frame">
+          <div className="column text-center">
+            <h2 id="tools-h" className="h-sec rise">
+              Tools &amp; skills
+            </h2>
+            <div className="draw rule mx-auto mt-6 w-[min(34rem,100%)]" />
+          </div>
+        </div>
+        {/* Full bleed: the rows run past the edge of the page, not inside a column. */}
+        <div className="mt-12">
+          <Toolbelt />
+        </div>
+      </section>
+
+      <Tape text="Projects" tilt={1.6} />
+
+      {/* 4 — what he built */}
+      <section className="band band-ink" aria-labelledby="work-h">
+        <div className="frame">
+          <div className="pwide">
+            <div className="plaque-row">
+              <h2 id="work-h" className="plaque">
+                Projects
+              </h2>
+              <p className="plaque-tag">Case studies</p>
+            </div>
+            <p className="lede rise mt-8 max-w-[38rem] opacity-85">
+              Six of them, each written from what it actually does rather than from the stack it was
+              built with.
+            </p>
+            <div className="mt-14">
+              <WorkGrid projects={front} />
+            </div>
+            <p className="mt-14">
+              <Link href="/work" className="pill pill-yellow">
+                See all {projects.length} in full
+              </Link>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <Tape text="Certificates &amp; achievements" tilt={-1.4} />
+
+      {/* 5 — what he has been given */}
+      <section className="band" aria-labelledby="awards-h">
+        <div className="frame">
+          <div className="column">
+            <h2 id="awards-h" className="h-sec rise">
+              Certificates &amp; achievements
+            </h2>
+            <div className="draw rule mt-6" />
+            <p className="lede rise mt-6 max-w-[38rem]">
+              Awards, courses, data competitions and chess, each with the body that gave them and the
+              certificate where there is one. Every data-competition card reads <b>Participant</b>, because
+              that is what every one of them was. Committee seats and training are with the organisations.
+            </p>
+          </div>
+        </div>
+        <div className="mt-12">
+          <Certificates />
+        </div>
+        <div className="frame">
+          <div className="column">
+            <p className="mt-12">
+              <Link href="/about/competitions" className="pill pill-solid">
+                {competitions.length} competitions
+              </Link>
+            </p>
+          </div>
+        </div>
+      </section>
+    </PageTransition>
   );
 }

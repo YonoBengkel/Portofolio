@@ -7,37 +7,23 @@ export const alt = `${profile.name}: business process, data, and applied AI`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-// next/og cannot read the site's woff2 fonts, so it gets two small static TTF instances
-// of Plus Jakarta Sans (licence in src/assets/fonts/OFL.txt).
+// next/og cannot read the site's woff2 files, so it gets static TTF copies of the same
+// two faces the site uses (licences in src/assets/fonts/OFL.txt).
 const fontDir = join(process.cwd(), "src/assets/fonts");
-const extraBold = await readFile(join(fontDir, "PlusJakartaSans-ExtraBold.ttf"));
-const medium = await readFile(join(fontDir, "PlusJakartaSans-Medium.ttf"));
+const display = await readFile(join(fontDir, "Anton-Regular.ttf"));
+const sans = await readFile(join(fontDir, "Archivo-Regular.ttf"));
 
-// The hero drawing (process box, data store, decision) in the site's dark-mode colours.
-const ROUTE = [
-  "M40 40H400V250H40Z",
-  "M400 145H560V174",
-  "M450 200A110 26 0 1 0 670 200A110 26 0 1 0 450 200",
-  "M450 200V420A110 26 0 0 0 670 420V200",
-  "M670 330H760",
-  "M760 330L910 180L1060 330L910 480Z",
-];
-const colors = { ground: "#111a31", ink: "#e6ecf8", route: "#8ea6f0" };
+const colors = { paper: "#fbefd8", paper2: "#fff8ec", ink: "#241206", ink2: "#5c4631", yellow: "#f2b705" };
 
-// Social preview image shown when the site link is shared (LinkedIn, WhatsApp, etc.).
+// The mark: a decision diamond cut open by a vertical slot that reads as an I.
+const MARK = "M 128 26 L 230 128 L 128 230 L 26 128 Z M 110 63 L 146 63 L 146 187 L 110 187 Z";
+
+/**
+ * The link preview. It used to draw the hero flowchart, which the site no longer has, so
+ * it now shows what the site shows: the mark, the name, and one line about the work, on
+ * the page colour with a single band of light behind it.
+ */
 export default function OpengraphImage() {
-  const [first, middle, last] = profile.name.split(" ");
-  const width = 960;
-  const height = Math.round((width * 530) / 1100);
-  const nameSize = Math.round(width * 0.082);
-  const word = {
-    position: "absolute",
-    fontSize: nameSize,
-    fontWeight: 800,
-    lineHeight: 1,
-    letterSpacing: -0.035 * nameSize,
-  } as const;
-
   return new ImageResponse(
     (
       <div
@@ -46,56 +32,71 @@ export default function OpengraphImage() {
           height: "100%",
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          background: colors.ground,
+          justifyContent: "center",
+          padding: "0 84px",
+          background: colors.paper,
           color: colors.ink,
-          fontFamily: "Plus Jakarta Sans",
+          fontFamily: "Archivo",
         }}
       >
-        <div style={{ position: "relative", display: "flex", width, height, marginTop: 30 }}>
-          <svg width={width} height={height} viewBox="0 0 1100 530" style={{ position: "absolute", left: 0, top: 0 }}>
-            {Array.from({ length: 14 }, (_, k) => (
-              <g
-                key={k}
-                transform={`translate(0 ${k * 3.2})`}
-                opacity={1 - k * 0.066}
-                fill="none"
-                stroke={colors.route}
-                strokeWidth={1.35}
-                strokeLinejoin="round"
-              >
-                {ROUTE.map((d) => (
-                  <path key={d} d={d} />
-                ))}
-              </g>
-            ))}
+        {/* One soft wash of the accent behind the name. */}
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 110,
+            width: 1200,
+            height: 430,
+            background: `radial-gradient(42% 56% at 32% 50%, ${colors.yellow}, transparent 72%)`,
+            opacity: 0.28,
+          }}
+        />
+        <div style={{ display: "flex", alignItems: "center", gap: 18, marginBottom: 34 }}>
+          <svg width={44} height={44} viewBox="0 0 256 256">
+            <path d={MARK} fill={colors.ink} fillRule="evenodd" />
           </svg>
-          <div style={{ ...word, left: -0.01 * width, top: 0.17 * height }}>{first}</div>
-          <div style={{ ...word, left: 0, right: 0, top: 0.45 * height, display: "flex", justifyContent: "center" }}>
-            {middle}
+          <div style={{ fontSize: 23, letterSpacing: "0.14em", textTransform: "uppercase", color: colors.ink2 }}>
+            {profile.label}
           </div>
-          <div style={{ ...word, right: -0.01 * width, top: 0.73 * height }}>{last}</div>
         </div>
+
         <div
           style={{
             display: "flex",
-            marginTop: 22,
-            maxWidth: 860,
-            textAlign: "center",
-            fontSize: 27,
-            fontWeight: 500,
-            lineHeight: 1.4,
+            fontFamily: "Anton",
+            fontSize: 112,
+            lineHeight: 0.95,
+            letterSpacing: "-0.02em",
+            textTransform: "uppercase",
           }}
+        >
+          {profile.name}
+        </div>
+
+        <div
+          style={{ display: "flex", marginTop: 34, maxWidth: 820, fontSize: 28, lineHeight: 1.45, color: colors.ink2 }}
         >
           {profile.tagline}
         </div>
+
+        {/* A dark band at the foot, the same one the page ends on. */}
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            bottom: 0,
+            width: 1200,
+            height: 92,
+            background: colors.ink,
+          }}
+        />
       </div>
     ),
     {
       ...size,
       fonts: [
-        { name: "Plus Jakarta Sans", data: extraBold, weight: 800, style: "normal" },
-        { name: "Plus Jakarta Sans", data: medium, weight: 500, style: "normal" },
+        { name: "Anton", data: display, weight: 400, style: "normal" },
+        { name: "Archivo", data: sans, weight: 400, style: "normal" },
       ],
     },
   );

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256"><title>Ilham Bintang Satria logo</title><g transform="translate(-32.51 -32.51) scale(1.254)" fill="currentColor">
+  
+  <!-- Cut for 24px and below: the slot is widened and the diamond pulled in, so both
+       survive the pixel grid instead of turning to mush. -->
+  <path fill-rule="evenodd" d="
+    M 128 30 L 226 128 L 128 226 L 30 128 Z
+    M 108 70 L 148 70 L 148 186 L 108 186 Z
+  "/>
+</g></svg>

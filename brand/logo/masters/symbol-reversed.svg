@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor">
+  <title>Ilham Bintang Satria logo, reversed</title>
+  <!-- Light on dark blooms: the diamond is pulled in 2 units and the slot widened 4,
+       so the reversed mark reads at the same weight as the positive one. -->
+  <path fill-rule="evenodd" d="
+    M 128 26 L 230 128 L 128 230 L 26 128 Z
+    M 110 63 L 146 63 L 146 187 L 110 187 Z
+  "/>
+</svg>

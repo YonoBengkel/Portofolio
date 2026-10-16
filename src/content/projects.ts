@@ -1,5 +1,10 @@
 import type { StaticImageData } from "next/image";
 import dwTopProducts from "@/assets/images/dw-top-products.png";
+import fallArchitecture from "@/assets/images/fall-architecture.webp";
+import fallStateMachine from "@/assets/images/fall-state-machine.webp";
+import bdcPipeline from "@/assets/images/bdc-pipeline.webp";
+import ispuDashboard from "@/assets/images/ispu-dashboard.webp";
+import agentRetrieval from "@/assets/images/agent-retrieval.webp";
 import ewsAdvice from "@/assets/images/ews-advice.jpg";
 import ewsAlert from "@/assets/images/ews-alert.jpg";
 import ewsEvaluation from "@/assets/images/ews-evaluation.jpg";
@@ -33,13 +38,15 @@ export type Project = {
   summary: string;
   type: "Team" | "Individual";
   teamLabel: string;
+  /** What a reader can actually open today. Honest about prototypes and dead demos. */
+  status: "Live" | "Prototype" | "Code only";
   context: string;
   period: string;
   role: string;
+  /** The project read left to right in four to six steps. Shown as a chain above the case study. */
+  flow: string[];
   tools: string[];
   links: { label: string; href: string }[];
-  /** The project's own colour: its home tile, the band at the top of its page, and the "next case study" link. */
-  color: { tile: string; ink: "light" | "dark" };
   cover: Figure;
   /** Show a diagram instead of the cover image at the top of the case study and on the home tile. */
   heroDiagram?: { diagram: "pipeline" | "star-schema"; caption: string };
@@ -59,12 +66,13 @@ export const projects: Project[] = [
       "Inventory and purchasing for small food & beverage businesses, designed around their existing cashier app.",
     type: "Team",
     teamLabel: "Team of 4",
+    status: "Prototype",
     context: "Data Analytics Project course, supply-chain project",
     period: "Sep 2026 – ongoing",
     role: "Our team had no fixed job split; I mainly worked on the logic: the rules that connect sales, stock, forecasts, orders, and goods receipt.",
+    flow: ["Cashier sales", "Stock ledger", "Restock forecast", "Distributor order", "Goods receipt"],
     tools: ["React", "TypeScript", "Process flowcharts", "SWOT"],
     links: [{ label: "GitHub repository", href: "https://github.com/YonoBengkel/Warungku" }],
-    color: { tile: "#0C726C", ink: "light" }, // the teal of the Warungku app itself
     cover: {
       src: warungkuOwner,
       alt: "Warungku business-owner screens: daily to-do list, stock forecast with reasons, and goods receipt",
@@ -163,12 +171,13 @@ export const projects: Project[] = [
     summary: "Choosing and reviewing suppliers with weighted criteria instead of the lowest price alone.",
     type: "Team",
     teamLabel: "Team project",
+    status: "Live",
     context: "Business Analytics for Data Science course",
     period: "Mar – Jun 2026",
     role: "I designed the scoring approach and its underlying math, and wrote the first version of the app; a teammate later upgraded it.",
+    flow: ["Purchase records", "Criteria the buyer weights", "Score per supplier", "Ranking", "Expiry audit"],
     tools: ["Python", "pandas", "Streamlit", "Plotly", "SAW & TOPSIS scoring"],
     links: [{ label: "Live app", href: "https://supplier-procurement-analysis.streamlit.app/" }],
-    color: { tile: "#F2CFC6", ink: "dark" }, // pink, like the purchase-order copy
     cover: {
       src: supplierActive,
       alt: "Supplier recommendation per product with criteria weights set in the sidebar",
@@ -223,12 +232,13 @@ export const projects: Project[] = [
     summary: "One trusted view of sales from two systems that did not agree with each other.",
     type: "Individual",
     teamLabel: "Individual",
+    status: "Code only",
     context: "Data Warehousing course, final project",
     period: "Jun 2026",
     role: "Designed and built the whole pipeline on my own, from raw files to data marts.",
+    flow: ["CRM and ERP exports", "Raw copy kept", "Cleaned and matched", "Star schema", "Data marts"],
     tools: ["Python", "pandas", "SQL", "SQLite", "Apache Airflow", "Docker"],
     links: [{ label: "GitHub repository", href: "https://github.com/YonoBengkel/Medallion" }],
-    color: { tile: "#E8B94A", ink: "dark" }, // the gold layer of the medallion pipeline
     cover: {
       src: dwTopProducts,
       alt: "Bar chart of the top five product subcategories by profit",
@@ -288,12 +298,13 @@ export const projects: Project[] = [
     summary: "Warning plant operators about impure output before it reaches the lab, with advice on what to adjust.",
     type: "Individual",
     teamLabel: "Individual",
+    status: "Code only",
     context: "Recommender Systems course, final project",
     period: "Jun 2026",
     role: "Built it end to end on my own: data preparation, model, advice rules, API, and dashboard.",
+    flow: ["Plant sensor readings", "Impurity model", "Cost-weighted threshold", "Alert", "What to adjust"],
     tools: ["Python", "scikit-learn", "FastAPI", "React"],
     links: [{ label: "GitHub repository", href: "https://github.com/YonoBengkel/Tambang" }],
-    color: { tile: "#7A2E25", ink: "light" }, // hematite, the iron ore itself
     cover: {
       src: ewsEvaluation,
       alt: "Dashboard flags a likely high-silica batch and recommends an action for the operator",
@@ -338,6 +349,294 @@ export const projects: Project[] = [
       {
         kind: "note",
         body: "Data: the public \"Quality Prediction in a Mining Process\" dataset (E. Magalhães, Kaggle).",
+      },
+    ],
+  },
+  {
+    slug: "fall-detection",
+    number: "05",
+    category: "Applied AI for care",
+    title: "Fall detection for a nursing home",
+    cardTitle: "Fall Detection for a Nursing Home",
+    subtitle:
+      "Four cameras, and a decision about how long someone has been on the floor - which is a harder question than it sounds.",
+    summary:
+      "Watching four rooms for a resident who has fallen, and deciding when the silence has gone on long enough to raise an alarm.",
+    type: "Team",
+    teamLabel: "Team of 4",
+    status: "Code only",
+    context: "Intelligent Systems Project course",
+    period: "Oct 2026",
+    role: "I built the backend: the per-camera pipeline, the state machine, the database layer, the API and the tests. A teammate trained the model.",
+    flow: ["Camera frame", "Posture per person", "Timer per person", "Alert saved", "Dashboard & Telegram"],
+    tools: ["Python", "FastAPI", "YOLO11", "SQLite", "WebSocket", "React"],
+    links: [
+      { label: "GitHub repository (integration branch)", href: "https://github.com/0Raja0-RA/nursing-home-fall-detection/tree/integration" },
+    ],
+    cover: {
+      src: fallArchitecture,
+      alt: "Diagram of the system: camera to camera service to inference to state machine to alert service, then to database, WebSocket and Telegram",
+      caption:
+        "The path a frame takes. One alert goes three places, in that order. (Diagram in Indonesian.)",
+    },
+    sections: [
+      {
+        kind: "text",
+        heading: "The problem",
+        body: [
+          "A resident who falls can lie on the floor for a long time before anyone walks past. A camera that can tell a standing person from a lying one sounds like enough, and it is not: the useful signal is not the posture in one frame, it is **how long** the posture has lasted, and the frames in between are where it gets difficult.",
+          "So the system watches four rooms, decides per person how long they have been down, and when that crosses a threshold it writes the incident down, pushes a banner to the caregivers' dashboard, and sends a photo to their phones.",
+        ],
+      },
+      {
+        kind: "text",
+        heading: "Five observations, not two",
+        body: [
+          "The first version of any detector like this has two answers: trigger posture, or not. That version is wrong in the one case that matters most.",
+          "A resident lying on the floor who gets covered by a blanket, or ends up behind a chair, **stops being detected** - and they stop being detected at exactly the moment the situation is most dangerous. If losing the person resets the timer, the system goes quiet precisely when it should be shouting.",
+          "So every frame becomes one of five observations, and each one does something different to the timer. A trigger posture advances it. A different posture rewinds it, but only after several consecutive frames, so one bad guess does not undo a real timer. A detection the model is not sure about **holds** the timer where it is, because an uncertain reading is not evidence of safety. Losing the person entirely holds it too, for a grace period, for the reason above. And a camera that has stopped sending frames at all is its own state, because a dead camera is not a quiet room.",
+        ],
+      },
+      {
+        kind: "figures",
+        figures: [
+          {
+            src: fallStateMachine,
+            alt: "State machine diagram: MONITORING to POSSIBLE_FALL after two seconds, to CONFIRMED_FALL after ten, with UNKNOWN for an offline camera",
+            caption:
+              "Four states and the conditions between them. A camera that stops sending frames leaves the loop entirely rather than being treated as a quiet room. (Diagram in Indonesian.)",
+          },
+        ],
+      },
+      {
+        kind: "decisions",
+        heading: "Decisions",
+        items: [
+          {
+            title: "The timer belongs to the person, not the frame",
+            body: "With more than one person in a room, a single timer per camera is wrong: somebody walking past would clear the timer of somebody on the floor. Everyone in the frame is detected, but while a timer is running only the person at the position that started it decides what happens to it.",
+          },
+          {
+            title: "The alert is saved before it is sent",
+            body: "Database first, then the dashboard, then the phones. A messaging service that is down must not be able to lose an incident, so a failed notification does not cancel the alert it was reporting.",
+          },
+          {
+            title: "Cameras and thresholds live in the database",
+            body: "Not in memory and not in environment variables. A caregiver who adds a camera or changes a threshold expects it to still be there after the machine restarts.",
+          },
+          {
+            title: "Marking an incident handled closes it",
+            body: "The banner clears on every screen at once, the camera goes back to monitoring, and the caregiver's note is kept against that incident rather than in a log nobody reads.",
+          },
+          {
+            title: "The demo button forces the observation, not the alert",
+            body: "There is a simulation button, because a demo cannot wait for someone to lie on the floor. It injects a trigger observation and nothing else: the timer, the cooldown, the save and the notification all run for real, and the alert it produces is labelled as a simulation.",
+          },
+        ],
+      },
+      {
+        kind: "text",
+        heading: "What the data could not support",
+        body: [
+          "The posture model has two modes. One is a custom detector trained on bounding boxes; the other reads posture from the angle of the spine using pose estimation. The second is the default, and the reason is the training set.",
+          "The public fall-detection dataset the team used holds about fifteen hundred labelled images, and **twelve** of them are labelled as a person on the ground. A detector trained on that will read a person lying down as something in between, because it has barely seen the thing it is supposed to find. Rather than report a number that the data could not support, the model choice was moved into a setting, the pose route was made the default, and the limit was written down.",
+        ],
+      },
+      {
+        kind: "note",
+        body: "The model weights and the database are deliberately not in the repository. The schema is, because it is written as code. The screenshots of the running dashboard are not here yet - they need the system running with its camera set, and this page will carry them rather than describe them.",
+      },
+    ],
+  },
+  {
+    slug: "waste-image-labels",
+    number: "06",
+    category: "Data-centric machine learning",
+    title: "When the labels are the problem",
+    cardTitle: "When the Labels Are the Problem",
+    subtitle:
+      "A national image competition where the team's first move was to stop trusting the labels they had been handed.",
+    summary:
+      "Twenty-six thousand labelled images, and the suspicion - then the evidence - that a lot of the labels were wrong.",
+    type: "Team",
+    teamLabel: "Team",
+    status: "Code only",
+    context: "Satria Data, Big Data Challenge - national competition",
+    period: "2026",
+    role: "I worked the data-centric half: the anomaly quarantine, the confident-learning re-label pass, and the model that was trained on what came out of it. A teammate owned the document heuristic and a second architecture.",
+    flow: ["Labelled images", "Quarantine", "Re-label", "Filter", "Grouped split", "Train"],
+    tools: ["Python", "cleanlab", "OpenCV", "PyTorch", "Perceptual hashing"],
+    links: [],
+    cover: {
+      src: bdcPipeline,
+      alt: "Diagram: images arrive labelled, then pass through quarantine, re-labelling and a document filter before a duplicate-grouped split and training",
+      caption:
+        "The pipeline. This is a drawing of the process rather than a screenshot of it - the repository is private, and the figures from the notebooks are not exported yet.",
+    },
+    sections: [
+      {
+        kind: "text",
+        heading: "The starting suspicion",
+        body: [
+          "The task was to sort photographs of waste into three classes, and the organisers supplied the labels. The usual move is to accept them and spend the time on architectures.",
+          "The team did not. Looking through the set by eye turned up images that were obviously in the wrong class, and the question stopped being *which model* and became **how much of this labelling can be trusted at all**. That is a claim you have to prove rather than assert, so the work became about producing the evidence.",
+        ],
+      },
+      {
+        kind: "steps",
+        heading: "How the labels were tested",
+        items: [
+          "Quarantine first: anomaly detection to pull out files that were corrupt, truncated or not a photograph at all, so later stages were not reasoning about noise.",
+          "Confident learning to rank every image by how likely its given label was to be wrong, which turns a vague suspicion into a list somebody can actually review.",
+          "A simple image heuristic for the one pattern the eye kept catching: scanned brochures and documents filed under organic waste. Thousands of them.",
+          "Group near-duplicate images with perceptual hashing **before** splitting into training and validation, so the same photograph could not sit on both sides.",
+        ],
+      },
+      {
+        kind: "decisions",
+        heading: "Decisions",
+        items: [
+          {
+            title: "A flagged label is reviewed, not flipped",
+            body: "Confident learning produces a ranking, not a verdict. Letting it rewrite labels automatically would have replaced the organisers' mistakes with its own, so what it produced was a review list and a record of what was changed.",
+          },
+          {
+            title: "Duplicates are grouped before the split, not after",
+            body: "This is the decision that costs you a nice number. Near-duplicate photographs across the split make a validation score look much better than the model deserves; grouping them first makes the score smaller and honest, which is the only kind worth reading.",
+          },
+          {
+            title: "Every stage leaves a record",
+            body: "Each pass writes down which images it moved, out of which class, and on what grounds. A data-cleaning step that cannot be argued with is indistinguishable from a bug.",
+          },
+        ],
+      },
+      {
+        kind: "note",
+        body: "The repository is private and stays private, so there is no link here. Two figures do exist in the notebooks - the mislabel review and a cluster scatter of the image embeddings - and this page will carry them instead of the diagram once they are exported.",
+      },
+    ],
+  },
+  {
+    slug: "air-quality-index",
+    number: "07",
+    category: "Forecasting & public data",
+    title: "A day-ahead air quality index for East Java",
+    cardTitle: "Day-Ahead Air Quality for East Java",
+    subtitle:
+      "Turning a government index into something a reader can act on, including the rule that says when a day does not count.",
+    summary:
+      "A dashboard that projects each district's air quality a day ahead, and is honest about the hours it did not get.",
+    type: "Team",
+    teamLabel: "Team of 3",
+    status: "Live",
+    context: "Web Service Technology course",
+    period: "2026",
+    role: "Mine was the index conversion and the model notebook: turning raw hourly readings into the official government index under its own rules, and the forecasting work behind the day-ahead numbers. The dashboard itself and the deployment were a teammate's.",
+    flow: ["Hourly readings", "Official index", "Day-ahead forecast", "Checked against what arrived"],
+    tools: ["Python", "pandas", "scikit-learn", "FastAPI"],
+    links: [{ label: "Live dashboard", href: "https://web-prediksi-ispu.vercel.app/" }],
+    cover: {
+      src: ispuDashboard,
+      alt: "The dashboard header, a 24-hour prediction slider, and summary cards for the most and least polluted districts",
+      caption:
+        "The live dashboard. The map below this panel currently renders a tile-provider watermark; that is a deployment key, not a design choice.",
+    },
+    sections: [
+      {
+        kind: "text",
+        heading: "The problem",
+        body: [
+          "Air quality is published as hourly concentrations for several pollutants, which is useful to an instrument and useless to a person. The government index, ISPU, is what a person can act on - but turning readings into it is not an average.",
+          "The rule that matters is the one about missing data: a day only counts when enough of its hours were actually measured. A sensor that was down for most of a day must not produce a confident-looking number, and the obvious implementation - average what you have - produces exactly that.",
+        ],
+      },
+      {
+        kind: "decisions",
+        heading: "Decisions",
+        items: [
+          {
+            title: "The coverage rule is enforced, not assumed",
+            body: "The conversion checks how many hours a day actually has before it will report an index for it. A day that does not clear the bar is reported as not measured rather than as clean air.",
+          },
+          {
+            title: "Yesterday's forecast is checked against today's reading",
+            body: "A forecast that is never compared to what arrived is a claim nobody can test. Each earlier prediction is held against the reading that later came in, so the dashboard can be wrong in public.",
+          },
+          {
+            title: "The index is computed per pollutant, then reduced",
+            body: "ISPU is defined per pollutant with its own breakpoints, and the day's figure is the worst of them rather than their average - because the point of the index is the thing that would hurt you.",
+          },
+        ],
+      },
+      {
+        kind: "note",
+        body: "This was a team of three and the repository belongs to a teammate, so there is no repository link here - only the live dashboard. What is mine is stated above rather than implied by the page.",
+      },
+    ],
+  },
+  {
+    slug: "vault-retrieval",
+    number: "08",
+    category: "Retrieval & evaluation",
+    title: "Knowing when a search engine got worse",
+    cardTitle: "Knowing When a Search Got Worse",
+    subtitle:
+      "A hybrid search over a note vault, and the held-out set that killed the feature which looked like an improvement.",
+    summary:
+      "Search across a working knowledge vault, built around a held-out question set rather than around a demo.",
+    type: "Individual",
+    teamLabel: "Individual",
+    status: "Code only",
+    context: "A working tool, built for his own notes",
+    period: "2026",
+    role: "All of it: the retrieval, the fusion, the evaluation set and the decision to throw a feature away.",
+    flow: ["Notes", "Chunks", "Dense + keyword", "Fused", "Measured against held-out questions"],
+    tools: ["Python", "Chroma", "BM25", "Embeddings"],
+    links: [],
+    cover: {
+      src: agentRetrieval,
+      alt: "Diagram: a note vault feeding dense and keyword retrieval, fused by reciprocal rank fusion, then measured against a held-out question set",
+      caption:
+        "The shape of it. A drawing rather than a screenshot: this one is a command-line tool over a private vault, so there is no interface to photograph.",
+    },
+    sections: [
+      {
+        kind: "text",
+        heading: "The problem",
+        body: [
+          "A vault of working notes is only worth keeping if you can find the right note later. Keyword search misses anything phrased differently; embedding search misses exact names, file paths and identifiers, which is most of what a technical note is made of. Running both and merging them is the obvious answer.",
+          "The interesting part is not building that. It is knowing whether a change to it made things better or only looked like it did.",
+        ],
+      },
+      {
+        kind: "text",
+        heading: "The feature that had to go",
+        body: [
+          "Notes link to each other, so following those links to pull in neighbouring notes should help. It did: on the set of questions used while developing, the scores went up, and the sensible thing would have been to ship it.",
+          "On the held-out set they went **down**, and not slightly - the mean reciprocal rank fell from 0.88 to 0.68. So the link expansion was switched off, its weight is still sitting at zero in the code, and the comment next to it says why. That is the whole discipline in one line: a development set tells you what you want to hear, and the only defence is a question set you have not been tuning against.",
+        ],
+      },
+      {
+        kind: "decisions",
+        heading: "Decisions",
+        items: [
+          {
+            title: "The question set includes questions with no answer",
+            body: "If every question in the set has an answer somewhere, a system that always returns something confident scores well. Some questions are about things the vault does not contain, so saying nothing is the right behaviour and can be measured.",
+          },
+          {
+            title: "Two retrievers, fused by rank rather than by score",
+            body: "A keyword score and an embedding distance are not on the same scale and averaging them is meaningless. Fusing by position sidesteps that entirely.",
+          },
+          {
+            title: "Re-indexing is incremental, keyed on file contents",
+            body: "A vault that takes minutes to re-index is a vault nobody re-indexes. Each file carries a hash, so a run only touches what changed.",
+          },
+        ],
+      },
+      {
+        kind: "note",
+        body: "The vault this runs over is private working notes, so the repository holds the tools and not the content. There are no accuracy figures on this page beyond the one that caused a feature to be deleted, which is the only one that decided anything.",
       },
     ],
   },
