@@ -2822,17 +2822,12 @@
     }
   }
   /*
-    It leaves as a curtain, not as a fade, and the gesture is borrowed rather than
-    invented: the panel between pages rises out of the bottom of the screen to cover and
-    then carries on upward and off, on cubic-bezier(0.76, 0, 0.24, 1). Fading was the one
-    transition on this site speaking a different language, and it happened to be the one
-    at first impression.
-
-    The paper peels itself off the hero rather than a second panel arriving over it. An
-    ink curtain sweeping across the intro would be the house move too, but it puts a
-    black screen between a visitor and the first thing they came to see; this way the
-    page underneath is simply uncovered, from the bottom up, by the sheet that was
-    already there.
+    The other exit, under ?intro=paper: the sheet peels itself off the hero rather than a
+    second panel arriving over it, uncovering the page from the bottom up. It is quieter
+    and 320ms shorter, and it was the default until the two were put side by side -
+    Ilham chose the ink. Kept because it is the one that does not put a black screen
+    between a visitor and the first thing they came to see, which is an argument that
+    may come back.
   */
   html[data-intro="out"][data-intro-style="paper"] .intro {
     animation: intro-lift 760ms cubic-bezier(0.76, 0, 0.24, 1) forwards;
@@ -2858,10 +2853,11 @@
   }
 
   /*
-    The other exit, for comparison: an ink panel that rises over the composition and then
+    The exit, and the default: an ink panel that rises over the composition and then
     carries on upward and off, uncovering the hero. This is curtain-up followed by
     curtain-off at their own durations - literally the move this site makes between
-    pages, borrowed whole rather than imitated.
+    pages, borrowed whole rather than imitated, so arriving and moving around speak the
+    same language. The paper curtain above it is kept under ?intro=paper.
 
     It is a sibling of .intro rather than a child, and that is forced: the paper is
     hidden on the frame the ink finishes covering it, and visibility is inherited - as a

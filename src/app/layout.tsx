@@ -93,10 +93,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           themselves choose - measured, four tabs and a return landed on /about with the
           sequence still playing.
 
-          The exit comes in two styles and the script only names which one. ?intro=ink
-          asks for the ink panel that sweeps across and off, the move the site makes
-          between pages; anything else is the paper curtain, which is the default and
-          what an ordinary first visit gets. One timer serves both: 1200ms is past the
+          The exit comes in two styles and the script only names which one. The default,
+          and what an ordinary first visit gets, is the ink panel that sweeps across and
+          off - the move the site already makes between pages, so arriving and moving
+          around are one gesture. ?intro=paper asks for the other one, where the sheet
+          peels itself off the hero instead. One timer serves both: 1200ms is past the
           longer of the two, and the overlay is hidden and inert well before it.
 
           Enter and Space end it, so the overlay is not a trap without a pointer, and
@@ -118,7 +119,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               'if((s!=="on"&&s!=="ready")||!up())return;' +
               'if(e.key==="Tab"){e.preventDefault();return}' +
               'if(s==="ready"&&(e.key==="Enter"||e.key===" ")){e.preventDefault();out()}}' +
-              'function on(s){d.dataset.introStyle=s==="ink"?"ink":"paper";' +
+              'function on(s){d.dataset.introStyle=s==="paper"?"paper":"ink";' +
               'd.dataset.intro="on";addEventListener("pointerdown",out);' +
               'addEventListener("keydown",key);' +
               'setTimeout(function(){if(d.dataset.intro==="on")d.dataset.intro=up()?"ready":"off"},3500)}' +
