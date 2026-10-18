@@ -1185,11 +1185,26 @@
     quick but still a ripple, and the whole sink ends at 336ms, just before the first
     band arrives.
   */
+  /*
+    Coming back, the wait is the whole point.
+
+    Going down, the letters have to be gone before the tape arrives. Coming up they have
+    to stay away until it has left, and that is not the same instant: measured at
+    1920x1042, the box the name sits in is still 91% covered at 200ms after the switch,
+    27% at 300 and clear at about 500. Without a wait the letters started at 0ms and 53
+    of 64 were already standing by 300ms - the name assembled itself underneath tape
+    that was still crossing it.
+
+    --rise-wait holds the queue until the floor is out of the way. 360ms is where the
+    name's box is down to 8% covered; the last letter then lands at 696ms.
+  */
   .sink > span {
+    --rise-wait: 360ms;
     display: inline-block;
     translate: 0 0;
     transition: translate 210ms cubic-bezier(0.76, 0, 0.24, 1);
-    transition-delay: calc((var(--n, 10) - var(--i, 0)) * 7ms);
+    /* max() so a miscounted queue can shorten the stagger but never eat into the wait. */
+    transition-delay: calc(var(--rise-wait) + max(0ms, (var(--n, 10) - var(--i, 0)) * 7ms));
   }
   html[data-run="1"] .sink > span {
     /*
@@ -1233,7 +1248,8 @@
   }
   .sink-block > * {
     transition: translate 210ms cubic-bezier(0.76, 0, 0.24, 1);
-    transition-delay: 120ms;
+    /* Same wait as the letters: these sit lower, where the tape clears at the same time. */
+    transition-delay: 360ms;
   }
   html[data-run="1"] .sink-block > * {
     translate: 0 140%;

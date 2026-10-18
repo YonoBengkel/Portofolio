@@ -117,10 +117,29 @@ function Band({ band, i }: { band: (typeof BANDS)[number]; i: number }) {
  * piece's place in the queue and `--n` the length, so the stagger can run forwards going
  * down and backwards coming back up.
  */
-function Sink({ text, by = "letter", lead = 0 }: { text: string; by?: "letter" | "word"; lead?: number }) {
+function Sink({
+  text,
+  by = "letter",
+  lead = 0,
+  total,
+}: {
+  text: string;
+  by?: "letter" | "word";
+  lead?: number;
+  total?: number;
+}) {
   const pieces = by === "word" ? text.split(" ") : [...text];
+  /*
+    --n is the length of the whole queue, not of this line. The two lines of the name are
+    one queue - the second carries a `lead` so its pieces keep counting on from the first
+    - and the rise reads `--n - --i` to run the stagger backwards. With --n set per line,
+    the second line's indices ran past its own length and that subtraction went negative:
+    "Satria" started 84ms before the wait it was supposed to sit behind, which put it back
+    on screen while the tape was still crossing it. A line that is its own queue can leave
+    `total` out.
+  */
   return (
-    <span className="sink-line" style={{ "--n": pieces.length } as React.CSSProperties}>
+    <span className="sink-line" style={{ "--n": total ?? pieces.length } as React.CSSProperties}>
       {pieces.map((piece, i) =>
         piece === " " ? (
           <span key={i}> </span>
@@ -139,6 +158,8 @@ export function Hero() {
   const words = profile.name.split(" ");
   const first = words.slice(0, 2).join(" ");
   const last = words.slice(2).join(" ");
+  // Both lines of the name are one queue, so they share its length.
+  const queue = [...first].length + [...last].length;
 
   return (
     <section className="hero frame" aria-label="Introduction">
@@ -154,10 +175,10 @@ export function Hero() {
         <h1 className="display hero-name">
           <span className="sr-only">{profile.name}</span>
           <span className="hero-out" aria-hidden="true">
-            <Sink text={first} />
+            <Sink text={first} total={queue} />
             <br />
             <span className="marker marker-split">
-              <Sink text={last} lead={first.length} />
+              <Sink text={last} lead={first.length} total={queue} />
             </span>
           </span>
         </h1>
