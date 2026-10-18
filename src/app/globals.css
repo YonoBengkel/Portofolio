@@ -2782,7 +2782,7 @@
     cursor: pointer;
   }
   html[data-intro="out"] .intro {
-    animation: intro-lift 420ms cubic-bezier(0.32, 0, 0.24, 1) forwards;
+    animation: intro-lift 760ms cubic-bezier(0.32, 0, 0.24, 1) forwards;
   }
   /*
     The way out when the script never ran at all.
@@ -2800,7 +2800,7 @@
     not, the sequence plays in full and then lets go by itself at 4000ms.
   */
   html:not([data-intro]) .intro {
-    animation: intro-lift 420ms cubic-bezier(0.32, 0, 0.24, 1) 4000ms forwards;
+    animation: intro-lift 760ms cubic-bezier(0.32, 0, 0.24, 1) 4000ms forwards;
   }
   /*
     Scroll is locked while the overlay is up, and this is not tidiness.
@@ -2826,7 +2826,7 @@
     layer at 0.99. The alternative was to reserve a scrollbar gutter, which costs 15px of
     every phone screen for the whole visit to fix three seconds of one page.
 
-    The cost is a 420ms window during the fade where the page can be scrolled again. The
+    The cost is the length of the fade, during which the page can be scrolled again. The
     visitor has committed to entering by then, and they can see it move.
 
     Deliberately not extended to html:not([data-intro]): with scripting off the noscript
@@ -3115,8 +3115,13 @@
 
   /*
     No hold at the front any more. This used to be the tail of a 3000ms animation that
-    ran whether anyone was watching or not; it is 420ms that starts when the click lands,
-    so it begins at its first frame.
+    ran whether anyone was watching or not; it starts when the click lands, so it begins
+    at its first frame.
+
+    760ms, and the rise grew with it. At 420 the exit was over before it registered as an
+    exit - Ilham asked for longer. A longer move over the same 1.5% would only have read
+    as slow, so the paper travels 2.6% now: far enough that the eye follows it off rather
+    than watching it dissolve in place.
   */
   @keyframes intro-lift {
     0% {
@@ -3128,7 +3133,7 @@
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
-      translate: 0 -1.5%;
+      translate: 0 -2.6%;
     }
   }
 

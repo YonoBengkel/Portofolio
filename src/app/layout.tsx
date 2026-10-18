@@ -107,7 +107,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               'function up(){var e=document.querySelector(".intro");' +
               'return !!e&&getComputedStyle(e).display!=="none"}' +
               'function out(){if(d.dataset.intro!=="ready"||!up())return;' +
-              'd.dataset.intro="out";setTimeout(off,500)}' +
+              'd.dataset.intro="out";setTimeout(off,860)}' +
               'function key(e){var s=d.dataset.intro;' +
               'if((s!=="on"&&s!=="ready")||!up())return;' +
               'if(e.key==="Tab"){e.preventDefault();return}' +
