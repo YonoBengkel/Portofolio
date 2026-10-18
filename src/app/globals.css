@@ -2732,6 +2732,213 @@
     transition group made the browser capture a 10,000px element into a texture on every
     navigation, which is where the lag came from.
   */
+  /* ========================================================= title sequence */
+
+  /*
+    A dot that spins up into the mark, then slides aside and lets the name out of itself.
+
+    All of it is keyframes with a forwards fill, and that is a safety property rather
+    than a preference: the sequence ends in visibility: hidden and pointer-events: none
+    whatever happens to the script, including the script never running. An overlay that
+    needs JavaScript to get out of the way is a door. What the script does is only ever
+    to end it sooner - a second visit, a different page, reduced motion, or a click.
+
+    z-index 95, one above the curtain. On a first load nothing else should be over it,
+    and the curtain is the only thing that ever would be.
+  */
+  .intro {
+    position: fixed;
+    inset: 0;
+    z-index: 95;
+    display: grid;
+    place-items: center;
+    background: var(--paper);
+    animation: intro-lift 2500ms linear both;
+  }
+  /*
+    Off means it was never wanted: a second visit in this session, any page but the home
+    page, or reduced motion. display: none rather than opacity, so nothing of it is left
+    to catch a click.
+  */
+  html[data-intro="off"] .intro {
+    display: none;
+  }
+
+  /*
+    One font-size carries the whole composition. Every length below is in em, so the
+    sequence keeps its proportions from a phone to a wide monitor without a single
+    media query - and the distances the mark and the words travel stay in step with how
+    big they are, which is the thing that breaks first when this is done in pixels.
+  */
+  .intro-stage {
+    /*
+      The floor matters more than the ceiling here. At 2.4vw a 375px phone fell to the
+      10px minimum and the whole title card came out 175px wide - a third of the screen,
+      reading as a label rather than as a title. 3.6vw clears the floor on a phone and
+      still hits the 20px cap by about 560px, so desktop is unchanged.
+    */
+    font-size: clamp(13px, 3.6vw, 20px);
+    display: grid;
+    place-items: center;
+    color: var(--ink);
+    /*
+      Where the mark goes and where the words come out, as variables rather than as
+      numbers inside the keyframes. There are two arrangements - beside each other and
+      stacked - and they differ only in these three values, so there is one sequence
+      rather than two that have to be kept in step.
+    */
+    --mark-end: -11em 0;
+    --words-start: 50% 0;
+    --words-end: calc(50% - 4em) 0;
+    --words-shut: inset(0 100% 0 0);
+  }
+  .intro-mark {
+    display: block;
+    animation: intro-mark 2500ms both;
+  }
+  .intro-mark svg {
+    display: block;
+    width: 7em;
+    height: 7em;
+  }
+  .intro-words {
+    display: grid;
+    gap: 0.5em;
+    justify-items: start;
+    white-space: nowrap;
+    animation: intro-words 2500ms both;
+  }
+  .intro-words b {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 2.5em;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+  }
+  .intro-words span {
+    font-family: var(--font-mono);
+    font-size: 0.82em;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  /*
+    Stacked below 820px, and it sits below the rules it overrides rather than above
+    them. Placed before .intro-words, its justify-items lost to the base rule at equal
+    specificity and the name stayed left-aligned under a centred line - which is the
+    third time a rule in this file has quietly lost that way.
+
+    The number is measured rather than chosen. The mono line
+    holds 26 characters at 0.82em with 0.22em of tracking, which is about 520px once the
+    clamp has reached its 20px ceiling - and with the 140px mark and the gap beside it
+    the row needs 730px. At 820 that still fits; below it the line ran off the right edge,
+    which is how "DECISIONS" came to be cut in half on a phone.
+
+    Stacking also sidesteps the thing that made the side-by-side version fragile: the
+    mark's offset has to know how wide the words are, and nothing in CSS can tell it.
+    Centred over each other, neither needs to know anything about the other.
+  */
+  @media (max-width: 820px) {
+    .intro-stage {
+      --mark-end: 0 -2.8em;
+      --words-start: 0 0;
+      --words-end: 0 2.6em;
+      --words-shut: inset(100% 0 0 0);
+    }
+    .intro-words {
+      justify-items: center;
+      text-align: center;
+    }
+  }
+  .intro-stage > * {
+    grid-area: 1 / 1;
+  }
+
+  /*
+    1080 degrees, not an arbitrary angle. The mark is four-fold symmetric, so any
+    multiple of 90 lands identically - which means the spin can be timed for how it
+    feels rather than for where it stops. Three turns is what fills the first second
+    without the shape turning into a grey disc for longer than it reads as one.
+  */
+  @keyframes intro-mark {
+    0% {
+      opacity: 0;
+      scale: 0.05;
+      rotate: 0deg;
+    }
+    5% {
+      opacity: 1;
+    }
+    46% {
+      scale: 1.08;
+      rotate: 990deg;
+      translate: 0 0;
+    }
+    58% {
+      scale: 1;
+      rotate: 1080deg;
+      translate: 0 0;
+    }
+    74%,
+    100% {
+      opacity: 1;
+      scale: 1;
+      rotate: 1080deg;
+      translate: var(--mark-end);
+    }
+  }
+
+  /*
+    The words are wiped open from the left edge while they move right, so they read as
+    coming out of the mark rather than appearing beside it. The wipe starts at 60% -
+    just as the mark begins to move - so the two gestures overlap instead of queueing.
+  */
+  @keyframes intro-words {
+    0%,
+    58% {
+      opacity: 0;
+      /*
+        50% of the words' own width, which puts their left edge exactly on the centre -
+        where the mark is standing. A percentage in `translate` resolves against the
+        element itself, which is the only way to say this without knowing how wide the
+        words are.
+
+        Centring them instead left their left edge a long way to the left of the mark, so
+        the first sliver of the wipe appeared beside the logo rather than out of it: two
+        stray letter-edges floating in the margin, which reads as a glitch. Visible at
+        1650ms in the first render, which is why the frames were stepped through.
+      */
+      translate: var(--words-start);
+      clip-path: var(--words-shut);
+    }
+    64% {
+      opacity: 1;
+    }
+    86%,
+    100% {
+      opacity: 1;
+      /* Still measured from their own leading edge, settling clear of the mark. */
+      translate: var(--words-end);
+      clip-path: inset(-0.4em);
+    }
+  }
+
+  @keyframes intro-lift {
+    0%,
+    92% {
+      opacity: 1;
+      visibility: visible;
+      translate: 0 0;
+    }
+    100% {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      translate: 0 -1.5%;
+    }
+  }
+
   .curtain {
     position: fixed;
     inset: 0;
@@ -2831,6 +3038,8 @@
       measured. Each selector here matches the element that actually transitions, at the
       same specificity as the rule it overrides and later in the layer.
     */
+    .intro-mark,
+    .intro-words,
     .hero-alt .hero-band-in,
     .ascii-frame,
     .ascii-photo,
