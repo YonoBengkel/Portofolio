@@ -1,30 +1,26 @@
-// Check the hero's ink bands: every cream run between them is either one of the even
-// gaps inside a set, or nothing.
+// Check the hero's lattice of ink bands: nothing shows with the switch off, every band
+// is actually on screen, and every crossing stacks the way the component asked.
 //
 // Usage: node tools/check-hero-bands.mjs http://localhost:3000
 //
-// The bands are two sets of parallel strips that cross. Inside a set the gap is the same
-// at every point across the window, because the strips share a tilt; between the sets
-// there is no gap at all, because they overlap rather than meet. Anything else is a
-// wedge: two strips at different angles diverging, cream showing through wide at one end
-// and shut at the other. This hero has carried that bug twice - once with alternating
-// tilts up to eleven degrees apart, and once behind a `gap: -38px` that read like it
-// closed them but was invalid CSS and never applied. Geometry caught neither, so this
-// measures the painted pixels.
+// This replaces a checker built for an older arrangement, where the bands were two sets
+// of near-parallel strips and the thing worth guarding was the even cream gap between
+// them. There are no gaps now - the bands cross outright - so that test could only pass
+// vacuously. What is worth guarding instead is the three things the lattice can quietly
+// lose:
 //
-// Four things here were each a wrong answer first:
+//   - a band left showing with the switch off. The travel out of the window is derived
+//     per band from its own height and tilt, and a change to either silently shortens it.
+//     This has already shipped once: a band sat 87px inside the window at 1920.
+//   - a band buried. Every band is meant to be seen; with six of them overlapping, one
+//     can end up entirely behind the others and nobody notices.
+//   - a crossing stacking the wrong way. The order is explicit per band, and z-index is
+//     fragile: any ancestor that creates a stacking context reorders the whole lattice
+//     without an error.
 //
-//   - The band text is cream on ink, so a letter at the edge of a column reads exactly
-//     like a wedge. The run is hidden before measuring; without that, the "DATA" on the
-//     left edge reported as a 132px gap.
-//   - The header strip, the toggle and the chip are also light-on-dark. Guessing their
-//     class names missed two of them, so everything outside .hero-alt is hidden by
-//     walking the DOM instead.
-//   - Column x=0 sits on the clip boundary of .hero-alt and antialiases towards the
-//     page, which trips the threshold at a 4x zoom that shows solid ink. It is skipped.
-//   - The first version failed any cream at all, which was right only while the bands
-//     were one solid field. The gaps are deliberate now, so the test is that a run fits
-//     the budget the page's own angles imply, not that there are no runs.
+// Measured from painted pixels, not geometry. A band tilted 24 degrees has a bounding
+// rect 2156px tall at 1920 of which almost none is on screen, so rect arithmetic reports
+// leaks and coverage that are not there - which it did, to me, while this was written.
 import puppeteer from "puppeteer-core";
 import { PNG } from "pngjs";
 import fs from "node:fs";
@@ -34,105 +30,129 @@ import path from "node:path";
 const EDGE = String.raw`C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe`;
 const base = process.argv[2] ?? "http://localhost:3000";
 const out = fs.mkdtempSync(path.join(os.tmpdir(), "hero-bands-"));
-const SLACK = 6; // px, for edge antialiasing and sub-pixel gap rounding
+const MIN_VISIBLE = 1.0; // % of the window a band must paint to count as present
+const STEP = 2; // pixel sampling stride
+
+const isInk = (d, i) => d[i] < 120 && d[i + 1] < 100;
+const isRed = (d, i) => d[i] > 150 && d[i + 1] < 90 && d[i + 2] < 90;
+
+function count(file, test) {
+  const png = PNG.sync.read(fs.readFileSync(file));
+  let n = 0;
+  let total = 0;
+  for (let y = 0; y < png.height; y += STEP) {
+    for (let x = 0; x < png.width; x += STEP) {
+      total++;
+      if (test(png.data, (png.width * y + x) << 2)) n++;
+    }
+  }
+  return { n, total };
+}
+
+// Everything outside the band field is hidden before measuring: the header strip, the
+// switch and the chip are light-on-dark too, and guessing their class names missed two
+// of them when this was first written. Walking the DOM is the version that holds.
+const isolate = () => {
+  const field = document.querySelector(".hero-alt");
+  document.querySelectorAll("body *").forEach((el) => {
+    if (el.closest(".hero-alt") || el.contains(field)) return;
+    el.style.visibility = "hidden";
+  });
+};
 
 const browser = await puppeteer.launch({ executablePath: EDGE, headless: "new", args: ["--hide-scrollbars"] });
 let failures = 0;
 
-for (const vw of [1440, 1920, 375]) {
+for (const [vw, vh] of [[1920, 1042], [1440, 900], [375, 812]]) {
   const page = await browser.newPage();
-  await page.setViewport({ width: vw, height: 900 });
+  await page.setViewport({ width: vw, height: vh });
   await page.goto(base, { waitUntil: "networkidle2", timeout: 60000 });
+  await page.evaluate(isolate);
 
-  await page.evaluate(() => {
-    const field = document.querySelector(".hero-alt");
-    document.querySelectorAll("body *").forEach((el) => {
-      if (el.closest(".hero-alt") || el.contains(field)) return;
-      el.style.visibility = "hidden";
-    });
-    document.querySelectorAll(".hero-band-run").forEach((e) => (e.style.visibility = "hidden"));
-    document.documentElement.setAttribute("data-run", "1");
-  });
+  // 1. nothing painted with the switch off
+  await new Promise((r) => setTimeout(r, 1200));
+  const offFile = path.join(out, `off-${vw}.png`);
+  await page.screenshot({ path: offFile });
+  const off = count(offFile, isInk);
+  const offOk = off.n === 0;
+  if (!offOk) failures++;
+  console.log(`${offOk ? "ok  " : "FAIL"} ${vw}x${vh} switch off: ${off.n} ink pixels${offOk ? "" : ` - see ${offFile}`}`);
+
+  await page.evaluate(() => document.documentElement.setAttribute("data-run", "1"));
   await new Promise((r) => setTimeout(r, 2600));
 
-  const box = await page.evaluate(() => {
-    const r = document.querySelector(".hero-alt").getBoundingClientRect();
-    const x = Math.max(0, Math.round(r.left));
-    const y = Math.max(0, Math.round(r.top));
-    return { x, y, width: Math.min(innerWidth - x, Math.round(r.width)), height: Math.min(innerHeight - y, Math.round(r.height)) };
-  });
-  const file = path.join(out, `bands-${vw}.png`);
-  await page.screenshot({ path: file, clip: box });
-
-  const png = PNG.sync.read(fs.readFileSync(file));
-  const dark = (x, y) => {
-    const i = (png.width * y + x) << 2;
-    return png.data[i] < 120 && png.data[i + 1] < 100;
-  };
-
-  // What the gaps are allowed to be, derived from the page rather than hard-coded, so
-  // the check follows the stylesheet instead of drifting from it.
-  //
-  // The bands inside a set are not exactly parallel: each carries a fraction of a degree
-  // of wobble so no two sit at the same angle. A pair that differs by d degrees holds its
-  // gap only in the middle of the window and opens by half-window times tan(d) towards
-  // one edge, so the honest ceiling is the gap plus that. Taking the largest adjacent
-  // difference in either set makes this the real budget rather than a guess, and keeps
-  // the test tight when the wobble is small instead of silently allowing a wedge.
-  const { gap, limit, worstPair } = await page.evaluate(() => {
-    const gap = parseFloat(getComputedStyle(document.querySelector(".hero-set")).rowGap);
-    // Read the `rotate` property, not `transform`. These elements use the individual
-    // transform properties, so their computed `transform` is "none" and a DOMMatrix
-    // built from it is the identity - which silently reported a wobble budget of zero.
-    const deg = (el) => {
-      const r = getComputedStyle(el).rotate;
-      if (!r || r === "none") return 0;
-      const m = r.match(/(-?[\d.]+)deg/); // "-3deg" or "0 0 1 -3deg"
-      return m ? parseFloat(m[1]) : 0;
-    };
-    let worst = 0;
-    let worstPair = "";
-    document.querySelectorAll(".hero-set").forEach((set) => {
-      const setDeg = deg(set);
-      // the band's own wobble composes with its set's tilt
-      const bands = [...set.querySelectorAll(".hero-band")].map((el) => Math.tan(((setDeg + deg(el)) * Math.PI) / 180));
-      for (let i = 1; i < bands.length; i++) {
-        const d = Math.abs(bands[i] - bands[i - 1]);
-        if (d > worst) { worst = d; worstPair = `${set.className.split(" ").pop()} ${i}/${i + 1}`; }
-      }
-    });
-    return { gap, limit: gap + (window.innerWidth / 2) * worst, worstPair };
-  });
-
-  let worst = 0;
-  let worstX = -1;
-  let columns = 0;
-  for (let x = 4; x < png.width; x += 4) {
-    let first = -1;
-    let last = -1;
-    for (let y = 0; y < png.height; y++) if (dark(x, y)) { if (first < 0) first = y; last = y; }
-    if (first < 0) continue;
-    columns++;
-    let run = 0;
-    let longest = 0;
-    for (let y = first; y <= last; y++) {
-      if (dark(x, y)) run = 0;
-      else { run++; longest = Math.max(longest, run); }
-    }
-    if (longest > worst) { worst = longest; worstX = x; }
+  // 2. every band paints something. Band k is turned red and the red is counted, so
+  //    occlusion by the others is included without any geometry being assumed.
+  await page.evaluate(() => document.querySelectorAll(".hero-band-run").forEach((e) => (e.style.visibility = "hidden")));
+  const n = await page.evaluate(() => document.querySelectorAll(".hero-band-in").length);
+  const hidden = [];
+  for (let k = 0; k < n; k++) {
+    await page.evaluate((k) => {
+      document.querySelectorAll(".hero-band-in").forEach((e, i) => (e.style.background = i === k ? "#e4002b" : ""));
+    }, k);
+    await new Promise((r) => setTimeout(r, 100));
+    const f = path.join(out, `band-${vw}-${k}.png`);
+    await page.screenshot({ path: f });
+    const { n: red, total } = count(f, isRed);
+    const pct = (red / total) * 100;
+    if (pct < MIN_VISIBLE) hidden.push(`${k}:${pct.toFixed(1)}%`);
+    fs.rmSync(f, { force: true });
   }
+  const visOk = hidden.length === 0;
+  if (!visOk) failures++;
+  console.log(`${visOk ? "ok  " : "FAIL"} ${vw}x${vh} all ${n} bands on screen${visOk ? "" : ` - buried: ${hidden.join(" ")}`}`);
 
-  const ok = worst <= limit + SLACK;
-  if (!ok) failures++;
-  console.log(
-    `${ok ? "ok  " : "FAIL"} ${vw}px  gap ${gap.toFixed(0)}px, wobble allows up to ${limit.toFixed(0)}px ` +
-      `(worst pair ${worstPair}), widest cream run ${worst}px` +
-      (ok ? "" : ` at x=${worstX} - ${(worst - limit).toFixed(0)}px over budget; see ${file}`) +
-      `  (${columns} columns)`,
-  );
+  // 3. every visible crossing stacks by the declared z
+  await page.evaluate(() => {
+    document.querySelectorAll(".hero-band-in").forEach((e) => (e.style.background = ""));
+    document.querySelectorAll(".hero-band-run").forEach((e) => (e.style.visibility = ""));
+  });
+  const wrong = await page.evaluate(() => {
+    const els = [...document.querySelectorAll(".hero-band")];
+    document.querySelector(".hero-alt").style.pointerEvents = "auto";
+    els.forEach((e) => (e.style.pointerEvents = "auto"));
+    const geo = els.map((el) => {
+      const inn = el.querySelector(".hero-band-in");
+      const r = inn.getBoundingClientRect();
+      const m = getComputedStyle(el).rotate.match(/(-?[\d.]+)deg/);
+      return { cx: r.left + r.width / 2, cy: r.top + r.height / 2, t: ((m ? parseFloat(m[1]) : 0) * Math.PI) / 180, h: inn.offsetHeight, w: inn.offsetWidth, z: +getComputedStyle(el).zIndex };
+    });
+    const inside = (g, x, y) => {
+      const dx = x - g.cx;
+      const dy = y - g.cy;
+      const u = dx * Math.cos(-g.t) - dy * Math.sin(-g.t);
+      const v = dx * Math.sin(-g.t) + dy * Math.cos(-g.t);
+      return Math.abs(u) <= g.w / 2 && Math.abs(v) <= g.h / 2;
+    };
+    const bad = [];
+    for (let i = 0; i < els.length; i++) {
+      for (let j = i + 1; j < els.length; j++) {
+        let pt = null;
+        let hits = 0;
+        for (let y = 4; y < innerHeight && !pt; y += 6) {
+          for (let x = 4; x < innerWidth; x += 6) {
+            if (inside(geo[i], x, y) && inside(geo[j], x, y) && ++hits > 40) { pt = [x, y]; break; }
+          }
+        }
+        if (!pt) continue;
+        const stack = document.elementsFromPoint(pt[0], pt[1]).map((e) => e.closest(".hero-band")).filter(Boolean);
+        const pi = stack.indexOf(els[i]);
+        const pj = stack.indexOf(els[j]);
+        const painted = pi >= 0 && (pj < 0 || pi < pj) ? i : j;
+        const declared = geo[i].z > geo[j].z ? i : j;
+        if (painted !== declared) bad.push(`${i}x${j}`);
+      }
+    }
+    return bad;
+  });
+  const zOk = wrong.length === 0;
+  if (!zOk) failures++;
+  console.log(`${zOk ? "ok  " : "FAIL"} ${vw}x${vh} crossings stack by z${zOk ? "" : ` - wrong: ${wrong.join(" ")}`}`);
+
+  fs.rmSync(offFile, { force: true });
   await page.close();
 }
 
 await browser.close();
-console.log(failures ? `\n${failures} failing` : "\nno wedges");
+console.log(failures ? `\n${failures} failing` : "\nlattice holds");
 process.exit(failures ? 1 : 0);

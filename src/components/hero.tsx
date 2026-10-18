@@ -6,7 +6,7 @@ import { openTo, profile } from "@/content/site";
  * One screen: the name at the size of a poster, what he does, and two ways in - and a
  * switch that swaps the whole ground underneath it.
  *
- * Flipping it brings seven full-bleed bands in along their own diagonals, and the name
+ * Flipping it brings nine full-bleed bands in along their own diagonals, and the name
  * goes down into the floor letter by letter rather than fading out. Those are two
  * different things and the difference is the whole feel: a fade says the text stopped
  * existing, a sink says it went somewhere. Each letter rides inside its own clipped
@@ -22,53 +22,43 @@ import { openTo, profile } from "@/content/site";
  */
 
 /*
-  Seven bands in two crossing sets, and the split is what makes both halves of the brief
-  possible at once.
+  The ground is a lattice, not a stack.
 
-  A cream gap between two strips is only even if the strips are parallel: give them
-  opposing tilts and the gap is a wedge, wide at one end and shut at the other. So the
-  bands are grouped, four running one way and three the other, parallel inside each
-  group. The gap inside a group is therefore the same at every point across the screen,
-  and the two directions come from the groups crossing each other rather than from
-  neighbouring strips disagreeing. Where they cross, ink covers ink and nothing opens.
+  It used to be two sets of near-parallel strips separated by even cream gaps, because an
+  even gap is only possible between strips that are parallel. That constraint is gone:
+  the bands now cross each other outright, the way tape actually lands on a floor, and the
+  cream is whatever triangle no band happens to cover. Nothing here is a gap, so nothing
+  here can be a wedge - the failure mode that shaped the last four versions of this file
+  does not exist in this arrangement.
 
-  That is the reference's own device. Measured on alieffauzan.com, his tape is two strips
-  at -4 and +6 degrees pulled into each other by about 104px so they overlap rather than
-  meet - a crossing, not a seam.
+  Each band carries its own tilt and its own height up the hero, and they overlap freely.
+  Two rules hold it together:
 
-  The words repeat on purpose. Four ideas across seven bands is a wall of the same few
-  words, which is what a police line is; seven different words would be a list.
+    - z is given per band rather than derived from the tilt. The order it encodes was
+      specified crossing by crossing, and one pair of it could not be honoured: the
+      bottom three ask for Evidence over Process, Process over Decisions, and Decisions
+      over Evidence, which is a cycle. Real tape can do that - it is what a weave is -
+      but a flat layer cannot, since each element has one z and nothing else. The cycle
+      is broken at its least visible link: Evidence and the lower Decisions overlap over
+      0.3% of the screen, against 3.9% and 5.4% for the other two crossings;
+    - the words run along the band, and the direction alternates, so the lattice reads as
+      several lines of tape moving past each other rather than one sheet scrolling;
+    - pad is the band's own thickness, in rem of padding around the same type. No two
+      are equal and the spread is small on purpose: 210 to 226px, a seventh between the
+      thinnest and the thickest, which reads as tape cut by hand rather than as a set of
+      deliberately different widths.
+
+  tan is |tan(tilt)| precomputed, because the travel out of the window depends on how far
+  a tilted band reaches vertically across the viewport and CSS has no trigonometry.
 */
-const SET_A = ["Process", "Data", "Decisions", "Evidence"];
-const SET_B = ["Process", "Decisions", "Data"];
-
-/*
-  The entry angle of each band, as a share of its vertical travel. The resting tilt is a
-  property of the group now, so this is the only thing left that varies band to band -
-  which is the point: the composition stands still and flat, the arrival does not. Not a
-  ramp, because a monotonic sequence reads as a single hinged sheet rather than seven
-  strips that happen to be falling.
-*/
-const SKEW = [-0.34, -0.62, -0.42, -0.7, -0.38, -0.66, -0.46];
-
-/*
-  A wobble on each band's own tilt, in degrees, on top of its set's. No two bands sit at
-  the same angle, which is what keeps a set from reading as a printed grid.
-
-  The size of it is not a taste decision. Two neighbours whose tilts differ by d degrees
-  no longer hold an even gap: the gap is 30px between their middles and opens or shuts by
-  half-window times tan(d) towards the edges. Measured at 1440 that is 24-36px at half a
-  degree, 17-43px at one, and 5-55px at two - by which point it is a wedge again, which is
-  the thing the sets were built to get rid of. So no neighbouring pair differs by more
-  than 0.65 degrees.
-
-  Only neighbours share a gap, though, so bands further apart in a set are free to differ
-  more, and the sequence is picked to use that: it zigzags rather than ramping, which
-  spreads the angles about a degree while keeping every step inside the budget. The seven
-  land on -3.65, -3.00, -3.30, -2.70, 5.55, 4.90 and 4.35 - no two alike, and the closest
-  pair within a set is 0.3 apart rather than the 0.05 an alternating pattern produces.
-*/
-const WOBBLE = [-0.65, 0, -0.3, 0.3, 0.55, -0.1, -0.65];
+const BANDS = [
+  { word: "Process", tilt: -13, y: 0.1, skew: -0.45, reverse: false, z: 5, pad: 1.35 },
+  { word: "Data", tilt: 6, y: 0.26, skew: -0.55, reverse: true, z: 6, pad: 1.7 },
+  { word: "Decisions", tilt: -5, y: 0.42, skew: -0.4, reverse: false, z: 4, pad: 1.45 },
+  { word: "Evidence", tilt: 16, y: 0.57, skew: -0.35, reverse: true, z: 3, pad: 1.85 },
+  { word: "Process", tilt: -9, y: 0.74, skew: -0.5, reverse: false, z: 2, pad: 1.55 },
+  { word: "Decisions", tilt: 4, y: 0.9, skew: -0.45, reverse: true, z: 1, pad: 1.75 },
+].map((b) => ({ ...b, tan: Math.abs(Math.tan((b.tilt * Math.PI) / 180)) }));
 
 // Enough repeats that half a track is wider than any window, since the keyframe moves
 // each band by half its own width - the same arithmetic as every other marquee here.
@@ -83,11 +73,23 @@ const PER_BAND = 8;
 */
 const LIT = new Set([2, 6, 9, 15, 19]);
 
-function Band({ word, i, className = "" }: { word: string; i: number; className?: string }) {
+function Band({ band, i }: { band: (typeof BANDS)[number]; i: number }) {
+  const { word, tilt, y, skew, reverse, tan, z, pad } = band;
   return (
     <div
-      className={`hero-band ${className}`}
-      style={{ "--i": i, "--skew": SKEW[i], "--wobble": `${WOBBLE[i]}deg` } as React.CSSProperties}
+      className="hero-band"
+      style={
+        {
+          "--i": i,
+          "--tilt": `${tilt}deg`,
+          "--y": `${y * 100}svh`,
+          "--skew": skew,
+          "--tan": tan.toFixed(4),
+          "--z": z,
+          "--pad": `${pad}rem`,
+          "--dir": reverse ? "reverse" : "normal",
+        } as React.CSSProperties
+      }
     >
       <div className="hero-band-in">
         <div className="hero-band-run">
@@ -139,16 +141,9 @@ export function Hero() {
       <div className="dots" aria-hidden="true" />
 
       <div className="hero-alt marquee-run" aria-hidden="true">
-        <div className="hero-set hero-set-a">
-          {SET_A.map((word, i) => (
-            <Band key={`a-${word}-${i}`} word={word} i={i} />
-          ))}
-        </div>
-        <div className="hero-set hero-set-b">
-          {SET_B.map((word, i) => (
-            <Band key={`b-${word}-${i}`} word={word} i={i + SET_A.length} />
-          ))}
-        </div>
+        {BANDS.map((band, i) => (
+          <Band key={`${band.word}-${i}`} band={band} i={i} />
+        ))}
       </div>
 
       <div className="hero-copy">

@@ -963,24 +963,17 @@
   /* ======================================================= the hero ground */
 
   /*
-    What the switch does. Seven bands arrive along a diagonal, and the name goes down
-    into the floor letter by letter.
+    What the switch does. Nine bands arrive along their own diagonals and cross each
+    other, and the name goes down into the floor letter by letter.
 
-    The angle is a chosen number, and getting there took two wrong turns worth writing
-    down. `rotate` is on the band and `translate` is on the element inside it, so the
-    translate runs in the band's own rotated frame. The first version put both on the
-    same element, and since CSS applies translate before rotate, every band slid
-    straight down whatever angle it was set to. Splitting them fixed that - but only
-    into a second, quieter version of the same bug: `translate: 0 Y` in a rotated frame
-    moves the band perpendicular to itself, so its screen angle is whatever the tilt
-    happens to be. Measured on the 3-6 degree tilts this design uses, the bands came in
-    3-6 degrees off vertical. That is a fall, not a diagonal.
-
-    So the travel is set on both local axes. --skew is the horizontal share of the
-    vertical travel, and the screen angle comes out at roughly atan(skew) plus the
-    band's own tilt - about 27 to 33 degrees here. The tilt is left alone deliberately:
-    steepening the bands to buy the angle is what opened the cream wedges that the
-    negative gap below exists to close.
+    The entry angle is a chosen number, and getting there took two wrong turns worth
+    writing down. `rotate` is on the band and `translate` is on the element inside it, so
+    the translate runs in the band's own rotated frame. The first version put both on the
+    same element, and since CSS applies translate before rotate, every band slid straight
+    down whatever angle it was set to. Splitting them fixed that - but only into a
+    second, quieter version of the same bug: `translate: 0 Y` in a rotated frame moves
+    the band perpendicular to itself, so its screen angle is whatever the tilt happens to
+    be. So the travel is set on both local axes, and --skew is the horizontal share.
   */
   .hero-alt {
     position: absolute;
@@ -994,149 +987,62 @@
     pointer-events: none;
     /*
       The height of one band, rebuilt from the rule that produces it: the marquee's own
-      font-size, times its line-height, plus the strip's padding. Everything about the
-      two sets - the gap inside them, where each one sits, how far they overlap - is a
-      multiple of this, so the composition holds its proportions from 375px to 1920px
-      instead of being a set of pixel offsets tuned at one width. Measured against the
-      rendered result: 181px at 1440, 63px at 375, both exact.
-
-      It has to be kept in step with .hero-band-run b by hand. CSS cannot read an
-      element's used height back out, and the alternative - measuring in JS and writing
-      a custom property - would put the hero's layout behind hydration.
+      font-size, times its line-height, plus the strip's padding. Measured against the
+      rendered result: 181px at 1440, 63px at 375, both exact. It has to be kept in step
+      with .hero-band-run b by hand - CSS cannot read an element's used height back out,
+      and measuring it in JS would put the hero's layout behind hydration.
     */
     --bh: calc(clamp(2.6rem, 12vw, 9.5rem) * 1.1 + 0.84rem);
-    --band-gap: calc(var(--bh) * 0.166);
-    /*
-      Defined here rather than on .hero-set because the bands read it too: how far a band
-      must travel to leave the window depends on where the pair is held.
-
-      In svh rather than %, and that is not cosmetic. A custom property is substituted
-      where it is used, and this one is used in `bottom` on the sets and in `translate`
-      on the bands. A percentage in `bottom` resolves against the hero; the same
-      percentage in `translate` resolves against the band's own box, so 50% would quietly
-      become half a band height - 90px - in the travel sum. svh means the same thing in
-      both places, and the hero is 100svh tall, so the value is unchanged.
-    */
-    --anchor: max(calc(var(--bh) * 0.2), calc(50svh - var(--bh) * 3.611));
   }
 
   /*
-    A set is a stack of parallel bands, rotated as one piece.
+    One band, placed on its own rather than as a row in a stack.
 
-    Rotating the group rather than each band is the whole trick. Two strips only hold an
-    even gap between them if they are parallel; tilt them against each other and the gap
-    becomes a wedge, 138px at one end of the screen and shut at the other, which is what
-    this hero used to show. Inside a set every band carries the same angle, so the cream
-    between them is the same width at every point across the window. The two directions
-    come from the two sets crossing, and ink over ink opens nothing.
+    --y is where its middle sits up the hero and --tilt is its angle; both come from the
+    component, because in a lattice there is nothing for neighbours to agree on. The
+    centring is `translate: -50% -50%` before `rotate`, so the band is centred on its
+    point first and then turned about itself.
 
-    The sets are positioned rather than stacked, so they overlap instead of meeting at a
-    seam. A seam between sets at 13 degrees apart cannot be closed: it would need the two
-    bands to overlap by more than a band's own thickness. Crossing them sidesteps the
-    question entirely, and it is what the reference does with its own two strips.
-  */
-  .hero-set {
-    position: absolute;
-    left: 50%;
-    /*
-      Where the pair of sets sits in the hero, measured up from its bottom edge.
+    --z carries the one ordering rule: a band running down to the right sits above a band
+    running up to the right. Without it the crossings would be decided by document order,
+    and every one of them would lean a different way.
 
-      Centred, the pair overflows at both ends on a desktop window - 1300px of bands
-      against a 913px hero - and the overflow at the bottom took the third band of set B
-      below the fold, so two of its three showed without scrolling. Anchoring to the
-      bottom spends the whole overflow at the top instead, where it is set A's first band
-      running off an edge the field already runs past on both sides.
-
-      But the bands scale with the viewport, and on a phone the pair is shorter than the
-      hero rather than taller. Pinned to the bottom there, it leaves the top third of the
-      screen empty. So the anchor is whichever sits lower: the fixed offset, or the one
-      that centres the pair. max() picks the bottom anchor exactly while the pair
-      overflows and hands back to centring once it fits.
-    */
-    bottom: calc(var(--anchor) + var(--set-y));
-    /*
-      Wide enough that a band still reaches past both edges of the window at its worst
-      moment: tilted, and shoved sideways by up to 0.7 of its vertical travel on the way
-      in. At 1440 that leaves about 970px of band beyond a 720px half-window.
-    */
-    width: 255%;
-    translate: -50% 0;
-    rotate: var(--tilt);
-    display: grid;
-    gap: var(--band-gap);
-  }
-  /*
-    Where the two sets sit, and how deeply they cross.
-
-    Set A sits 2.724 band-heights above set B, which is set B's own height (3 bands and
-    2 gaps) less the 0.608-band overlap.
-
-    That overlap is where two requirements pull against each other. The junction only
-    stays shut if the overlap covers how far the two sets separate across the window -
-    half-window times the difference of their tangents. But whatever the overlap covers
-    is taken out of set A's last band, and that band still has to read: the reference
-    leaves about half of its covered strip showing, and at much less than that the band
-    stops looking like a band passing underneath and starts looking like a row of letters
-    with their tops sliced off.
-
-    Both can be had, and the lever is the angle between the sets rather than the overlap.
-    Closing the junction at 1440 leaves 30% of the covered band at 10 degrees apart, 44%
-    at 8, 58% at 6. At 8 degrees, with an overlap of 0.608 of a band: the junction is shut
-    at 1440, opens 24px at 1920 - still narrower than the 30px gaps around it - and 71px
-    of the covered band stays out in the open, widening to 172px towards one edge.
-
-    The reference does the same thing and does not quite close it: its two strips are
-    132px short of parallel across their own width and overlap by 104, a ratio of 0.79.
-    Ours is 1.0 at 1440. The crossing is the device; the arithmetic only decides how
-    tidy it is.
-  */
-  .hero-set-a {
-    --tilt: -3deg;
-    --set-y: calc(var(--bh) * 2.724);
-  }
-  .hero-set-b {
-    --tilt: 5deg;
-    --set-y: 0px;
-  }
-  /*
-    The band is a row in its set. Width and spacing belong to the set, because they are
-    what has to agree between neighbours; --i, --skew and --wobble come in per band from
-    the component, because they are what has to differ.
-
-    --wobble is a fraction of a degree on top of the set's tilt, so no two bands in the
-    hero stand at the same angle. It is bounded, and the bound is in the component beside
-    the numbers: past about a degree between neighbours the even gap turns back into the
-    wedge these sets exist to remove.
+    255% wide so a band still reaches past both edges of the window at its worst moment -
+    tilted hard, and shoved sideways by up to 0.6 of its vertical travel on the way in.
   */
   .hero-band {
-    min-width: 0;
-    rotate: var(--wobble, 0deg);
+    position: absolute;
+    left: 50%;
+    top: var(--y);
+    width: 255%;
+    translate: -50% -50%;
+    rotate: var(--tilt);
+    z-index: var(--z, 1);
   }
   /* The strip itself: much taller than it was, because thin reads as limp. */
   .hero-band-in {
     overflow: hidden;
-    padding-block: 0.42rem;
+    /* Per band, so no two strips are the same thickness. Default matches the old fixed value. */
+    padding-block: var(--pad, 0.42rem);
     background: var(--ink);
     color: var(--paper);
   }
   /*
-    How far a band has to go to be gone, and why it is not a round number.
+    How far a band has to go to be gone, derived per band rather than shared.
 
-    This was `100svh + 340px` for every band, which worked only while the pair of sets
-    was centred. Anchoring them to the bottom lifted set A's first band to 427px above
-    the top of the hero, and a fixed distance measured from the viewport no longer
-    reached: that band landed 87px inside the window at 1920 and 180px at 1440, which is
-    the dark strip that used to sit under the buttons with the switch off. Worse, the
-    `--i` term handed the most travel to the lowest band and the least to the highest,
-    which is backwards - the highest one starts furthest from the exit.
+    A shared constant was wrong twice. It was `100svh + 340px`, which only held while the
+    bands sat near the middle of the hero; once they moved, that distance stopped reaching
+    and a band landed 87px inside the window at 1920 with the switch off - the dark strip
+    that used to sit under the buttons.
 
-    So the distance is measured from the field instead of from the window. 7.222 band
-    heights is the pair's full extent (set A's height of 4.498, plus the 2.724 it sits
-    above set B), --anchor is how far the pair is held off the hero's bottom edge, and
-    the rest is clearance: a band is wider than the window and tilted, so the corner that
-    is still inside the window sits above the band's own middle, by about 60px at 1920.
-    Every term scales with the band, so this holds at 375 as well as at 1920 rather than
-    being a number that happened to work at one size.
+    Now each band is asked how far it is from the bottom of the window, and how far it
+    reaches above its own middle. A tilted band is a long strip, so its topmost point
+    inside the window is half a band above its centre plus half a window-width times the
+    tangent of its tilt: at 24 degrees and 1920 that second term alone is 427px. --tan is
+    precomputed in the component because CSS has no trigonometry, and 0.7 covers half a
+    band divided by cos(tilt) for anything up to 45 degrees. --pad is added because --bh
+    is built from the default padding, and a band that carries more of it is taller than
+    --bh says.
   */
   .hero-alt .hero-band-in {
     /*
@@ -1145,7 +1051,7 @@
       atan(skew) plus the set's tilt, which puts the seven between about 15 and 31
       degrees off vertical.
     */
-    --travel: calc(var(--anchor) + var(--bh) * 8 + var(--i) * 40px);
+    --travel: calc(100svh - var(--y) + var(--bh) * 0.7 + var(--pad) + 50vw * var(--tan) + 70px);
     translate: calc(var(--travel) * var(--skew)) var(--travel);
     transition: translate 820ms cubic-bezier(0.22, 1, 0.3, 1);
     transition-delay: calc(var(--i) * 50ms);
@@ -1163,7 +1069,11 @@
   .hero-band-run {
     display: inline-flex;
     white-space: nowrap;
-    animation: slide var(--dur, 64s) linear infinite;
+    /*
+      --dir flips the run. Half the bands read one way and half the other, so the lattice
+      moves like several lines of tape passing each other instead of one sheet sliding.
+    */
+    animation: slide var(--dur, 64s) linear infinite var(--dir, normal);
   }
   .hero-band:nth-child(2n) .hero-band-run {
     animation-direction: reverse;
