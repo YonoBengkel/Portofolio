@@ -1191,26 +1191,30 @@
     Going down, the letters have to be gone before the tape arrives. Coming up they have
     to stay away until it has left, and that is not the same instant.
 
-    The first attempt put the wait at 360ms, which is when the box the name sits in is
-    down to 8% covered. That was the wrong test: the name's own box being clear is not
-    the tape being gone, and at 360ms there were still 21,000 ink pixels on the screen -
-    bands crossing everywhere else. Counting painted pixels rather than checking one
-    rectangle gives the real curve after the switch:
+    Where to put that wait took three goes, and the useful part is that the three are
+    different questions about the same moment. Counting painted pixels in three zones as
+    the tape slides off:
 
-        311ms  55,802 ink pixels
-        470ms  21,254
-        612ms   7,036
-        761ms     690
-        906ms       3
-       1107ms       0
+        time    centre column    the area the copy occupies    whole screen
+        218ms         35%                    47%                    39%
+        311ms         19%                    19%                    25%
+        405ms          3%                     5%                    17%
+        513ms          0%                     0%                     6%
+        854ms          0%                     0%                     0%
 
-    So 900ms, which is where the floor has actually gone. The last letter lands at
-    1243ms. That is slower than it was, and it is the point: the rule here is the one
-    Ilham asked for - the tape leaves, then the name arrives, with nothing shared
-    between them.
+    360ms was the first try, taken from when the name's own box was 8% covered - too
+    early, and wrong in kind: the name's box being clear is not the tape being clear,
+    and there were still bands crossing everywhere else. 900ms was the second, taken
+    from the last column, which is honest but waits on tape at the far edges that is
+    nowhere near the words.
+
+    500ms is the middle column, and it is the one that matches what the eye is actually
+    waiting for: the tape has passed the centre and nothing covers the ground the copy
+    is about to stand on. The far edges are still clearing, and that is fine - they are
+    not where anybody is looking. The last letter lands at 1153ms.
   */
   .sink > span {
-    --rise-wait: 900ms;
+    --rise-wait: 500ms;
     display: inline-block;
     translate: 0 0;
     /*
@@ -1273,8 +1277,8 @@
   .sink-block > * {
     /* Same split as the letters: unhurried coming back, quick going down. */
     transition: translate 520ms cubic-bezier(0.33, 1, 0.68, 1);
-    /* Same wait too: nothing in the block comes back before the tape is gone. */
-    transition-delay: 900ms;
+    /* Same wait too: nothing in the block comes back before the centre is clear. */
+    transition-delay: 500ms;
   }
   html[data-run="1"] .sink-block > * {
     translate: 0 140%;
