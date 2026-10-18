@@ -241,13 +241,13 @@ const state = (page) =>
 {
   // The cue has to leave with the overlay rather than blink out under it. Its rule was
   // keyed on "ready" alone, so the click took the animation off the element and dropped
-  // it to its base opacity in one frame with 390ms of the lift still to run.
+  // it to its base opacity in one frame with most of the lift still to run.
   const page = await fresh();
   await page.goto(base + "/?intro", { waitUntil: "domcontentloaded" });
   await wait(4200);
   const together = await page.evaluate(async () => {
     document.documentElement.dataset.intro = "out";
-    await new Promise((r) => setTimeout(r, 120));
+    await new Promise((r) => setTimeout(r, 400));
     return {
       cue: Number(getComputedStyle(document.querySelector(".intro-cue")).opacity),
       intro: Number(getComputedStyle(document.querySelector(".intro")).opacity),
