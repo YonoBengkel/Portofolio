@@ -1031,50 +1031,20 @@
   }
   /* The strip itself: much taller than it was, because thin reads as limp. */
   /*
-    The strip itself: ink, with a hazard stripe along the top and bottom edge and the
-    words between them, which is the order real tape reads in.
-
-    The stripes are two background layers rather than two elements, so they cost no
-    markup and cannot fall out of step with the band they belong to. Each is pinned to
-    one edge and sized to --stripe tall, and the ink underneath is a background-color so
-    the gaps in the hatch show it rather than the page.
-
-    Everything scales off --bh rather than being fixed: a 25px stripe reads as an edge on
-    a 250px band at 1920 and as a blanket on an 88px band at 375. At 0.14 of a band it is
-    25px on the desktop and 9px on a phone, and the hatch spacing follows it so the
-    diagonals stay the same shape at both ends.
+    The strip itself. A hazard stripe along both edges was tried here - two background
+    layers pinned to the top and bottom, with the words between them, the way real tape
+    reads - and taken out again: at this size the diagonals read as noise rather than as
+    tape, and the stripes cost each band 20px of extra thickness, which took the cream in
+    the lattice from 26% down to 20%.
   */
   .hero-band-in {
-    --stripe: calc(var(--bh) * 0.14);
-    /*
-      The bar is nearly as wide as the stripe is tall, which is what makes it read as
-      hazard tape rather than as hatching. At a third of that the diagonals were so fine
-      across a 2400px band that the edge looked like noise; the reference runs its bars
-      at about a fifth of the tape's height apart, and this lands at the same ratio.
-    */
-    --hatch: calc(var(--stripe) * 0.8);
     overflow: hidden;
     /* Per band, so no two strips are the same thickness. */
-    padding-block: calc(var(--pad, 0.42rem) + var(--stripe));
+    padding-block: var(--pad, 0.42rem);
+    background: var(--ink);
     color: var(--paper);
-    background-color: var(--ink);
-    background-image:
-      repeating-linear-gradient(
-        135deg,
-        var(--paper) 0 var(--hatch),
-        transparent var(--hatch) calc(var(--hatch) * 2.3)
-      ),
-      repeating-linear-gradient(
-        135deg,
-        var(--paper) 0 var(--hatch),
-        transparent var(--hatch) calc(var(--hatch) * 2.3)
-      );
-    background-size: 100% var(--stripe);
-    background-position:
-      0 0,
-      0 100%;
-    background-repeat: no-repeat;
   }
+
   /*
     How far a band has to go to be gone, and which way it goes.
 
@@ -1222,19 +1192,40 @@
     transition-delay: calc((var(--n, 10) - var(--i, 0)) * 7ms);
   }
   html[data-run="1"] .sink > span {
-    translate: 0 118%;
+    /*
+      100% of the letter plus a little, not 118% of it.
+
+      A percentage here resolves against the letter's own box, but what has to be cleared
+      is the slot's, and the slot is taller by its padding. Measured on the marked line:
+      the letter stands 103px, the slot 128, and 118% is 121 - so a 6px band of letter
+      tops stayed inside the clip, which is the dark dashed rule that sat over the toggle
+      after everything else had gone. The em term covers the padding at any size, where a
+      flat percentage only happened to cover it on the unmarked lines.
+    */
+    translate: 0 calc(100% + 0.3em);
     transition-delay: calc(var(--i, 0) * 7ms);
   }
-  /* The highlighter is carried by the slots, so the plate goes down with the letters. */
+  /*
+    The highlighter rides the letters, not the slots.
+
+    It used to sit on the slot, which is the clip and therefore the one part that cannot
+    move: the letters slid out and left a solid yellow block the size of the word behind
+    them, held until the whole block was switched to visibility: hidden. Putting it on
+    the letter instead means the plate goes down with what it marks. The padding moves
+    with it, so the slot measures the same 128px it did before.
+  */
   .marker-split {
     background: none;
     padding: 0;
     margin-inline: 0;
   }
   .marker-split .sink {
+    padding: 0;
+    margin-bottom: -0.1em;
+  }
+  .marker-split .sink > span {
     background: var(--yellow);
     padding: 0.08em 0 0.1em;
-    margin-bottom: -0.1em;
   }
   /* Whole blocks that are not split into pieces still go down, inside their own clip. */
   .sink-block {
@@ -1259,7 +1250,13 @@
   }
   html[data-run="1"] .hero-out {
     visibility: hidden;
-    transition: visibility 0s linear 760ms;
+    /*
+      420ms, from 760. It is only a backstop - it takes the links out of the tab order
+      once they are off the floor - but 760 was tuned against a sink that finished at
+      992ms, and anything the sink leaves behind stays painted until this fires. The sink
+      now ends at 336ms.
+    */
+    transition: visibility 0s linear 420ms;
   }
   .dots {
     transition: opacity 400ms ease;
