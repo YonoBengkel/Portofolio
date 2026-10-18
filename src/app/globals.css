@@ -1202,19 +1202,21 @@
         513ms          0%                     0%                     6%
         854ms          0%                     0%                     0%
 
-    360ms was the first try, taken from when the name's own box was 8% covered - too
-    early, and wrong in kind: the name's box being clear is not the tape being clear,
-    and there were still bands crossing everywhere else. 900ms was the second, taken
-    from the last column, which is honest but waits on tape at the far edges that is
-    nowhere near the words.
+    900ms waited for the last column, which is honest but waits on tape at the far edges
+    that is nowhere near the words. 500ms was the middle column: nothing covering the
+    ground the copy is about to stand on.
 
-    500ms is the middle column, and it is the one that matches what the eye is actually
-    waiting for: the tape has passed the centre and nothing covers the ground the copy
-    is about to stand on. The far edges are still clearing, and that is fine - they are
-    not where anybody is looking. The last letter lands at 1153ms.
+    250ms is Ilham's, and it is earlier than any of those columns - at 250ms the centre
+    is still around a third covered, so the first letters start while tape is still
+    crossing them. That is a choice, not an oversight: the two motions overlap on
+    purpose, which reads as one gesture rather than two taking turns. The measurements
+    above are kept because they say what the number is trading away, and because the
+    thresholds are what to come back to if the overlap turns out to be too much.
+
+    The last letter lands at 903ms.
   */
   .sink > span {
-    --rise-wait: 500ms;
+    --rise-wait: 250ms;
     display: inline-block;
     translate: 0 0;
     /*
@@ -1277,8 +1279,8 @@
   .sink-block > * {
     /* Same split as the letters: unhurried coming back, quick going down. */
     transition: translate 520ms cubic-bezier(0.33, 1, 0.68, 1);
-    /* Same wait too: nothing in the block comes back before the centre is clear. */
-    transition-delay: 500ms;
+    /* Same wait as the letters. */
+    transition-delay: 250ms;
   }
   html[data-run="1"] .sink-block > * {
     translate: 0 140%;
