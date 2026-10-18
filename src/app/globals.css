@@ -1213,7 +1213,18 @@
     --rise-wait: 900ms;
     display: inline-block;
     translate: 0 0;
-    transition: translate 210ms cubic-bezier(0.76, 0, 0.24, 1);
+    /*
+      520ms on the way up against 210 on the way down, and the two are separate because a
+      transition takes its duration from the state it is going to. The rule below owns
+      the sink and declares its own; this one owns the rise.
+
+      They are not the same job. Going down the letters are racing the tape and the only
+      thing that matters is being gone before it lands. Coming up nothing is chasing
+      them - the floor has already left - so the move can take its time, and the curve
+      goes from the hard ease-in-out the sink uses to a plain ease-out that settles
+      rather than snaps.
+    */
+    transition: translate 520ms cubic-bezier(0.33, 1, 0.68, 1);
     /* max() so a miscounted queue can shorten the stagger but never eat into the wait. */
     transition-delay: calc(var(--rise-wait) + max(0ms, (var(--n, 10) - var(--i, 0)) * 7ms));
   }
@@ -1229,6 +1240,8 @@
       flat percentage only happened to cover it on the unmarked lines.
     */
     translate: 0 calc(100% + 0.3em);
+    transition-duration: 210ms;
+    transition-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
     transition-delay: calc(var(--i, 0) * 7ms);
   }
   /*
@@ -1258,12 +1271,15 @@
     overflow: clip;
   }
   .sink-block > * {
-    transition: translate 210ms cubic-bezier(0.76, 0, 0.24, 1);
-    /* Same wait as the letters: nothing in the block comes back before the tape is gone. */
+    /* Same split as the letters: unhurried coming back, quick going down. */
+    transition: translate 520ms cubic-bezier(0.33, 1, 0.68, 1);
+    /* Same wait too: nothing in the block comes back before the tape is gone. */
     transition-delay: 900ms;
   }
   html[data-run="1"] .sink-block > * {
     translate: 0 140%;
+    transition-duration: 210ms;
+    transition-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
     transition-delay: 0ms;
   }
   /*
@@ -2703,11 +2719,18 @@
       transition-duration: 1ms;
     }
     /*
-      .hero-band above is dead weight kept for the rotate: the band's travel transition
-      lives on the child, and transitions are not inherited, so naming the parent did
-      nothing. Same specificity as the rule it overrides, and later in the layer.
+      .hero-band and .hero-out above are both dead weight kept for what else they carry:
+      the travel transition lives on .hero-band-in and the sink lives on the letters
+      inside .sink, and transitions are not inherited, so naming either parent did
+      nothing. The letters were still sliding 520ms with reduce on until this was
+      measured. Each selector here matches the element that actually transitions, at the
+      same specificity as the rule it overrides and later in the layer.
     */
-    .hero-alt .hero-band-in {
+    .hero-alt .hero-band-in,
+    .sink > span,
+    html[data-run="1"] .sink > span,
+    .sink-block > *,
+    html[data-run="1"] .sink-block > * {
       transition-duration: 1ms;
     }
     .tape-run,
