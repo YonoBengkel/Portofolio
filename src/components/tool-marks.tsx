@@ -13,12 +13,11 @@
  * an idea has no logo, so one is drawn for it. They share a single language: a 24px box,
  * a 1.7px stroke in the page's ink, round joins, no fill.
  *
- * Excel and Power BI are the uncomfortable pair. They ARE products, and Microsoft keeps
- * their marks out of every freely-licensed set, so what sits in their boxes is a drawn
- * glyph for the kind of thing they are - a sheet of cells, a bar chart - and not an
- * attempt at the logo. Redrawing a trademarked mark by hand is both the worse legal
- * position and the thing that makes an icon row look slightly wrong. Flagged for Ilham;
- * if he can supply the official SVGs the two entries become brand marks like the rest.
+ * Excel and Power BI are a third kind. Microsoft keeps their marks out of every
+ * freely-licensed set, so for a while they carried drawn glyphs for the kind of thing
+ * they are - a sheet of cells, a bar chart - standing in for logos that could not be
+ * taken. Ilham supplied the official files, so they are now the marks themselves,
+ * verbatim; SUPPLIED below says why they do not live in PATHS with the others.
  *
  * The letter badge that used to fill these gaps is gone - he asked for no letters.
  */
@@ -114,23 +113,139 @@ const GLYPHS: Record<string, React.ReactElement> = {
       <path d="M9 10.5h.01M12 10.5h.01M15 10.5h.01" strokeWidth={2.4} />
     </>
   ),
-  // a sheet of cells - the kind of thing, not the logo
-  Excel: (
-    <>
-      <path d="M3 4h18v16H3z" />
-      <path d="M3 9.3h18M3 14.7h18M9 4v16M15 4v16" />
-    </>
-  ),
-  // bars on an axis - the kind of thing, not the logo
-  "Power BI": (
-    <>
-      <path d="M3 20h18" />
-      <path d="M6.6 20V12.5M12 20V4.5M17.4 20V9" strokeWidth={2.4} />
-    </>
-  ),
 };
 
-export function ToolMark({ tool, size = 14 }: { tool: string; size?: number }) {
+/*
+  The two Ilham supplied himself, verbatim from Microsoft own files. They are not in
+  PATHS because neither is a single path: Excel is a dozen shapes and a gradient, Power
+  BI is three gradient-filled bars, and flattening either into one silhouette would be
+  redrawing the mark rather than using it.
+
+  Each gradient needs an id, and an id has to be unique on the page - these rows repeat
+  their whole set four times so one cycle of the marquee is wide enough to wrap, so the
+  same mark is in the DOM four times over. uid comes down from the copy index and makes
+  every id its own. Without it all four copies would point at the first definition, which
+  happens to render correctly and is still invalid markup waiting to break the day that
+  first copy is removed.
+
+  Power BI file carries a Sketch drop-shadow filter. It is dropped: a 10px Gaussian blur
+  inside a 38px icon is invisible, and it is a filter the compositor has to run anyway.
+*/
+const SUPPLIED: Record<string, { viewBox: string; render: (uid: string) => React.ReactElement }> = {
+  Excel: {
+    /*
+      Tightened to the artwork. The file ships a 2976x3195 canvas with the logo sitting
+      in roughly three quarters of it, which at 38px rendered the mark visibly smaller
+      than every other tile in the row. The shapes span 0..2289.75 across and 0..2130
+      down, so that is the box. Nothing is cropped - only the empty margin is.
+    */
+    viewBox: "0 0 2289.75 2130",
+    render: (uid) => (
+      <>
+        <defs>
+          <linearGradient
+            id={`xl-${uid}`}
+            gradientTransform="matrix(1 0 0 -1 0 2132)"
+            x1="203.513"
+            y1="1729.018"
+            x2="967.987"
+            y2="404.982"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop offset="0" stopColor="#18884f" />
+            <stop offset=".5" stopColor="#117e43" />
+            <stop offset="1" stopColor="#0b6631" />
+          </linearGradient>
+        </defs>
+        <path
+          d="M1437.75 1011.75L532.5 852v1180.393c0 53.907 43.7 97.607 97.607 97.607h1562.036c53.907 0 97.607-43.7 97.607-97.607V1597.5z"
+          fill="#185C37"
+        />
+        <path
+          d="M1437.75 0H630.107C576.2 0 532.5 43.7 532.5 97.607V532.5l905.25 532.5L1917 1224.75 2289.75 1065V532.5z"
+          fill="#21A366"
+        />
+        <path d="M532.5 532.5h905.25V1065H532.5z" fill="#107C41" />
+        <path
+          d="M1180.393 426H532.5v1331.25h647.893c53.834-.175 97.432-43.773 97.607-97.607V523.607c-.175-53.834-43.773-97.432-97.607-97.607z"
+          opacity=".1"
+        />
+        <path
+          d="M1127.143 479.25H532.5V1810.5h594.643c53.834-.175 97.432-43.773 97.607-97.607V576.857c-.175-53.834-43.773-97.432-97.607-97.607z"
+          opacity=".2"
+        />
+        <path
+          d="M1127.143 479.25H532.5V1704h594.643c53.834-.175 97.432-43.773 97.607-97.607V576.857c-.175-53.834-43.773-97.432-97.607-97.607z"
+          opacity=".2"
+        />
+        <path
+          d="M1073.893 479.25H532.5V1704h541.393c53.834-.175 97.432-43.773 97.607-97.607V576.857c-.175-53.834-43.773-97.432-97.607-97.607z"
+          opacity=".2"
+        />
+        <path
+          d="M97.607 479.25h976.285c53.907 0 97.607 43.7 97.607 97.607v976.285c0 53.907-43.7 97.607-97.607 97.607H97.607C43.7 1650.75 0 1607.05 0 1553.143V576.857c0-53.907 43.7-97.607 97.607-97.607z"
+          fill={`url(#xl-${uid})`}
+        />
+        <path
+          d="M302.3 1382.264l205.332-318.169L319.5 747.683h151.336l102.666 202.35c9.479 19.223 15.975 33.494 19.49 42.919h1.331a798.667 798.667 0 0121.3-44.677L725.371 747.79H864.3l-192.925 314.548L869.2 1382.263H721.378L602.79 1160.158a186.298 186.298 0 01-14.164-29.66h-1.757a140.458 140.458 0 01-13.739 28.755l-122.102 223.011z"
+          fill="#FFF"
+        />
+        <path d="M2192.143 0H1437.75v532.5h852V97.607C2289.75 43.7 2246.05 0 2192.143 0z" fill="#33C481" />
+        <path d="M1437.75 1065h852v532.5h-852z" fill="#107C41" />
+      </>
+    ),
+  },
+  "Power BI": {
+    // Same tightening: the bars live between x 77.5 and 552.5 of a 630-wide canvas.
+    viewBox: "77.5 0 475 630",
+    render: (uid) => (
+      <>
+        <defs>
+          <linearGradient id={`pbi-a-${uid}`} x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop stopColor="#EBBB14" offset="0%" />
+            <stop stopColor="#B25400" offset="100%" />
+          </linearGradient>
+          <linearGradient id={`pbi-b-${uid}`} x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop stopColor="#F9E583" offset="0%" />
+            <stop stopColor="#DE9800" offset="100%" />
+          </linearGradient>
+          <linearGradient id={`pbi-c-${uid}`} x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop stopColor="#F9E68B" offset="0%" />
+            <stop stopColor="#F3CD32" offset="100%" />
+          </linearGradient>
+        </defs>
+        <g transform="translate(77.5 0)">
+          <rect x="256" y="0" width="219" height="630" rx="26" fill={`url(#pbi-a-${uid})`} />
+          <path
+            d="M346,604 L346,630 L320,630 L153,630 C138.640597,630 127,618.359403 127,604 L127,183 C127,168.640597 138.640597,157 153,157 L320,157 C334.359403,157 346,168.640597 346,183 L346,604 Z"
+            fill={`url(#pbi-b-${uid})`}
+          />
+          <path
+            d="M219,604 L219,630 L193,630 L26,630 C11.6405965,630 1.75851975e-15,618.359403 0,604 L0,341 C-1.75851975e-15,326.640597 11.6405965,315 26,315 L193,315 C207.359403,315 219,326.640597 219,341 L219,604 Z"
+            fill={`url(#pbi-c-${uid})`}
+          />
+        </g>
+      </>
+    ),
+  },
+};
+
+export function ToolMark({ tool, size = 14, uid = "0" }: { tool: string; size?: number; uid?: string }) {
+  const supplied = SUPPLIED[tool];
+  if (supplied) {
+    return (
+      <svg
+        className="chip-mark"
+        width={size}
+        height={size}
+        viewBox={supplied.viewBox}
+        aria-hidden="true"
+        focusable="false"
+      >
+        {supplied.render(uid)}
+      </svg>
+    );
+  }
   const key = FOR_TOOL[tool];
   const d = key ? PATHS[key] : undefined;
   if (!d) {
