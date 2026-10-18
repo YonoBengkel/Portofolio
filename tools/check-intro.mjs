@@ -208,7 +208,7 @@ const state = (page) =>
   // Enter on its own, before the click is tried: the only keyboard assertion used to be
   // that keys do nothing, which is satisfied just as well by the handler not existing.
   await page.keyboard.press("Enter");
-  await wait(700);
+  await wait(1100); // the curtain runs 760ms and the overlay leaves the layer at 860
   const byEnter = await state(page);
   check(byEnter.flag === "off", "Enter ends it once it is ready", `flag=${byEnter.flag}`);
   await page.close();
@@ -218,7 +218,7 @@ const state = (page) =>
   await page.goto(base + "/?intro", { waitUntil: "domcontentloaded" });
   await wait(4000);
   await page.keyboard.press("Space");
-  await wait(700);
+  await wait(1100);
   const bySpace = await state(page);
   check(bySpace.flag === "off", "Space ends it once it is ready", `flag=${bySpace.flag}`);
   await page.close();
@@ -230,7 +230,7 @@ const state = (page) =>
 
   // And now the click works.
   await page.mouse.click(960, 520);
-  await wait(900);
+  await wait(1100);
   const after = await page.evaluate(() => {
     const at = document.elementFromPoint(innerWidth / 2, innerHeight / 2);
     return { intro: !!at?.closest(".intro"), tag: at?.tagName ?? null, flag: document.documentElement.dataset.intro };
@@ -239,24 +239,36 @@ const state = (page) =>
   await page.close();
 }
 {
-  // The cue has to leave with the overlay rather than blink out under it. Its rule was
-  // keyed on "ready" alone, so the click took the animation off the element and dropped
-  // it to its base opacity in one frame with most of the lift still to run.
+  // The exit is a curtain: the paper's bottom edge travels to the top of the screen and
+  // the composition fades out ahead of it. Two things to hold. The cue has to fade WITH
+  // the rest rather than blink out under it - its own rule stops matching the moment the
+  // state leaves "ready", which on its own dropped it to opacity 0 in a single frame. And
+  // the panel itself must not fade: a clip that is also a fade is just a fade with extra
+  // steps, and the edge stops being an edge.
   const page = await fresh();
   await page.goto(base + "/?intro", { waitUntil: "domcontentloaded" });
   await wait(4200);
-  const together = await page.evaluate(async () => {
+  const mid = await page.evaluate(async () => {
     document.documentElement.dataset.intro = "out";
-    await new Promise((r) => setTimeout(r, 400));
+    await new Promise((r) => setTimeout(r, 130));
+    const read = (sel) => getComputedStyle(document.querySelector(sel));
     return {
-      cue: Number(getComputedStyle(document.querySelector(".intro-cue")).opacity),
-      intro: Number(getComputedStyle(document.querySelector(".intro")).opacity),
+      cue: Number(read(".intro-cue").opacity),
+      stage: Number(read(".intro-stage").opacity),
+      panel: Number(read(".intro").opacity),
+      clip: read(".intro").clipPath,
     };
   });
+  const partly = /inset\((.+)\)/.exec(mid.clip);
   check(
-    together.cue > 0.5 && together.intro < 1,
-    "the cue leaves with the overlay, not before it",
-    `cue=${together.cue.toFixed(2)} overlay=${together.intro.toFixed(2)}`,
+    Math.abs(mid.cue - mid.stage) < 0.2 && mid.cue > 0 && mid.cue < 1,
+    "the composition fades out ahead of the edge",
+    `cue=${mid.cue.toFixed(2)} stage=${mid.stage.toFixed(2)}`,
+  );
+  check(
+    mid.panel === 1 && !!partly && !/^0px 0px 0px 0px$/.test(partly[1]),
+    "the panel wipes rather than fades",
+    `opacity=${mid.panel} clip-path=${mid.clip}`,
   );
   await page.close();
 }
@@ -342,15 +354,19 @@ const state = (page) =>
   const order = await page.evaluate(async () => {
     document.documentElement.dataset.intro = "out";
     await new Promise((r) => requestAnimationFrame(r));
-    return {
-      overflow: getComputedStyle(document.documentElement).overflowY,
-      opacity: Number(getComputedStyle(document.querySelector(".intro")).opacity),
-    };
+    const cs = getComputedStyle(document.querySelector(".intro"));
+    return { overflow: getComputedStyle(document.documentElement).overflowY, clip: cs.clipPath };
   });
+  // With a wipe the panel never goes transparent, so what says it is still covering the
+  // page is the clip: on the first frame it is the whole screen.
+  // The bottom inset is the one that matters and Chrome serialises it however it likes -
+  // "inset(0px 0px 0%)" for an uncut panel, "inset(0px 0px 2.29%)" once it is moving - so
+  // the number is read rather than the string matched.
+  const cut = parseFloat((order.clip.match(/inset\(\S+ \S+ (\S+)/) ?? [])[1] ?? "100");
   check(
-    order.overflow === "visible" && order.opacity > 0.85,
+    order.overflow === "visible" && cut === 0,
     "scroll is given back while the overlay still covers the page",
-    `html overflow-y=${order.overflow} overlay opacity=${order.opacity.toFixed(2)}`,
+    `html overflow-y=${order.overflow} clip-path=${order.clip}`,
   );
   await page.close();
 }
