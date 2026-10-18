@@ -34,9 +34,10 @@ import { asciiPortraits } from "@/content/ascii-portraits";
 // Short enough that a visitor sees two or three, long enough to look at one.
 const HOLD = 2500;
 const FLY = 500;
-// How far a character can be thrown, in cells. Measured against the 100-wide grid: much
-// less and the scatter reads as a shimmer rather than as motion.
-const THROW = 22;
+// How far a character can be thrown, in cells, against a grid 100 wide and 61 tall. At
+// 22 the scatter stayed inside the portrait's own outline; at 50 a piece can cross half
+// the frame, so the figure comes apart rather than just loosening.
+const THROW = 50;
 
 const GRIDS = asciiPortraits.map((p) => p.ascii.split("\n"));
 const ROWS = GRIDS[0].length;
