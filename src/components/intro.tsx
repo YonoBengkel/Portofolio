@@ -18,7 +18,9 @@ import { Logo } from "./logo";
  *
  * What the script in layout.tsx does is only ever to take it away sooner: it is not
  * drawn at all on a second visit in the same session, on any page but the home page, or
- * under prefers-reduced-motion, and a click, a key or a scroll ends it early.
+ * under prefers-reduced-motion. It cannot be clicked away - Ilham asked for that, having
+ * found he could not photograph it - so ?intro forces it to play again on demand, which
+ * is what the skip was being used for.
  *
  * Hidden from the accessibility tree. Everything it says - the name, the three words -
  * is in the hero behind it, in text, and a screen reader should be reading that.
@@ -27,6 +29,7 @@ export function Intro() {
   return (
     <div className="intro" aria-hidden="true">
       <div className="intro-stage">
+        <span className="intro-ring" />
         <span className="intro-mark">
           <Logo size={112} />
         </span>

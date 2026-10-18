@@ -2753,7 +2753,7 @@
     display: grid;
     place-items: center;
     background: var(--paper);
-    animation: intro-lift 2500ms linear both;
+    animation: intro-lift 3000ms linear both;
   }
   /*
     Off means it was never wanted: a second visit in this session, any page but the home
@@ -2777,7 +2777,7 @@
       reading as a label rather than as a title. 3.6vw clears the floor on a phone and
       still hits the 20px cap by about 560px, so desktop is unchanged.
     */
-    font-size: clamp(13px, 3.6vw, 20px);
+    font-size: clamp(15px, 4.2vw, 26px);
     display: grid;
     place-items: center;
     color: var(--ink);
@@ -2792,9 +2792,33 @@
     --words-end: calc(50% - 4em) 0;
     --words-shut: inset(0 100% 0 0);
   }
+  /*
+    The ripple. One ring that opens out of the mark the moment it lands and is gone
+    before the mark moves - the same figure as the ring in the profile README, which is
+    what Ilham pointed at: a drop hitting water, not a glow.
+
+    It is a sibling rather than a child of the mark, because the mark is being scaled and
+    rotated and a ring inside it would inherit both - a circle cannot show rotation, but
+    it would compound the scale and the ripple would arrive already stretched.
+  */
+  .intro-ring {
+    width: 7em;
+    height: 7em;
+    border: 0.16em solid var(--ink);
+    border-radius: 50%;
+    opacity: 0;
+    /*
+      forwards, not both. `both` fills backwards as well, which applies the 0% keyframe
+      through the whole 1500ms delay - so the ring sat on screen at full opacity from the
+      first frame, visible until the growing mark happened to cover it. Caught in the
+      300ms frame, where the mark has not arrived yet and the ring was the only thing on
+      the page.
+    */
+    animation: intro-ring 820ms cubic-bezier(0.18, 0.72, 0.3, 1) 1500ms forwards;
+  }
   .intro-mark {
     display: block;
-    animation: intro-mark 2500ms both;
+    animation: intro-mark 3000ms both;
   }
   .intro-mark svg {
     display: block;
@@ -2806,7 +2830,7 @@
     gap: 0.5em;
     justify-items: start;
     white-space: nowrap;
-    animation: intro-words 2500ms both;
+    animation: intro-words 3000ms both;
   }
   .intro-words b {
     font-family: var(--font-display);
@@ -2856,29 +2880,52 @@
   }
 
   /*
-    1080 degrees, not an arbitrary angle. The mark is four-fold symmetric, so any
-    multiple of 90 lands identically - which means the spin can be timed for how it
-    feels rather than for where it stops. Three turns is what fills the first second
-    without the shape turning into a grey disc for longer than it reads as one.
+    1080 degrees, and the landing is not luck. The diamond is four-fold but the slot
+    through it is not, so the mark reads the same every 180 degrees and any multiple of
+    that lands upright. 1080 is six of them.
+
+    What matters more is that this is ONE segment. There used to be a keyframe at 990
+    degrees, and the easing slowed into it and then out of it again - so the mark crawled
+    at 115 degrees a second for a fifth of a second while sitting at 978 to 1001 degrees,
+    which is 258 to 281 modulo 180: the slot lying flat. It looked exactly like a mark
+    that had stopped horizontal and then crept the rest of the way. Measured frame by
+    frame; nothing about the final angle was ever wrong.
+
+    The first 500ms are empty on purpose - the dot was arriving before anyone had looked
+    at the screen.
   */
   @keyframes intro-mark {
-    0% {
+    0%,
+    16.66% {
       opacity: 0;
       scale: 0.05;
       rotate: 0deg;
-    }
-    5% {
-      opacity: 1;
-    }
-    46% {
-      scale: 1.08;
-      rotate: 990deg;
       translate: 0 0;
     }
-    58% {
+    16.67% {
+      opacity: 1;
+      scale: 0.05;
+      rotate: 0deg;
+      translate: 0 0;
+      animation-timing-function: cubic-bezier(0.19, 0.78, 0.22, 1);
+    }
+    /* The spin ends here, upright, and the water starts. */
+    50% {
       scale: 1;
       rotate: 1080deg;
+    }
+    56% {
+      scale: 1.1;
+    }
+    60% {
+      scale: 0.955;
       translate: 0 0;
+    }
+    66% {
+      scale: 1.025;
+    }
+    71% {
+      scale: 1;
     }
     74%,
     100% {
@@ -2889,14 +2936,26 @@
     }
   }
 
+  @keyframes intro-ring {
+    0% {
+      opacity: 0.55;
+      scale: 0.45;
+    }
+    100% {
+      opacity: 0;
+      scale: 1.9;
+    }
+  }
+
   /*
-    The words are wiped open from the left edge while they move right, so they read as
-    coming out of the mark rather than appearing beside it. The wipe starts at 60% -
-    just as the mark begins to move - so the two gestures overlap instead of queueing.
+    The words are wiped open from the leading edge while they move, so they read as coming
+    out of the mark rather than appearing beside it. The wipe starts at 64% - after the
+    water has settled and as the mark begins to move - so the two gestures overlap
+    instead of queueing.
   */
   @keyframes intro-words {
     0%,
-    58% {
+    64% {
       opacity: 0;
       /*
         50% of the words' own width, which puts their left edge exactly on the centre -
@@ -2912,10 +2971,10 @@
       translate: var(--words-start);
       clip-path: var(--words-shut);
     }
-    64% {
+    69% {
       opacity: 1;
     }
-    86%,
+    88%,
     100% {
       opacity: 1;
       /* Still measured from their own leading edge, settling clear of the mark. */

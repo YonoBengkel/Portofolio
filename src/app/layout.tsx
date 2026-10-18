@@ -63,18 +63,25 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
 
           The session flag is set on the way in rather than at the end, so a reload
           halfway through does not start it again.
+
+          Nothing here listens for a click any more. It used to end on the first pointer,
+          key or wheel event, which is the usual courtesy - but Ilham could not photograph
+          it, because taking a screenshot ends it. ?intro replays it on demand instead,
+          and that is what the skip was actually being used for.
+
+          The only timer left removes the finished overlay from the layer at 3100ms; the
+          CSS has already hidden it by then.
         */}
         <script
           dangerouslySetInnerHTML={{
             __html:
               '(function(){var d=document.documentElement;function off(){d.dataset.intro="off"}' +
+              'function on(){d.dataset.intro="on";setTimeout(off,3100)}' +
+              'if(location.search.indexOf("intro")>0){on();return}' +
               'if(location.pathname!=="/"){off();return}' +
               'try{if(sessionStorage.getItem("intro")){off();return}sessionStorage.setItem("intro","1")}catch(e){}' +
               'if(matchMedia("(prefers-reduced-motion: reduce)").matches){off();return}' +
-              'd.dataset.intro="on";' +
-              'var o={once:true,passive:true};addEventListener("pointerdown",off,o);' +
-              'addEventListener("wheel",off,o);addEventListener("keydown",off,{once:true});' +
-              'setTimeout(off,2600)})()',
+              'on()})()',
           }}
         />
         <a
