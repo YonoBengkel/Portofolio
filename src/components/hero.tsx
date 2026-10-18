@@ -58,8 +58,8 @@ import { openTo, profile } from "@/content/site";
 const BANDS = [
   { word: "Process", tilt: -13, y: 0.1, side: 1, reverse: false, z: 5, pad: 1.35 },
   { word: "Data", tilt: 6, y: 0.26, side: -1, reverse: true, z: 6, pad: 1.7 },
-  { word: "Decisions", tilt: -5, y: 0.42, side: 1, reverse: false, z: 4, pad: 1.45 },
-  { word: "Evidence", tilt: 16, y: 0.57, side: -1, reverse: true, z: 3, pad: 1.85 },
+  { word: "Decisions", tilt: -5, y: 0.42, side: 1, reverse: true, z: 4, pad: 1.45 },
+  { word: "Evidence", tilt: 16, y: 0.57, side: -1, reverse: false, z: 3, pad: 1.85 },
   { word: "Process", tilt: -9, y: 0.74, side: 1, reverse: false, z: 2, pad: 1.55 },
   { word: "Decisions", tilt: 4, y: 0.9, side: -1, reverse: true, z: 1, pad: 1.75 },
 ].map((b) => ({ ...b, cos: Math.cos((b.tilt * Math.PI) / 180) }));
