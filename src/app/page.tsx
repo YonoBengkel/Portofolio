@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AboutCard } from "@/components/about-card";
 import { Certificates } from "@/components/certificates";
 import { Hero } from "@/components/hero";
+import { Intro } from "@/components/intro";
 import { Tape } from "@/components/tape";
 import { PageTransition } from "@/components/page-transition";
 import { Toolbelt } from "@/components/toolbelt";
@@ -44,6 +45,9 @@ export default function Home() {
 
   return (
     <PageTransition>
+      {/* Only the front page gets it; a visitor arriving at /work from a search result
+          should not be shown a name card. */}
+      <Intro />
       <Hero />
 
       {/* 1 — who he is. Carries its own marquee band, so it needs no divider above it. */}

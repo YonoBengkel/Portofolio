@@ -41,8 +41,42 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       data-scroll-behavior="smooth"
       className={`${anton.variable} ${archivo.variable} ${plexMono.variable} h-full antialiased`}
+      /*
+        The script below writes data-intro here before React hydrates, which React then
+        reports as a tree that "hydrated but some attributes didn't match". It is the
+        expected shape of a pre-paint script and the warning is about this one attribute,
+        not about the tree: without this the console carried a hydration error on every
+        route, and the page check failed all eighteen of them.
+      */
+      suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col font-sans">
+        {/*
+          Runs before the body paints, which is the only place this decision can be made
+          without a flash: deciding it in an effect means the title sequence renders and
+          then vanishes, which is worse than either showing it or not.
+
+          It only ever takes the sequence away earlier than the CSS would. The sequence
+          itself is keyframes with a forwards fill and ends on its own, so a failure here
+          - a blocked script, a thrown error, storage refused in a private window - leaves
+          a title sequence that still finishes and uncovers the page.
+
+          The session flag is set on the way in rather than at the end, so a reload
+          halfway through does not start it again.
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              '(function(){var d=document.documentElement;function off(){d.dataset.intro="off"}' +
+              'if(location.pathname!=="/"){off();return}' +
+              'try{if(sessionStorage.getItem("intro")){off();return}sessionStorage.setItem("intro","1")}catch(e){}' +
+              'if(matchMedia("(prefers-reduced-motion: reduce)").matches){off();return}' +
+              'd.dataset.intro="on";' +
+              'var o={once:true,passive:true};addEventListener("pointerdown",off,o);' +
+              'addEventListener("wheel",off,o);addEventListener("keydown",off,{once:true});' +
+              'setTimeout(off,2600)})()',
+          }}
+        />
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:bg-ink focus:px-4 focus:py-3 focus:font-bold focus:text-paper"
