@@ -1103,13 +1103,17 @@
     display: inline-flex;
     white-space: nowrap;
     /*
-      --dir flips the run. Half the bands read one way and half the other, so the lattice
-      moves like several lines of tape passing each other instead of one sheet sliding.
+      --dir flips the run, and it is the only thing that does. A
+      `.hero-band:nth-child(2n) .hero-band-run { animation-direction: reverse }` used to
+      sit below this - left over from the two-set design, where direction alternated by
+      position - and at (0,2,1) it outranked this declaration for every even band. The
+      effect was that changing --dir worked on the odd bands and did nothing at all on
+      the even ones, with no error anywhere. Found on the live page, not in the source.
+
+      A nth-child(7) duration rule went with it: there have been six bands since the
+      lattice replaced the sets.
     */
     animation: slide var(--dur, 64s) linear infinite var(--dir, normal);
-  }
-  .hero-band:nth-child(2n) .hero-band-run {
-    animation-direction: reverse;
   }
   .hero-band:nth-child(2) .hero-band-run {
     --dur: 52s;
@@ -1125,9 +1129,6 @@
   }
   .hero-band:nth-child(6) .hero-band-run {
     --dur: 49s;
-  }
-  .hero-band:nth-child(7) .hero-band-run {
-    --dur: 82s;
   }
   .hero-band-set {
     display: inline-flex;

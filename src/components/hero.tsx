@@ -50,7 +50,10 @@ import { openTo, profile } from "@/content/site";
 
   side is which edge a band comes in from, +1 for the left and -1 for the right. It is
   not a shared direction: the bands arrive from both sides at once, which is what stops
-  the entry reading as one sheet being dragged on.
+  the entry reading as one sheet being dragged on. It is kept paired with reverse - side
+  1 always with reverse false - so a band arrives from the end its words run towards. Un-
+  pairing them is visible: the tape slides on one way and its text immediately runs the
+  other.
 
   cos is cos(tilt) precomputed, because how far a band must slide to leave the window
   depends on its angle and CSS has no trigonometry.
@@ -58,8 +61,8 @@ import { openTo, profile } from "@/content/site";
 const BANDS = [
   { word: "Process", tilt: -13, y: 0.1, side: 1, reverse: false, z: 5, pad: 1.35 },
   { word: "Data", tilt: 6, y: 0.26, side: -1, reverse: true, z: 6, pad: 1.7 },
-  { word: "Decisions", tilt: -5, y: 0.42, side: 1, reverse: true, z: 4, pad: 1.45 },
-  { word: "Evidence", tilt: 16, y: 0.57, side: -1, reverse: false, z: 3, pad: 1.85 },
+  { word: "Decisions", tilt: -5, y: 0.42, side: -1, reverse: true, z: 4, pad: 1.45 },
+  { word: "Evidence", tilt: 16, y: 0.57, side: 1, reverse: false, z: 3, pad: 1.85 },
   { word: "Process", tilt: -9, y: 0.74, side: 1, reverse: false, z: 2, pad: 1.55 },
   { word: "Decisions", tilt: 4, y: 0.9, side: -1, reverse: true, z: 1, pad: 1.75 },
 ].map((b) => ({ ...b, cos: Math.cos((b.tilt * Math.PI) / 180) }));
