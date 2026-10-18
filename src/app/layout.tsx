@@ -93,6 +93,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           themselves choose - measured, four tabs and a return landed on /about with the
           sequence still playing.
 
+          The exit comes in two styles and the script only names which one. ?intro=ink
+          asks for the ink panel that sweeps across and off, the move the site makes
+          between pages; anything else is the paper curtain, which is the default and
+          what an ordinary first visit gets. One timer serves both: 1200ms is past the
+          longer of the two, and the overlay is hidden and inert well before it.
+
           Enter and Space end it, so the overlay is not a trap without a pointer, and
           preventDefault is called only while it is up - otherwise Space would stop
           scrolling the page on every visit that never showed an intro at all.
@@ -107,16 +113,18 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               'function up(){var e=document.querySelector(".intro");' +
               'return !!e&&getComputedStyle(e).display!=="none"}' +
               'function out(){if(d.dataset.intro!=="ready"||!up())return;' +
-              'd.dataset.intro="out";setTimeout(off,860)}' +
+              'd.dataset.intro="out";setTimeout(off,1200)}' +
               'function key(e){var s=d.dataset.intro;' +
               'if((s!=="on"&&s!=="ready")||!up())return;' +
               'if(e.key==="Tab"){e.preventDefault();return}' +
               'if(s==="ready"&&(e.key==="Enter"||e.key===" ")){e.preventDefault();out()}}' +
-              'function on(){d.dataset.intro="on";addEventListener("pointerdown",out);' +
+              'function on(s){d.dataset.introStyle=s==="ink"?"ink":"paper";' +
+              'd.dataset.intro="on";addEventListener("pointerdown",out);' +
               'addEventListener("keydown",key);' +
               'setTimeout(function(){if(d.dataset.intro==="on")d.dataset.intro=up()?"ready":"off"},3500)}' +
               'if(location.pathname!=="/"){off();return}' +
-              'if(/[?&]intro(=|&|$)/.test(location.search)){on();return}' +
+              'var m=/[?&]intro(?:=([a-z]+))?(?:&|$)/.exec(location.search);' +
+              'if(m){on(m[1]);return}' +
               'try{if(sessionStorage.getItem("intro")){off();return}sessionStorage.setItem("intro","1")}catch(e){}' +
               'if(matchMedia("(prefers-reduced-motion: reduce)").matches){off();return}' +
               'on()})()',

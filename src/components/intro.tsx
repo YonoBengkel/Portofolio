@@ -29,7 +29,10 @@ import { Logo } from "./logo";
  * A visitor never meets a door that cannot be opened.
  *
  * ?intro replays the whole thing on demand, which is what the old skip gesture was
- * actually being used for.
+ * actually being used for. ?intro=ink replays it with the other exit: an ink panel that
+ * sweeps over the composition and carries on off the top, which is the move the site
+ * already makes between pages. The paper one is the default - .intro-sweep is simply
+ * never animated unless the style attribute asks for it.
  *
  * Hidden from the accessibility tree. Everything it says - the name, the three words -
  * is in the hero behind it, in text, and a screen reader should be reading that. Enter
@@ -38,21 +41,31 @@ import { Logo } from "./logo";
  */
 export function Intro() {
   return (
-    <div className="intro" aria-hidden="true">
-      <noscript>
-        <style>{".intro{display:none}"}</style>
-      </noscript>
-      <div className="intro-stage">
-        <span className="intro-ring" />
-        <span className="intro-mark">
-          <Logo size={112} />
-        </span>
-        <p className="intro-words">
-          <b>Ilham Satria</b>
-          <span>Process &middot; Data &middot; Decisions</span>
-        </p>
+    <>
+      <div className="intro" aria-hidden="true">
+        <noscript>
+          <style>{".intro{display:none}"}</style>
+        </noscript>
+        <div className="intro-stage">
+          <span className="intro-ring" />
+          <span className="intro-mark">
+            <Logo size={112} />
+          </span>
+          <p className="intro-words">
+            <b>Ilham Satria</b>
+            <span>Process &middot; Data &middot; Decisions</span>
+          </p>
+        </div>
+        <span className="intro-cue">Click anywhere to enter</span>
       </div>
-      <span className="intro-cue">Click anywhere to enter</span>
-    </div>
+      {/*
+        A sibling, not a child, and that is load-bearing rather than tidy. Inside .intro
+        it inherits visibility, and the ink style hides the paper the moment the ink
+        finishes covering it - so the panel vanished on that frame instead of sweeping
+        off, and the page appeared as if cut to. Visibility is inherited; z-index 96 is
+        what keeps it over the paper.
+      */}
+      <span className="intro-sweep" aria-hidden="true" />
+    </>
   );
 }

@@ -2804,7 +2804,7 @@
     opacity: 0;
     pointer-events: none;
   }
-  html[data-intro="out"] .intro::after {
+  html[data-intro="out"][data-intro-style="paper"] .intro::after {
     animation: intro-edge 760ms cubic-bezier(0.76, 0, 0.24, 1) forwards;
   }
 
@@ -2834,7 +2834,7 @@
     page underneath is simply uncovered, from the bottom up, by the sheet that was
     already there.
   */
-  html[data-intro="out"] .intro {
+  html[data-intro="out"][data-intro-style="paper"] .intro {
     animation: intro-lift 760ms cubic-bezier(0.76, 0, 0.24, 1) forwards;
   }
   /*
@@ -2843,8 +2843,8 @@
     travelling through the letters of a name slices them; letting them go first means the
     curtain wipes clean paper.
   */
-  html[data-intro="out"] .intro-stage,
-  html[data-intro="out"] .intro-cue {
+  html[data-intro="out"][data-intro-style="paper"] .intro-stage,
+  html[data-intro="out"][data-intro-style="paper"] .intro-cue {
     animation: intro-content-out 260ms ease both;
   }
 
@@ -2854,6 +2854,61 @@
     }
     to {
       opacity: 0;
+    }
+  }
+
+  /*
+    The other exit, for comparison: an ink panel that rises over the composition and then
+    carries on upward and off, uncovering the hero. This is curtain-up followed by
+    curtain-off at their own durations - literally the move this site makes between
+    pages, borrowed whole rather than imitated.
+
+    It is a sibling of .intro rather than a child, and that is forced: the paper is
+    hidden on the frame the ink finishes covering it, and visibility is inherited - as a
+    child the panel went out with the paper on that same frame and the page appeared as
+    if cut to, with no sweep at all. Clipped to nothing by default, so it costs nothing
+    in the style that does not use it.
+
+    The paper does not fade or wipe here. It is simply hidden on the frame the ink
+    finishes covering, which no one can see.
+  */
+  .intro-sweep {
+    position: fixed;
+    inset: 0;
+    z-index: 96;
+    background: var(--ink);
+    clip-path: inset(100% 0 0 0);
+    pointer-events: none;
+  }
+  html[data-intro="out"][data-intro-style="ink"] .intro-sweep {
+    animation:
+      intro-sweep-up 520ms cubic-bezier(0.76, 0, 0.24, 1) forwards,
+      intro-sweep-off 560ms cubic-bezier(0.76, 0, 0.24, 1) 520ms forwards;
+  }
+  html[data-intro="out"][data-intro-style="ink"] .intro {
+    animation: intro-hide 1ms linear 520ms forwards;
+  }
+
+  @keyframes intro-sweep-up {
+    from {
+      clip-path: inset(100% 0 0 0);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+    }
+  }
+  @keyframes intro-sweep-off {
+    from {
+      clip-path: inset(0 0 0 0);
+    }
+    to {
+      clip-path: inset(0 0 100% 0);
+    }
+  }
+  @keyframes intro-hide {
+    to {
+      visibility: hidden;
+      pointer-events: none;
     }
   }
   /*
@@ -3338,10 +3393,12 @@
     html[data-intro="out"] .intro-cue {
       animation-duration: 1ms;
     }
-    html[data-intro="out"] .intro,
-    html[data-intro="out"] .intro::after,
-    html[data-intro="out"] .intro-stage,
-    html[data-intro="out"] .intro-cue,
+    html[data-intro="out"][data-intro-style="paper"] .intro,
+    html[data-intro="out"][data-intro-style="paper"] .intro::after,
+    html[data-intro="out"][data-intro-style="paper"] .intro-stage,
+    html[data-intro="out"][data-intro-style="paper"] .intro-cue,
+    html[data-intro="out"][data-intro-style="ink"] .intro,
+    html[data-intro="out"][data-intro-style="ink"] .intro-sweep,
     html:not([data-intro]) .intro {
       animation-duration: 1ms;
     }
