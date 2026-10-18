@@ -2,7 +2,7 @@ import { Logo } from "./logo";
 
 /**
  * The title sequence: a dot that spins up into the mark, then slides aside and lets the
- * name out of itself.
+ * name out of itself - and then waits for a click.
  *
  * The move fits this mark rather than being imposed on it. A four-fold shape spun fast
  * at small size blurs into a disc, so the dot is not a stand-in for the logo - it is the
@@ -10,24 +10,38 @@ import { Logo } from "./logo";
  * aperture; the words have somewhere to come from. The same sequence on a wordmark or an
  * asymmetric glyph would be a trick.
  *
- * It is CSS alone, and that is a safety property rather than a preference. The whole
- * sequence is one set of keyframes ending in `visibility: hidden; pointer-events: none`
- * with a forwards fill, so it finishes and uncovers the page whatever happens to the
- * script - including the script never running at all. An overlay that needs JavaScript
- * to get out of the way is a door, not a welcome.
+ * Ilham asked for an intro that ends when he clicks and not before, which turns it from
+ * something that gets out of the way into something you open. Two consequences, and both
+ * are deliberate:
  *
- * What the script in layout.tsx does is only ever to take it away sooner: it is not
- * drawn at all on a second visit in the same session, on any page but the home page, or
- * under prefers-reduced-motion. It cannot be clicked away - Ilham asked for that, having
- * found he could not photograph it - so ?intro forces it to play again on demand, which
- * is what the skip was being used for.
+ * The first 3500ms cannot be skipped. A click during the sequence does nothing at all -
+ * this is the same request as last time, where a screenshot could dismiss it and he
+ * could not photograph what he wanted to point at. At 3500ms the cue appears and the
+ * click starts working, in one step, so the cue never offers something that is not there.
+ *
+ * And it no longer takes itself away. The whole sequence used to end in visibility:
+ * hidden with a forwards fill, which opened the page even if the script never ran; now
+ * only the script can end it. That is a real risk, and it is covered twice. The noscript
+ * rule below removes the overlay entirely when scripting is off - unlayered, so it beats
+ * the .intro rule inside @layer components no matter what that rule says. And for the
+ * case noscript cannot see, scripting enabled but this one inline script blocked by a
+ * CSP or an extension, globals.css gives html:not([data-intro]) .intro a lift at 4000ms.
+ * A visitor never meets a door that cannot be opened.
+ *
+ * ?intro replays the whole thing on demand, which is what the old skip gesture was
+ * actually being used for.
  *
  * Hidden from the accessibility tree. Everything it says - the name, the three words -
- * is in the hero behind it, in text, and a screen reader should be reading that.
+ * is in the hero behind it, in text, and a screen reader should be reading that. Enter
+ * and Space end it as well as a click, so the overlay is not a trap for anyone who is
+ * not using a pointer.
  */
 export function Intro() {
   return (
     <div className="intro" aria-hidden="true">
+      <noscript>
+        <style>{".intro{display:none}"}</style>
+      </noscript>
       <div className="intro-stage">
         <span className="intro-ring" />
         <span className="intro-mark">
@@ -38,6 +52,7 @@ export function Intro() {
           <span>Process &middot; Data &middot; Decisions</span>
         </p>
       </div>
+      <span className="intro-cue">Click anywhere to enter</span>
     </div>
   );
 }

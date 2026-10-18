@@ -50,6 +50,12 @@ for (const w of [1440, 375]) {
 
     await page.setViewport({ width: w, height: 900 });
     const resp = await page.goto(base + p, { waitUntil: "domcontentloaded", timeout: 60000 });
+    // The home page opens behind the title sequence, which locks scroll until it is
+    // clicked away - and this checker measures by scrolling. Without this the walk down
+    // the page silently does nothing on "/", no lazy image ever loads, and the overflow
+    // test passes for the wrong reason. Each path gets a fresh tab, so the session flag
+    // that would otherwise suppress it is never set.
+    await page.evaluate(() => (document.documentElement.dataset.intro = "off"));
 
     // Scroll the page so lazy images mount, then give them a bounded chance to arrive.
     await page.evaluate(async () => {
