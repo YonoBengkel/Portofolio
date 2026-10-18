@@ -1660,11 +1660,12 @@
     letter-spacing: 0;
     color: var(--ink);
     white-space: pre;
-    opacity: 0;
-    transition: opacity 900ms ease;
-  }
-  .ascii-frame[data-on] {
-    opacity: 1;
+    /*
+      One node, not one per portrait. The change between portraits is a scatter written
+      into this node's text rather than a crossfade between stacked copies - see
+      ascii-portrait.tsx. The only thing that fades here is the hover.
+    */
+    transition: opacity 420ms ease;
   }
   .ascii-photo {
     opacity: 0;
@@ -1678,7 +1679,7 @@
   .about-photo:hover .ascii-photo[data-on] {
     opacity: 1;
   }
-  .about-photo:hover .ascii-frame[data-on] {
+  .about-photo:hover .ascii-frame {
     opacity: 0;
   }
 
