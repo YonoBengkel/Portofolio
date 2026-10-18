@@ -284,7 +284,18 @@ const state = (page) =>
   // domcontentloaded, not networkidle0: over HTTPS something always keeps a connection
   // open and the idle never arrives. The 5200ms wait below covers the stylesheet.
   await page.setContent(html, { waitUntil: "domcontentloaded" });
-  await wait(5200);
+  // Waiting a fixed 5200ms read the fallback mid-flight over HTTPS, where the stylesheet
+  // lands later and the 4000ms delay therefore starts later - visibility was still
+  // "visible" while pointer-events had already flipped, which is simply the middle of a
+  // discrete interpolation. page.evaluate still runs under the CSP (it goes in over the
+  // debugger protocol, not as page script), so the animation can be waited on directly.
+  await page.evaluate(async () => {
+    const el = document.querySelector(".intro");
+    for (let i = 0; i < 80 && el.getAnimations().length === 0; i++) {
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    await Promise.all(el.getAnimations().map((a) => a.finished));
+  });
   const released = await page.evaluate(() => {
     const el = document.querySelector(".intro");
     const cs = getComputedStyle(el);
