@@ -1,21 +1,27 @@
 /**
- * Brand marks for the tools belt.
+ * Marks for the tools belt.
  *
- * Six, not sixteen. These are the official marks taken verbatim from Simple Icons
- * (CC0-1.0); Excel, Power BI and Tableau are not here because their owners keep them out
- * of every freely-licensed icon set, and redrawing a trademarked logo by hand is both the
- * worse legal position and the thing that makes an icon row look slightly wrong. Those
- * chips carry the letter badge instead - which is the fallback the chip was designed
- * around in the first place, not a patch over a gap.
+ * Two kinds, and the split is not arbitrary.
  *
- * Each mark renders in its owner's own colour, which is what Ilham asked for and is also
- * the stricter trademark position - an unaltered mark in its own colour is the use every
- * brand page allows, where a recoloured one often is not. The hex values are the ones
- * Simple Icons records for each brand.
+ * Brand marks are taken verbatim from Simple Icons (CC0-1.0) and render in their owner's
+ * own colour. That is what Ilham asked for and it is also the stricter trademark
+ * position: an unaltered mark in its own colour is the use every brand page allows,
+ * where a recoloured or redrawn one often is not.
  *
- * The marks are the trademarks of their owners and are used here only to name a tool.
+ * Drawn glyphs cover everything that has no mark to take. Most of those are not products
+ * at all - SQL, ETL, star schema, statistics, machine learning, LLM agents are ideas, and
+ * an idea has no logo, so one is drawn for it. They share a single language: a 24px box,
+ * a 1.7px stroke in the page's ink, round joins, no fill.
+ *
+ * Excel and Power BI are the uncomfortable pair. They ARE products, and Microsoft keeps
+ * their marks out of every freely-licensed set, so what sits in their boxes is a drawn
+ * glyph for the kind of thing they are - a sheet of cells, a bar chart - and not an
+ * attempt at the logo. Redrawing a trademarked mark by hand is both the worse legal
+ * position and the thing that makes an icon row look slightly wrong. Flagged for Ilham;
+ * if he can supply the official SVGs the two entries become brand marks like the rest.
+ *
+ * The letter badge that used to fill these gaps is gone - he asked for no letters.
  */
-
 const COLOURS: Record<string, string> = {
   python: "#3776AB",
   looker: "#4285F4",
@@ -23,6 +29,8 @@ const COLOURS: Record<string, string> = {
   apacheairflow: "#017CEE",
   docker: "#2496ED",
   react: "#61DAFB",
+  fastapi: "#009688",
+  tableau: "#E97627",
 };
 
 const PATHS: Record<string, string> = {
@@ -38,6 +46,10 @@ const PATHS: Record<string, string> = {
     "M13.983 11.078h2.119a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.119a.185.185 0 00-.185.185v1.888c0 .102.083.185.185.185m-2.954-5.43h2.118a.186.186 0 00.186-.186V3.574a.186.186 0 00-.186-.185h-2.118a.185.185 0 00-.185.185v1.888c0 .102.082.185.185.185m0 2.716h2.118a.187.187 0 00.186-.186V6.29a.186.186 0 00-.186-.185h-2.118a.185.185 0 00-.185.185v1.887c0 .102.082.185.185.186m-2.93 0h2.12a.186.186 0 00.184-.186V6.29a.185.185 0 00-.185-.185H8.1a.185.185 0 00-.185.185v1.887c0 .102.083.185.185.186m-2.964 0h2.119a.186.186 0 00.185-.186V6.29a.185.185 0 00-.185-.185H5.136a.186.186 0 00-.186.185v1.887c0 .102.084.185.186.186m5.893 2.715h2.118a.186.186 0 00.186-.185V9.006a.186.186 0 00-.186-.186h-2.118a.185.185 0 00-.185.185v1.888c0 .102.082.185.185.185m-2.93 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.185.185 0 00-.184.185v1.888c0 .102.083.185.185.185m-2.964 0h2.119a.185.185 0 00.185-.185V9.006a.185.185 0 00-.184-.186h-2.12a.186.186 0 00-.186.186v1.887c0 .102.084.185.186.185m-2.92 0h2.12a.185.185 0 00.184-.185V9.006a.185.185 0 00-.184-.186h-2.12a.185.185 0 00-.184.185v1.888c0 .102.082.185.185.185M23.763 9.89c-.065-.051-.672-.51-1.954-.51-.338.001-.676.03-1.01.087-.248-1.7-1.653-2.53-1.716-2.566l-.344-.199-.226.327c-.284.438-.49.922-.612 1.43-.23.97-.09 1.882.403 2.661-.595.332-1.55.413-1.744.42H.751a.751.751 0 00-.75.748 11.376 11.376 0 00.692 4.062c.545 1.428 1.355 2.48 2.41 3.124 1.18.723 3.1 1.137 5.275 1.137.983.003 1.963-.086 2.93-.266a12.248 12.248 0 003.823-1.389c.98-.567 1.86-1.288 2.61-2.136 1.252-1.418 1.998-2.997 2.553-4.4h.221c1.372 0 2.215-.549 2.68-1.009.309-.293.55-.65.707-1.046l.098-.288Z",
   react:
     "M14.23 12.004a2.236 2.236 0 0 1-2.235 2.236 2.236 2.236 0 0 1-2.236-2.236 2.236 2.236 0 0 1 2.235-2.236 2.236 2.236 0 0 1 2.236 2.236zm2.648-10.69c-1.346 0-3.107.96-4.888 2.622-1.78-1.653-3.542-2.602-4.887-2.602-.41 0-.783.093-1.106.278-1.375.793-1.683 3.264-.973 6.365C1.98 8.917 0 10.42 0 12.004c0 1.59 1.99 3.097 5.043 4.03-.704 3.113-.39 5.588.988 6.38.32.187.69.275 1.102.275 1.345 0 3.107-.96 4.888-2.624 1.78 1.654 3.542 2.603 4.887 2.603.41 0 .783-.09 1.106-.275 1.374-.792 1.683-3.263.973-6.365C22.02 15.096 24 13.59 24 12.004c0-1.59-1.99-3.097-5.043-4.032.704-3.11.39-5.587-.988-6.38-.318-.184-.688-.277-1.092-.278zm-.005 1.09v.006c.225 0 .406.044.558.127.666.382.955 1.835.73 3.704-.054.46-.142.945-.25 1.44-.96-.236-2.006-.417-3.107-.534-.66-.905-1.345-1.727-2.035-2.447 1.592-1.48 3.087-2.292 4.105-2.295zm-9.77.02c1.012 0 2.514.808 4.11 2.28-.686.72-1.37 1.537-2.02 2.442-1.107.117-2.154.298-3.113.538-.112-.49-.195-.964-.254-1.42-.23-1.868.054-3.32.714-3.707.19-.09.4-.127.563-.132zm4.882 3.05c.455.468.91.992 1.36 1.564-.44-.02-.89-.034-1.345-.034-.46 0-.915.01-1.36.034.44-.572.895-1.096 1.345-1.565zM12 8.1c.74 0 1.477.034 2.202.093.406.582.802 1.203 1.183 1.86.372.64.71 1.29 1.018 1.946-.308.655-.646 1.31-1.013 1.95-.38.66-.773 1.288-1.18 1.87-.728.063-1.466.098-2.21.098-.74 0-1.477-.035-2.202-.093-.406-.582-.802-1.204-1.183-1.86-.372-.64-.71-1.29-1.018-1.946.303-.657.646-1.313 1.013-1.954.38-.66.773-1.286 1.18-1.868.728-.064 1.466-.098 2.21-.098zm-3.635.254c-.24.377-.48.763-.704 1.16-.225.39-.435.782-.635 1.174-.265-.656-.49-1.31-.676-1.947.64-.15 1.315-.283 2.015-.386zm7.26 0c.695.103 1.365.23 2.006.387-.18.632-.405 1.282-.66 1.933-.2-.39-.41-.783-.64-1.174-.225-.392-.465-.774-.705-1.146zm3.063.675c.484.15.944.317 1.375.498 1.732.74 2.852 1.708 2.852 2.476-.005.768-1.125 1.74-2.857 2.475-.42.18-.88.342-1.355.493-.28-.958-.646-1.956-1.1-2.98.45-1.017.81-2.01 1.085-2.964zm-13.395.004c.278.96.645 1.957 1.1 2.98-.45 1.017-.812 2.01-1.086 2.964-.484-.15-.944-.318-1.37-.5-1.732-.737-2.852-1.706-2.852-2.474 0-.768 1.12-1.742 2.852-2.476.42-.18.88-.342 1.356-.494zm11.678 4.28c.265.657.49 1.312.676 1.948-.64.157-1.316.29-2.016.39.24-.375.48-.762.705-1.158.225-.39.435-.788.636-1.18zm-9.945.02c.2.392.41.783.64 1.175.23.39.465.772.705 1.143-.695-.102-1.365-.23-2.006-.386.18-.63.406-1.282.66-1.933zM17.92 16.32c.112.493.2.968.254 1.423.23 1.868-.054 3.32-.714 3.708-.147.09-.338.128-.563.128-1.012 0-2.514-.807-4.11-2.28.686-.72 1.37-1.536 2.02-2.44 1.107-.118 2.154-.3 3.113-.54zm-11.83.01c.96.234 2.006.415 3.107.532.66.905 1.345 1.727 2.035 2.446-1.595 1.483-3.092 2.295-4.11 2.295-.22-.005-.406-.05-.553-.132-.666-.38-.955-1.834-.73-3.703.054-.46.142-.944.25-1.438zm4.56.64c.44.02.89.034 1.345.034.46 0 .915-.01 1.36-.034-.44.572-.895 1.095-1.345 1.565-.455-.47-.91-.993-1.36-1.565z",
+  fastapi:
+    "M12 .0387C5.3729.0384.0003 5.3931 0 11.9988c-.001 6.6066 5.372 11.9628 12 11.9625 6.628.0003 12.001-5.3559 12-11.9625-.0003-6.6057-5.3729-11.9604-12-11.96m-.829 5.4153h7.55l-7.5805 5.3284h5.1828L5.279 18.5436q2.9466-6.5444 5.892-13.0896",
+  tableau:
+    "M11.654.174V2.377H9.682v.58h1.972V5.16h.696V2.957h1.97v-.58h-1.97V.174h-.348zm6.03 2.262l-.002 1.623v1.623h-2.957v.927h2.957v3.188H18.725l.011-1.582.02-1.576 1.465-.02 1.46-.01v-.927H18.728V2.436h-.522zm-12.407.06V5.686H2.291v.925H5.277V9.801h.985V6.61h3.013v-.925H6.262V2.496H5.77zm6.086 5.27v3.593H8.06v1.188h3.304v3.596h1.28v-3.596H15.953v-1.188H12.643V7.766h-.637zm9.721 1.55v2.221h-2.012v.811h2.012v2.261h.887v-2.261H24v-.811h-2.029V9.317h-.422zm-19.111.131V11.621H0v.621H1.973v2.194H2.64v-2.194h2v-.62H2.609V9.446h-.318zm15.709 4.516v3.254h-3.016v.927h3.016v3.217h1.072v-3.216H21.74v-.928H18.754v-3.254h-.533zm-12.463.008v3.246H2.262v.928h2.957v3.189H6.32v-3.189h2.955v-.928H6.32V13.97h-.55zm6.316 4.578l.002 1.103v1.1H9.566v.812h1.971v2.262h.928l.012-1.119.017-1.143H14.463v-.812h-2V18.549h-.465z",
 };
 
 /**
@@ -46,23 +58,100 @@ const PATHS: Record<string, string> = {
  * anything unmatched falls through to the letter badge with no special case.
  */
 const FOR_TOOL: Record<string, string> = {
-  "Python (pandas, scikit-learn)": "python",
+  Python: "python",
   "Looker Studio": "looker",
   Streamlit: "streamlit",
-  "Apache Airflow": "apacheairflow",
+  Airflow: "apacheairflow",
   Docker: "docker",
-  "React & TypeScript": "react",
+  ReactJS: "react",
+  FastAPI: "fastapi",
+  Tableau: "tableau",
+};
+
+/*
+  Drawn glyphs, one per tool that has no mark to take. Stroke rather than fill so they sit
+  at the same visual weight as each other whatever they depict, and in the page's ink
+  rather than a colour, because none of these has a brand colour to be right about.
+*/
+const GLYPHS: Record<string, React.ReactElement> = {
+  // a database: the oldest drawing of a table there is
+  SQL: (
+    <>
+      <path d="M4 6c0-1.66 3.58-3 8-3s8 1.34 8 3-3.58 3-8 3-8-1.34-8-3Z" />
+      <path d="M20 6v12c0 1.66-3.58 3-8 3s-8-1.34-8-3V6" />
+      <path d="M20 12c0 1.66-3.58 3-8 3s-8-1.34-8-3" />
+    </>
+  ),
+  // a normal curve against its axis, with the mean marked
+  Statistics: (
+    <>
+      <path d="M2 20h20" />
+      <path d="M3 20C7 20 8 6 12 6s5 14 9 14" />
+      <path d="M12 6v14" />
+    </>
+  ),
+  // a fact table with its dimensions hanging off the corners
+  "Star schema": (
+    <>
+      <path d="M9.5 9.5h5v5h-5z" />
+      <path d="M2 2h4.2v4.2H2zM17.8 2H22v4.2h-4.2zM2 17.8h4.2V22H2zM17.8 17.8H22V22h-4.2z" />
+      <path d="M6.2 6.2 9.5 9.5M17.8 6.2 14.5 9.5M6.2 17.8 9.5 14.5M17.8 17.8 14.5 14.5" />
+    </>
+  ),
+  // a funnel: everything in at the top, one shape out at the bottom
+  ETL: <path d="M3 4h18l-7 8.2V19l-4 2v-8.8z" />,
+  // a small network, which is what the phrase actually means
+  "Machine learning": (
+    <>
+      <path d="M5 5.6a1.9 1.9 0 1 0 0 3.8 1.9 1.9 0 0 0 0-3.8ZM5 14.6a1.9 1.9 0 1 0 0 3.8 1.9 1.9 0 0 0 0-3.8ZM19 9.1a1.9 1.9 0 1 0 0 3.8 1.9 1.9 0 0 0 0-3.8Z" />
+      <path d="M6.7 8.3 17.3 10.3M6.7 15.7 17.3 11.9" />
+    </>
+  ),
+  // something that is spoken to and answers back
+  "LLM agents": (
+    <>
+      <path d="M4 5h16v11h-9.5L5 20v-4H4z" />
+      <path d="M9 10.5h.01M12 10.5h.01M15 10.5h.01" strokeWidth={2.4} />
+    </>
+  ),
+  // a sheet of cells - the kind of thing, not the logo
+  Excel: (
+    <>
+      <path d="M3 4h18v16H3z" />
+      <path d="M3 9.3h18M3 14.7h18M9 4v16M15 4v16" />
+    </>
+  ),
+  // bars on an axis - the kind of thing, not the logo
+  "Power BI": (
+    <>
+      <path d="M3 20h18" />
+      <path d="M6.6 20V12.5M12 20V4.5M17.4 20V9" strokeWidth={2.4} />
+    </>
+  ),
 };
 
 export function ToolMark({ tool, size = 14 }: { tool: string; size?: number }) {
   const key = FOR_TOOL[tool];
   const d = key ? PATHS[key] : undefined;
   if (!d) {
-    // Toriq's own fallback: a hairline circle carrying the first letter.
+    const glyph = GLYPHS[tool];
+    if (!glyph) return null;
     return (
-      <span className="chip-badge" aria-hidden="true">
-        {tool[0]}
-      </span>
+      <svg
+        className="chip-mark"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.7}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+        focusable="false"
+      >
+        {glyph}
+      </svg>
     );
   }
   return (

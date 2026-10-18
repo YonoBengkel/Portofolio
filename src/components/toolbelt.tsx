@@ -36,9 +36,9 @@ import { ToolMark } from "./tool-marks";
   TILE and CHAR_W are checked against the rendered width rather than assumed; see the
   note on setWidth.
 */
-const TILE = 60; // the box, and the floor on a tile's width
-const CHAR_W = 7.2; // one character of the name, mono at 0.7rem with its letter-spacing
-const GAP = 22; // tiles need more air between them than pills did
+const TILE = 86; // the box, and the floor on a tile's width
+const CHAR_W = 6.6; // one character of the caption, sans semibold at 0.82rem, measured
+const GAP = 30; // 24px of air plus the 6px the box's shadow spends on its right
 const SPEED = 50; // px per second, measured
 
 /*
@@ -58,7 +58,7 @@ function Chip({ label }: { label: string }) {
   return (
     <span className="chip-tool">
       <span className="chip-box">
-        <ToolMark tool={label} size={26} />
+        <ToolMark tool={label} size={38} />
       </span>
       <span className="chip-name">{label}</span>
     </span>
