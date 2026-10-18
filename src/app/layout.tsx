@@ -56,29 +56,67 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           without a flash: deciding it in an effect means the title sequence renders and
           then vanishes, which is worse than either showing it or not.
 
-          It only ever takes the sequence away earlier than the CSS would. The sequence
-          itself is keyframes with a forwards fill and ends on its own, so a failure here
-          - a blocked script, a thrown error, storage refused in a private window - leaves
-          a title sequence that still finishes and uncovers the page.
+          This now owns the whole life of the overlay, not just its early exit. The
+          sequence used to lift itself at the end of its own keyframes; Ilham asked for
+          one that ends on a click, so the CSS holds the last frame indefinitely and
+          every state change below is the only thing that moves it on. The two failures
+          that buys are both covered in globals.css rather than here, because a script
+          cannot catch its own absence: noscript removes the overlay when scripting is
+          off, and html:not([data-intro]) lifts it at 4000ms when scripting is on but
+          this script did not run - a CSP or an extension that strips inline scripts.
 
           The session flag is set on the way in rather than at the end, so a reload
           halfway through does not start it again.
 
-          Nothing here listens for a click any more. It used to end on the first pointer,
-          key or wheel event, which is the usual courtesy - but Ilham could not photograph
-          it, because taking a screenshot ends it. ?intro replays it on demand instead,
-          and that is what the skip was actually being used for.
+          The gates run route first. The replay test used to come first and matched
+          "intro" anywhere in the query string, so /work?utm_campaign=introducing-ilham
+          put the page into the sequence states on a route that never renders the overlay
+          - and 3500ms later the first Space or Enter was silently eaten. It is now
+          anchored to a whole parameter name and only ever reached on the home page.
 
-          The only timer left removes the finished overlay from the layer at 3100ms; the
-          CSS has already hidden it by then.
+          Four deliberate details in the handlers:
+
+          The listeners are attached immediately but out() returns unless the state is
+          already "ready", so the first 3500ms cannot be clicked away. Gating on the
+          state rather than attaching the listeners on the timer means there is no window
+          where the cue is up and the click has not been wired yet - the cue is drawn by
+          the same attribute that permits the click.
+
+          Everything also checks up(), that an overlay is actually on screen. A client-side
+          navigation away from the home page unmounts it while the states live on <html>,
+          and without this check a keystroke would be swallowed on a page with nothing
+          covering it. The 3500ms timer resolves to "off" rather than "ready" for the
+          same reason.
+
+          Tab is held while the overlay is up. Focus otherwise walks into the header
+          behind it, invisibly, and Enter then follows a link the visitor never saw
+          themselves choose - measured, four tabs and a return landed on /about with the
+          sequence still playing.
+
+          Enter and Space end it, so the overlay is not a trap without a pointer, and
+          preventDefault is called only while it is up - otherwise Space would stop
+          scrolling the page on every visit that never showed an intro at all.
+          Deliberately not any key: PrintScreen and the Windows key fire keydown, and a
+          screenshot dismissing the thing being photographed is exactly the complaint
+          that got the old skip gesture removed.
         */}
         <script
           dangerouslySetInnerHTML={{
             __html:
               '(function(){var d=document.documentElement;function off(){d.dataset.intro="off"}' +
-              'function on(){d.dataset.intro="on";setTimeout(off,3100)}' +
-              'if(location.search.indexOf("intro")>0){on();return}' +
+              'function up(){var e=document.querySelector(".intro");' +
+              'return !!e&&getComputedStyle(e).display!=="none"}' +
+              'function out(){if(d.dataset.intro!=="ready"||!up())return;' +
+              'd.dataset.intro="out";setTimeout(off,500)}' +
+              'function key(e){var s=d.dataset.intro;' +
+              'if((s!=="on"&&s!=="ready")||!up())return;' +
+              'if(e.key==="Tab"){e.preventDefault();return}' +
+              'if(s==="ready"&&(e.key==="Enter"||e.key===" ")){e.preventDefault();out()}}' +
+              'function on(){d.dataset.intro="on";addEventListener("pointerdown",out);' +
+              'addEventListener("keydown",key);' +
+              'setTimeout(function(){if(d.dataset.intro==="on")d.dataset.intro=up()?"ready":"off"},3500)}' +
               'if(location.pathname!=="/"){off();return}' +
+              'if(/[?&]intro(=|&|$)/.test(location.search)){on();return}' +
               'try{if(sessionStorage.getItem("intro")){off();return}sessionStorage.setItem("intro","1")}catch(e){}' +
               'if(matchMedia("(prefers-reduced-motion: reduce)").matches){off();return}' +
               'on()})()',

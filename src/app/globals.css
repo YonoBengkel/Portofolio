@@ -2735,13 +2735,23 @@
   /* ========================================================= title sequence */
 
   /*
-    A dot that spins up into the mark, then slides aside and lets the name out of itself.
+    A dot that spins up into the mark, then slides aside and lets the name out of itself -
+    and then waits, because Ilham asked for an intro that ends when he clicks and not
+    before.
 
-    All of it is keyframes with a forwards fill, and that is a safety property rather
-    than a preference: the sequence ends in visibility: hidden and pointer-events: none
-    whatever happens to the script, including the script never running. An overlay that
-    needs JavaScript to get out of the way is a door. What the script does is only ever
-    to end it sooner - a second visit, a different page, reduced motion, or a click.
+    That makes it a door, and it is a door on purpose. The earlier version lifted itself
+    at the end of its own keyframes, which meant it opened the page whatever happened to
+    the script. This one does not: data-intro goes on -> ready -> out -> off, and only
+    the script moves it. The cost is real and is paid in two places - a noscript rule in
+    the component takes the whole overlay away when scripting is off, and the sequence
+    arms itself after 3500ms rather than waiting on a gesture nobody has been told about.
+
+    Four states rather than two:
+      on     the sequence is playing. A click does nothing - the first 3500ms cannot be
+             skipped, which is what Ilham lost back when a screenshot could dismiss it.
+      ready  the sequence has finished and the cue is up. Click, Enter or Space ends it.
+      out    lifting.
+      off    finished, or never wanted at all.
 
     z-index 95, one above the curtain. On a first load nothing else should be over it,
     and the curtain is the only thing that ever would be.
@@ -2753,15 +2763,79 @@
     display: grid;
     place-items: center;
     background: var(--paper);
-    animation: intro-lift 3000ms linear both;
   }
   /*
-    Off means it was never wanted: a second visit in this session, any page but the home
-    page, or reduced motion. display: none rather than opacity, so nothing of it is left
-    to catch a click.
+    Off means it is finished, or was never wanted: a second visit in this session, any
+    page but the home page, or reduced motion. display: none rather than opacity, so
+    nothing of it is left to catch a click.
   */
   html[data-intro="off"] .intro {
     display: none;
+  }
+  /*
+    The cursor is half the affordance. A full-screen still image that happens to be
+    waiting for a click looks exactly like a full-screen still image that has hung, and
+    the pointer is the first thing that says otherwise - before anyone has read the line
+    at the bottom of the screen.
+  */
+  html[data-intro="ready"] .intro {
+    cursor: pointer;
+  }
+  html[data-intro="out"] .intro {
+    animation: intro-lift 420ms cubic-bezier(0.32, 0, 0.24, 1) forwards;
+  }
+  /*
+    The way out when the script never ran at all.
+
+    noscript covers scripting being off. It does not cover scripting being ON and this
+    one script not executing - an extension that strips inline scripts, or a Content
+    Security Policy added later. Measured: with script-src 'self' the overlay sat there
+    at opacity 1 and pointer-events auto, and click, Enter, Space and Escape all did
+    nothing. The home page was simply unreachable.
+
+    This selector only matches when nothing has ever set the attribute, and the script
+    sets it before the body paints - well before .intro exists, since the script is the
+    first child of body and the overlay is rendered further down. So when the script
+    runs this rule can never apply, and the click requirement is untouched; when it does
+    not, the sequence plays in full and then lets go by itself at 4000ms.
+  */
+  html:not([data-intro]) .intro {
+    animation: intro-lift 420ms cubic-bezier(0.32, 0, 0.24, 1) 4000ms forwards;
+  }
+  /*
+    Scroll is locked while the overlay is up, and this is not tidiness.
+
+    A wheel is not a pointerdown, so it never reached out() and never dismissed anything
+    - it just scrolled the document behind an opaque fixed layer that gave no sign the
+    page was moving. Measured on the production build: six ticks of 400 during the
+    sequence left scrollY at 2400, and the click that followed dropped the visitor 2285px
+    below the heading the sequence had just introduced. It was bounded at three seconds
+    before, because the overlay used to lift itself; holding indefinitely is what makes
+    it worth fixing.
+
+    overflow on html, not body: with html set to anything but visible the value is used
+    for the viewport and body's is not propagated, which is what actually stops the wheel
+    and the arrow keys alike.
+
+    "out" is deliberately not in this list, and that is the whole scrollbar answer. Where
+    scrollbars take up space - Windows and Linux desktops - hiding the overflow takes the
+    scrollbar away and the page widens by about 15px, which moves a centred layout
+    sideways by half that. Releasing the lock on the click rather than at the end of the
+    lift puts that reflow on the first frame of intro-lift, where the overlay is still at
+    opacity 1 and covering it. Measured: the band field steps from 712.5 to 720 behind a
+    layer at 0.99. The alternative was to reserve a scrollbar gutter, which costs 15px of
+    every phone screen for the whole visit to fix three seconds of one page.
+
+    The cost is a 420ms window during the fade where the page can be scrolled again. The
+    visitor has committed to entering by then, and they can see it move.
+
+    Deliberately not extended to html:not([data-intro]): with scripting off the noscript
+    rule removes the overlay but the attribute is still absent, and locking the page then
+    would leave a scrollless site with nothing covering it.
+  */
+  html[data-intro="on"],
+  html[data-intro="ready"] {
+    overflow: hidden;
   }
 
   /*
@@ -2818,7 +2892,7 @@
   }
   .intro-mark {
     display: block;
-    animation: intro-mark 3000ms both;
+    animation: intro-mark 3500ms both;
   }
   .intro-mark svg {
     display: block;
@@ -2830,7 +2904,7 @@
     gap: 0.5em;
     justify-items: start;
     white-space: nowrap;
-    animation: intro-words 3000ms both;
+    animation: intro-words 3500ms both;
   }
   .intro-words b {
     font-family: var(--font-display);
@@ -2880,6 +2954,56 @@
   }
 
   /*
+    The line at the foot of the screen, and the only part of this that is not decoration:
+    without it the overlay is a still picture with no visible way out.
+
+    It is driven by the state attribute rather than by a keyframe timed to match, so it
+    cannot lie. The script arms the click and sets data-intro="ready" in one step, which
+    means the cue is on screen if and only if clicking actually works. A cue on its own
+    3500ms animation would have been two clocks telling the same time, and the one that
+    drifts is the one that invites a click that does nothing.
+
+    Out of the flow, so it does not give .intro a second grid row and push the title card
+    off centre. left/right rather than a centring translate, because the fade-in animates
+    translate and the two would be fighting over one property.
+  */
+  .intro-cue {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: clamp(2rem, 7vh, 4.5rem);
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: clamp(0.62rem, 2.4vw, 0.74rem);
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    opacity: 0;
+  }
+  /*
+    Both states, and the second one is the point. Keyed on "ready" alone the selector
+    stopped matching the instant the click flipped it to "out", which took the animation
+    and its forwards fill off the element and dropped the cue to its base opacity of 0 in
+    one frame - measured at 0 while the overlay behind it was still at 0.94, with 390ms
+    of the lift left to run. The line blinked out instead of leaving with everything else.
+  */
+  html[data-intro="ready"] .intro-cue,
+  html[data-intro="out"] .intro-cue {
+    animation: intro-cue-in 520ms cubic-bezier(0.33, 1, 0.68, 1) both;
+  }
+
+  @keyframes intro-cue-in {
+    0% {
+      opacity: 0;
+      translate: 0 0.6em;
+    }
+    100% {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+
+  /*
     1080 degrees, and the landing is not luck. The diamond is four-fold but the slot
     through it is not, so the mark reads the same every 180 degrees and any multiple of
     that lands upright. 1080 is six of them.
@@ -2893,16 +3017,22 @@
 
     The first 500ms are empty on purpose - the dot was arriving before anyone had looked
     at the screen.
+
+    Every percentage below is a millisecond divided by 3500. The sequence was built at
+    3000ms and the move itself is unchanged: the dot still appears at 500ms, the spin
+    still lands at 1500ms, the water still settles at 2220ms. Lengthening it to 3500ms
+    extended the last frame and nothing else, which is what Ilham asked for - and the
+    3500 is not an arbitrary end, it is the moment the overlay starts listening.
   */
   @keyframes intro-mark {
     0%,
-    16.66% {
+    14.28% {
       opacity: 0;
       scale: 0.05;
       rotate: 0deg;
       translate: 0 0;
     }
-    16.67% {
+    14.29% {
       opacity: 1;
       scale: 0.05;
       rotate: 0deg;
@@ -2910,24 +3040,24 @@
       animation-timing-function: cubic-bezier(0.19, 0.78, 0.22, 1);
     }
     /* The spin ends here, upright, and the water starts. */
-    50% {
+    42.86% {
       scale: 1;
       rotate: 1080deg;
     }
-    56% {
+    48% {
       scale: 1.1;
     }
-    60% {
+    51.43% {
       scale: 0.955;
       translate: 0 0;
     }
-    66% {
+    56.57% {
       scale: 1.025;
     }
-    71% {
+    60.86% {
       scale: 1;
     }
-    74%,
+    63.43%,
     100% {
       opacity: 1;
       scale: 1;
@@ -2949,13 +3079,13 @@
 
   /*
     The words are wiped open from the leading edge while they move, so they read as coming
-    out of the mark rather than appearing beside it. The wipe starts at 64% - after the
-    water has settled and as the mark begins to move - so the two gestures overlap
-    instead of queueing.
+    out of the mark rather than appearing beside it. The wipe starts at 1920ms - after
+    the water has settled and as the mark begins to move - so the two gestures overlap
+    instead of queueing, and they are fully out at 2640ms.
   */
   @keyframes intro-words {
     0%,
-    64% {
+    54.86% {
       opacity: 0;
       /*
         50% of the words' own width, which puts their left edge exactly on the centre -
@@ -2971,10 +3101,10 @@
       translate: var(--words-start);
       clip-path: var(--words-shut);
     }
-    69% {
+    59.14% {
       opacity: 1;
     }
-    88%,
+    75.43%,
     100% {
       opacity: 1;
       /* Still measured from their own leading edge, settling clear of the mark. */
@@ -2983,9 +3113,13 @@
     }
   }
 
+  /*
+    No hold at the front any more. This used to be the tail of a 3000ms animation that
+    ran whether anyone was watching or not; it is 420ms that starts when the click lands,
+    so it begins at its first frame.
+  */
   @keyframes intro-lift {
-    0%,
-    92% {
+    0% {
       opacity: 1;
       visibility: visible;
       translate: 0 0;
@@ -3097,8 +3231,6 @@
       measured. Each selector here matches the element that actually transitions, at the
       same specificity as the rule it overrides and later in the layer.
     */
-    .intro-mark,
-    .intro-words,
     .hero-alt .hero-band-in,
     .ascii-frame,
     .ascii-photo,
@@ -3108,6 +3240,33 @@
     html[data-run="1"] .sink-block > * {
       transition-duration: 1ms;
     }
+    /*
+      The intro is animated, not transitioned, so it was in the list above doing nothing
+      at all: transition-duration on an element that has no transition is a no-op. It
+      only ever went unnoticed because reduce also makes the script skip the overlay
+      outright - every path except ?intro, which is explicit enough to honour.
+
+      1ms rather than none: none would drop the forwards fill and leave the mark at
+      translate 0 on top of words that are still clipped shut by their own 0% keyframe.
+      A 1ms duration lands on the final frame, which is the composition at rest.
+
+      Both selectors below repeat the attribute they override. A bare .intro-cue would
+      be specificity 0,1,0 against a shorthand at 0,2,0 and would lose silently - the
+      way three rules in this file already have.
+    */
+    .intro-mark,
+    .intro-words {
+      animation-duration: 1ms;
+    }
+    html[data-intro="ready"] .intro-cue,
+    html[data-intro="out"] .intro-cue {
+      animation-duration: 1ms;
+    }
+    html[data-intro="out"] .intro,
+    html:not([data-intro]) .intro {
+      animation-duration: 1ms;
+    }
+    .intro-ring,
     .tape-run,
     .marquee-track,
     .drift img,

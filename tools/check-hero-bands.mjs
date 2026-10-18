@@ -67,6 +67,11 @@ for (const [vw, vh] of [[1920, 1042], [1440, 900], [375, 812]]) {
   const page = await browser.newPage();
   await page.setViewport({ width: vw, height: vh });
   await page.goto(base, { waitUntil: "networkidle2", timeout: 60000 });
+  // The hero only exists for a visitor who has already clicked past the title sequence,
+  // so that is the state to measure it in. isolate() hides the overlay anyway, but the
+  // sequence also locks scroll, and a checker that has to be told twice is cheaper than
+  // one that measures a state nobody sees.
+  await page.evaluate(() => (document.documentElement.dataset.intro = "off"));
   await page.evaluate(isolate);
 
   // 1. nothing painted with the switch off
@@ -127,15 +132,25 @@ for (const [vw, vh] of [[1920, 1042], [1440, 900], [375, 812]]) {
     const bad = [];
     for (let i = 0; i < els.length; i++) {
       for (let j = i + 1; j < els.length; j++) {
-        let pt = null;
+        // Candidates rather than one point, because a point can be geometrically inside
+        // both bands and still hit nothing: innerWidth includes the reserved scrollbar
+        // gutter, and a probe that lands in it comes back with an empty stack. That read
+        // as "painted in the wrong order" and failed two crossings that were correct.
+        // The first 40 hits are skipped to get away from the tapering ends of the overlap.
+        const cands = [];
         let hits = 0;
-        for (let y = 4; y < innerHeight && !pt; y += 6) {
+        for (let y = 4; y < innerHeight && cands.length < 24; y += 6) {
           for (let x = 4; x < innerWidth; x += 6) {
-            if (inside(geo[i], x, y) && inside(geo[j], x, y) && ++hits > 40) { pt = [x, y]; break; }
+            if (inside(geo[i], x, y) && inside(geo[j], x, y) && ++hits > 40) cands.push([x, y]);
           }
         }
+        let pt = null;
+        let stack = [];
+        for (const c of cands) {
+          const s = document.elementsFromPoint(c[0], c[1]).map((e) => e.closest(".hero-band")).filter(Boolean);
+          if (s.includes(els[i]) || s.includes(els[j])) { pt = c; stack = s; break; }
+        }
         if (!pt) continue;
-        const stack = document.elementsFromPoint(pt[0], pt[1]).map((e) => e.closest(".hero-band")).filter(Boolean);
         const pi = stack.indexOf(els[i]);
         const pj = stack.indexOf(els[j]);
         const painted = pi >= 0 && (pj < 0 || pi < pj) ? i : j;
