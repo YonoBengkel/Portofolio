@@ -330,17 +330,34 @@
 
   /* ---------------------------------------------------------- the hero */
 
+  /*
+    The hero keeps its full 100svh: the switch swaps the ground under the whole view, and
+    a hero shorter than the window would leave the next section showing under the bands,
+    which is the one thing that effect cannot survive.
+
+    What came down instead is what sits inside it. The top padding was 160px against a
+    header that measures 81, so half of it was clearing nothing; 112 clears the header
+    with room and gives 48px back. Measured at 1920 the block ran from 224 to 888 with
+    154px of dead space below it, which reads as a column of text pushed down the screen
+    rather than as a title page.
+  */
   .hero {
     position: relative;
     min-height: 100svh;
     display: grid;
     place-items: center;
     text-align: center;
-    padding-block: 160px 90px;
+    padding-block: 112px 80px;
   }
   .hero-name {
-    /* Alief measured 160px across two lines at 1440; this is the same size, fluid. */
-    font-size: clamp(2.9rem, 11.2vw, 10rem);
+    /*
+      Alief measured 160px across two lines at 1440, and this matched it. At that size
+      the two lines stand 304px tall, nearly a third of the window before anything else
+      is placed, and the switch and the buttons were pushed into the bottom quarter.
+      8.5rem brings the pair to 258px and gives 46px back; the name still arrives at a
+      size nothing else on the page comes near, which is the whole job it has.
+    */
+    font-size: clamp(2.6rem, 10vw, 8.5rem);
   }
   .hero-role {
     margin-top: 1.6rem;
@@ -989,6 +1006,18 @@
     */
     --bh: calc(clamp(2.6rem, 12vw, 9.5rem) * 1.1 + 0.84rem);
     --band-gap: calc(var(--bh) * 0.166);
+    /*
+      Defined here rather than on .hero-set because the bands read it too: how far a band
+      must travel to leave the window depends on where the pair is held.
+
+      In svh rather than %, and that is not cosmetic. A custom property is substituted
+      where it is used, and this one is used in `bottom` on the sets and in `translate`
+      on the bands. A percentage in `bottom` resolves against the hero; the same
+      percentage in `translate` resolves against the band's own box, so 50% would quietly
+      become half a band height - 90px - in the travel sum. svh means the same thing in
+      both places, and the hero is 100svh tall, so the value is unchanged.
+    */
+    --anchor: max(calc(var(--bh) * 0.2), calc(50svh - var(--bh) * 3.611));
   }
 
   /*
@@ -1024,7 +1053,6 @@
       that centres the pair. max() picks the bottom anchor exactly while the pair
       overflows and hands back to centring once it fits.
     */
-    --anchor: max(calc(var(--bh) * 0.2), calc(50% - var(--bh) * 3.611));
     bottom: calc(var(--anchor) + var(--set-y));
     /*
       Wide enough that a band still reaches past both edges of the window at its worst
@@ -1092,10 +1120,23 @@
     color: var(--paper);
   }
   /*
-    One viewport is not enough travel. A 150%-wide strip tilted twelve degrees rises and
-    falls by about 150px across its own length, so at exactly 100svh the far corner was
-    still showing along the bottom of the page - which is what the stripes under the
-    buttons were. Measured: 340px of margin clears every one of the four.
+    How far a band has to go to be gone, and why it is not a round number.
+
+    This was `100svh + 340px` for every band, which worked only while the pair of sets
+    was centred. Anchoring them to the bottom lifted set A's first band to 427px above
+    the top of the hero, and a fixed distance measured from the viewport no longer
+    reached: that band landed 87px inside the window at 1920 and 180px at 1440, which is
+    the dark strip that used to sit under the buttons with the switch off. Worse, the
+    `--i` term handed the most travel to the lowest band and the least to the highest,
+    which is backwards - the highest one starts furthest from the exit.
+
+    So the distance is measured from the field instead of from the window. 7.222 band
+    heights is the pair's full extent (set A's height of 4.498, plus the 2.724 it sits
+    above set B), --anchor is how far the pair is held off the hero's bottom edge, and
+    the rest is clearance: a band is wider than the window and tilted, so the corner that
+    is still inside the window sits above the band's own middle, by about 60px at 1920.
+    Every term scales with the band, so this holds at 375 as well as at 1920 rather than
+    being a number that happened to work at one size.
   */
   .hero-alt .hero-band-in {
     /*
@@ -1104,7 +1145,7 @@
       atan(skew) plus the set's tilt, which puts the seven between about 15 and 31
       degrees off vertical.
     */
-    --travel: calc(100svh + 340px + var(--i) * 40px);
+    --travel: calc(var(--anchor) + var(--bh) * 8 + var(--i) * 40px);
     translate: calc(var(--travel) * var(--skew)) var(--travel);
     transition: translate 820ms cubic-bezier(0.22, 1, 0.3, 1);
     transition-delay: calc(var(--i) * 50ms);
