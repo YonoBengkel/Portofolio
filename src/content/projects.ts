@@ -592,7 +592,7 @@ export const projects: Project[] = [
     role: "All of it: the retrieval, the fusion, the evaluation set and the decision to throw a feature away.",
     flow: ["Notes", "Chunks", "Dense + keyword", "Fused", "Measured against held-out questions"],
     tools: ["Python", "Chroma", "BM25", "Embeddings"],
-    links: [],
+    links: [{ label: "GitHub repository", href: "https://github.com/YonoBengkel/agent" }],
     cover: {
       src: agentRetrieval,
       alt: "Diagram: a note vault feeding dense and keyword retrieval, fused by reciprocal rank fusion, then measured against a held-out question set",
