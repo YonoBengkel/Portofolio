@@ -2781,8 +2781,80 @@
   html[data-intro="ready"] .intro {
     cursor: pointer;
   }
+  /*
+    The edge of the curtain, and without it there is no curtain.
+
+    The panel is paper and so is the page behind it, so the clip that takes it away has
+    nothing to show for itself: the frames read as content arriving in bands rather than
+    as a sheet being pulled off. The one between pages is ink over paper and does not
+    have this problem. So the sheet gets a trailing edge, 2px of ink - the same weight as
+    every other rule on this site.
+
+    A box the size of the panel with a bottom border, rather than a line positioned at
+    the clip boundary: its own height is the viewport, so a translate of -100% carries
+    that border from the bottom of the screen to the top, and the parent's clip is
+    travelling on the same curve over the same 760ms. The border sits in the 2px just
+    above the boundary the whole way up.
+  */
+  .intro::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-bottom: 2px solid var(--ink);
+    opacity: 0;
+    pointer-events: none;
+  }
+  html[data-intro="out"] .intro::after {
+    animation: intro-edge 760ms cubic-bezier(0.76, 0, 0.24, 1) forwards;
+  }
+
+  @keyframes intro-edge {
+    0%,
+    88% {
+      opacity: 1;
+    }
+    0% {
+      translate: 0 0;
+    }
+    100% {
+      opacity: 0;
+      translate: 0 -100%;
+    }
+  }
+  /*
+    It leaves as a curtain, not as a fade, and the gesture is borrowed rather than
+    invented: the panel between pages rises out of the bottom of the screen to cover and
+    then carries on upward and off, on cubic-bezier(0.76, 0, 0.24, 1). Fading was the one
+    transition on this site speaking a different language, and it happened to be the one
+    at first impression.
+
+    The paper peels itself off the hero rather than a second panel arriving over it. An
+    ink curtain sweeping across the intro would be the house move too, but it puts a
+    black screen between a visitor and the first thing they came to see; this way the
+    page underneath is simply uncovered, from the bottom up, by the sheet that was
+    already there.
+  */
   html[data-intro="out"] .intro {
-    animation: intro-lift 760ms cubic-bezier(0.32, 0, 0.24, 1) forwards;
+    animation: intro-lift 760ms cubic-bezier(0.76, 0, 0.24, 1) forwards;
+  }
+  /*
+    And the composition goes before the edge reaches it, over 260ms - the same beat, and
+    the same reason, as the word on the curtain between pages. A hard horizontal edge
+    travelling through the letters of a name slices them; letting them go first means the
+    curtain wipes clean paper.
+  */
+  html[data-intro="out"] .intro-stage,
+  html[data-intro="out"] .intro-cue {
+    animation: intro-content-out 260ms ease both;
+  }
+
+  @keyframes intro-content-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
   }
   /*
     The way out when the script never ran at all.
@@ -2800,7 +2872,7 @@
     not, the sequence plays in full and then lets go by itself at 4000ms.
   */
   html:not([data-intro]) .intro {
-    animation: intro-lift 760ms cubic-bezier(0.32, 0, 0.24, 1) 4000ms forwards;
+    animation: intro-lift 760ms cubic-bezier(0.76, 0, 0.24, 1) 4000ms forwards;
   }
   /*
     Scroll is locked while the overlay is up, and this is not tidiness.
@@ -2981,14 +3053,13 @@
     opacity: 0;
   }
   /*
-    Both states, and the second one is the point. Keyed on "ready" alone the selector
-    stopped matching the instant the click flipped it to "out", which took the animation
-    and its forwards fill off the element and dropped the cue to its base opacity of 0 in
-    one frame - measured at 0 while the overlay behind it was still at 0.94, with 390ms
-    of the lift left to run. The line blinked out instead of leaving with everything else.
+    Keyed on "ready" alone, and the state it leaves out is handled rather than forgotten.
+    This selector stops matching the instant the click flips it to "out", which takes the
+    animation and its forwards fill off the element - on its own that dropped the cue to
+    opacity 0 in a single frame while the overlay behind it was still at 0.94. The rule
+    for "out" further down picks it up and fades it with the rest of the composition.
   */
-  html[data-intro="ready"] .intro-cue,
-  html[data-intro="out"] .intro-cue {
+  html[data-intro="ready"] .intro-cue {
     animation: intro-cue-in 520ms cubic-bezier(0.33, 1, 0.68, 1) both;
   }
 
@@ -3114,26 +3185,26 @@
   }
 
   /*
-    No hold at the front any more. This used to be the tail of a 3000ms animation that
-    ran whether anyone was watching or not; it starts when the click lands, so it begins
-    at its first frame.
+    A clip, not a fade. The bottom edge of the paper travels to the top of the screen and
+    the hero is uncovered behind it, which is curtain-off further down this file with a
+    different colour of panel - the same shape, so entering the site and moving around it
+    are one gesture.
 
-    760ms, and the rise grew with it. At 420 the exit was over before it registered as an
-    exit - Ilham asked for longer. A longer move over the same 1.5% would only have read
-    as slow, so the paper travels 2.6% now: far enough that the eye follows it off rather
-    than watching it dissolve in place.
+    760ms because 420 was over before it read as an exit, and because a wipe wants longer
+    than a fade: a fade is finished the moment it is mostly gone, an edge has to arrive.
+
+    It still ends in visibility: hidden and pointer-events: none. A clipped element is
+    invisible but it is still there, and it would go on taking the clicks.
   */
   @keyframes intro-lift {
     0% {
-      opacity: 1;
+      clip-path: inset(0 0 0 0);
       visibility: visible;
-      translate: 0 0;
     }
     100% {
-      opacity: 0;
+      clip-path: inset(0 0 100% 0);
       visibility: hidden;
       pointer-events: none;
-      translate: 0 -2.6%;
     }
   }
 
@@ -3268,6 +3339,9 @@
       animation-duration: 1ms;
     }
     html[data-intro="out"] .intro,
+    html[data-intro="out"] .intro::after,
+    html[data-intro="out"] .intro-stage,
+    html[data-intro="out"] .intro-cue,
     html:not([data-intro]) .intro {
       animation-duration: 1ms;
     }
