@@ -54,11 +54,12 @@ function setWidth(items: string[]) {
   return items.reduce((w, item) => w + Math.max(TILE, CHAR_W * item.length) + GAP, 0);
 }
 
-function Chip({ label }: { label: string }) {
+function Chip({ label, uid }: { label: string; uid: string }) {
   return (
     <span className="chip-tool">
       <span className="chip-box">
-        <ToolMark tool={label} size={38} />
+        {/* uid keeps gradient ids unique: the set is in the DOM four times over. */}
+        <ToolMark tool={label} size={38} uid={uid} />
       </span>
       <span className="chip-name">{label}</span>
     </span>
@@ -83,7 +84,7 @@ function Row({ items, reverse }: { items: string[]; reverse?: boolean }) {
         {Array.from({ length: COPIES }, (_, copy) => (
           <span className="belt-set" key={copy} aria-hidden={copy > 0 ? "true" : undefined}>
             {items.map((item) => (
-              <Chip key={item} label={item} />
+              <Chip key={item} label={item} uid={`${reverse ? "b" : "a"}${copy}`} />
             ))}
           </span>
         ))}
