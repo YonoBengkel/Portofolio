@@ -208,7 +208,7 @@ const state = (page) =>
   // Enter on its own, before the click is tried: the only keyboard assertion used to be
   // that keys do nothing, which is satisfied just as well by the handler not existing.
   await page.keyboard.press("Enter");
-  await wait(1100); // the curtain runs 760ms and the overlay leaves the layer at 860
+  await wait(1500); // the longer curtain runs 1080ms and the overlay leaves the layer at 1200
   const byEnter = await state(page);
   check(byEnter.flag === "off", "Enter ends it once it is ready", `flag=${byEnter.flag}`);
   await page.close();
@@ -218,7 +218,7 @@ const state = (page) =>
   await page.goto(base + "/?intro", { waitUntil: "domcontentloaded" });
   await wait(4000);
   await page.keyboard.press("Space");
-  await wait(1100);
+  await wait(1500);
   const bySpace = await state(page);
   check(bySpace.flag === "off", "Space ends it once it is ready", `flag=${bySpace.flag}`);
   await page.close();
@@ -230,7 +230,7 @@ const state = (page) =>
 
   // And now the click works.
   await page.mouse.click(960, 520);
-  await wait(1100);
+  await wait(1500);
   const after = await page.evaluate(() => {
     const at = document.elementFromPoint(innerWidth / 2, innerHeight / 2);
     return { intro: !!at?.closest(".intro"), tag: at?.tagName ?? null, flag: document.documentElement.dataset.intro };
@@ -378,6 +378,36 @@ const state = (page) =>
     order.overflow === "visible" && cut === 0,
     "scroll is given back while the overlay still covers the page",
     `html overflow-y=${order.overflow} clip-path=${order.clip}`,
+  );
+  await page.close();
+}
+
+{
+  // The other exit, asked for by name. Two assertions rather than a second suite: that
+  // the query selects it at all, and that the ink actually covers before it clears - a
+  // sweep that cleared without covering would uncover the paper again and read as a flash.
+  const page = await fresh();
+  await page.goto(base + "/?intro=ink", { waitUntil: "domcontentloaded" });
+  const style = await page.evaluate(() => document.documentElement.dataset.introStyle);
+  check(style === "ink", "?intro=ink selects the ink curtain", `style=${style}`);
+
+  await wait(4000);
+  const sweep = await page.evaluate(async () => {
+    const read = () => {
+      const cs = getComputedStyle(document.querySelector(".intro-sweep"));
+      const m = /inset\(\S+ \S+ (\S+)/.exec(cs.clipPath);
+      return { cut: parseFloat(m ? m[1] : "100"), paper: getComputedStyle(document.querySelector(".intro")).visibility };
+    };
+    document.documentElement.dataset.intro = "out";
+    await new Promise((r) => setTimeout(r, 480));
+    const covering = read();
+    await new Promise((r) => setTimeout(r, 420));
+    return { covering, clearing: read() };
+  });
+  check(
+    sweep.covering.cut < 15 && sweep.clearing.cut > 25 && sweep.clearing.paper === "hidden",
+    "the ink covers before it clears",
+    `covered to ${(100 - sweep.covering.cut).toFixed(0)}%, then cleared ${sweep.clearing.cut.toFixed(0)}%, paper=${sweep.clearing.paper}`,
   );
   await page.close();
 }
