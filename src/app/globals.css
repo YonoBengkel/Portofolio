@@ -1030,12 +1030,50 @@
     z-index: var(--z, 1);
   }
   /* The strip itself: much taller than it was, because thin reads as limp. */
+  /*
+    The strip itself: ink, with a hazard stripe along the top and bottom edge and the
+    words between them, which is the order real tape reads in.
+
+    The stripes are two background layers rather than two elements, so they cost no
+    markup and cannot fall out of step with the band they belong to. Each is pinned to
+    one edge and sized to --stripe tall, and the ink underneath is a background-color so
+    the gaps in the hatch show it rather than the page.
+
+    Everything scales off --bh rather than being fixed: a 25px stripe reads as an edge on
+    a 250px band at 1920 and as a blanket on an 88px band at 375. At 0.14 of a band it is
+    25px on the desktop and 9px on a phone, and the hatch spacing follows it so the
+    diagonals stay the same shape at both ends.
+  */
   .hero-band-in {
+    --stripe: calc(var(--bh) * 0.14);
+    /*
+      The bar is nearly as wide as the stripe is tall, which is what makes it read as
+      hazard tape rather than as hatching. At a third of that the diagonals were so fine
+      across a 2400px band that the edge looked like noise; the reference runs its bars
+      at about a fifth of the tape's height apart, and this lands at the same ratio.
+    */
+    --hatch: calc(var(--stripe) * 0.8);
     overflow: hidden;
-    /* Per band, so no two strips are the same thickness. Default matches the old fixed value. */
-    padding-block: var(--pad, 0.42rem);
-    background: var(--ink);
+    /* Per band, so no two strips are the same thickness. */
+    padding-block: calc(var(--pad, 0.42rem) + var(--stripe));
     color: var(--paper);
+    background-color: var(--ink);
+    background-image:
+      repeating-linear-gradient(
+        135deg,
+        var(--paper) 0 var(--hatch),
+        transparent var(--hatch) calc(var(--hatch) * 2.3)
+      ),
+      repeating-linear-gradient(
+        135deg,
+        var(--paper) 0 var(--hatch),
+        transparent var(--hatch) calc(var(--hatch) * 2.3)
+      );
+    background-size: 100% var(--stripe);
+    background-position:
+      0 0,
+      0 100%;
+    background-repeat: no-repeat;
   }
   /*
     How far a band has to go to be gone, and which way it goes.
@@ -1164,24 +1202,28 @@
     vertical-align: bottom;
   }
   /*
-    380ms and 13ms a letter, down from 560 and 24.
+    210ms and 7ms a letter, down from 560/24 and then 380/13.
 
-    The whole sink used to finish at 992ms: 432ms of stagger across eighteen letters,
-    then a 560ms move. That is longer than the floor takes to arrive, so the name stayed
-    drawn over bands that had already landed. The stagger was the heavier half of it, and
-    halving the per-letter step is what shortens the thing without making any single
-    letter move at a different speed than reads well - the queue gets tighter, the
-    letters do not get whipped. The end lands at 614ms, just under the bands.
+    The target is not "before the bands finish" but "before the bands reach the name",
+    and those are 700ms apart. Measured at 1920x1042: the first ink touches the box the
+    name sits in at 350ms and covers it completely by 450ms, while the bands themselves
+    are not done until 1438. Finishing at 614 was still late by a quarter of a second -
+    the letters were sinking behind tape that had already crossed them.
+
+    Nearly all of the saving is in the queue rather than the move: eighteen letters at
+    24ms apart is 432ms of waiting before the last one has started. At 7ms the ripple is
+    quick but still a ripple, and the whole sink ends at 336ms, just before the first
+    band arrives.
   */
   .sink > span {
     display: inline-block;
     translate: 0 0;
-    transition: translate 380ms cubic-bezier(0.76, 0, 0.24, 1);
-    transition-delay: calc((var(--n, 10) - var(--i, 0)) * 13ms);
+    transition: translate 210ms cubic-bezier(0.76, 0, 0.24, 1);
+    transition-delay: calc((var(--n, 10) - var(--i, 0)) * 7ms);
   }
   html[data-run="1"] .sink > span {
     translate: 0 118%;
-    transition-delay: calc(var(--i, 0) * 13ms);
+    transition-delay: calc(var(--i, 0) * 7ms);
   }
   /* The highlighter is carried by the slots, so the plate goes down with the letters. */
   .marker-split {
@@ -1199,7 +1241,7 @@
     overflow: clip;
   }
   .sink-block > * {
-    transition: translate 380ms cubic-bezier(0.76, 0, 0.24, 1);
+    transition: translate 210ms cubic-bezier(0.76, 0, 0.24, 1);
     transition-delay: 120ms;
   }
   html[data-run="1"] .sink-block > * {
@@ -1246,9 +1288,40 @@
     color: var(--ink-2);
     transition: color 150ms ease;
   }
+  .run-label {
+    position: relative;
+  }
   .run-label .is-on {
     color: var(--ink);
-    border-bottom: 2px solid var(--ink);
+  }
+  /*
+    The mark used to be a border-bottom on whichever word was active, which meant it
+    vanished from one and appeared under the other. One element that slides says the
+    selection moved; two borders blinking say nothing moved at all.
+  */
+  /*
+    `.run-label .run-mark`, not `.run-mark`. The mark is a span inside the label, so the
+    rule two blocks up - `.run-label span { transition: color 150ms ease }` - outranks a
+    bare class on transition and quietly won: the mark jumped instead of sliding, and the
+    computed transition-property read `color`. Measured frame by frame before and after,
+    because a jump and a slide look the same in a still.
+  */
+  .run-label .run-mark {
+    position: absolute;
+    left: 0;
+    bottom: 5px;
+    height: 2px;
+    width: var(--mark-w, 0);
+    translate: var(--mark-x, 0) 0;
+    background: var(--ink);
+    opacity: 0;
+    transition:
+      translate 420ms cubic-bezier(0.76, 0, 0.24, 1),
+      width 420ms cubic-bezier(0.76, 0, 0.24, 1),
+      opacity 180ms ease;
+  }
+  .run-label[data-has-mark] .run-mark {
+    opacity: 1;
   }
 
   /* =========================================================== the stamp */

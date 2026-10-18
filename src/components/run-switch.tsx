@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 /**
  * The switch in the middle of the hero.
@@ -21,9 +21,37 @@ import { useEffect, useState } from "react";
  */
 export function RunSwitch() {
   const [alt, setAlt] = useState(false);
+  const labelRef = useRef<HTMLParagraphElement>(null);
+  const [mark, setMark] = useState<{ x: number; w: number } | null>(null);
 
   useEffect(() => {
     document.documentElement.dataset.run = alt ? "1" : "0";
+  }, [alt]);
+
+  /*
+    The mark under the active word is one element that travels, not a border that moves
+    from one word to the other - two borders cannot animate into each other, only a
+    single object can cross the gap. Same device as the nav pill's fill.
+
+    Measured from the live word rather than written down, so it stays right at whatever
+    the font renders to; offsetLeft is taken from the label's border box while the mark
+    is positioned against its padding box, which is what clientLeft subtracts. The active
+    word is found by its class rather than by index - the mark is a span inside the same
+    label, so counting children puts it in the queue with the words.
+  */
+  useLayoutEffect(() => {
+    const label = labelRef.current;
+    if (!label) return;
+    const measure = () => {
+      const word = label.querySelector<HTMLElement>(".is-on");
+      setMark(word ? { x: word.offsetLeft - label.clientLeft, w: word.offsetWidth } : null);
+    };
+    measure();
+    // Fonts land after first paint and change both words' widths.
+    const observer = new ResizeObserver(measure);
+    observer.observe(label);
+    document.fonts?.ready?.then(measure).catch(() => {});
+    return () => observer.disconnect();
   }, [alt]);
 
   return (
@@ -42,7 +70,13 @@ export function RunSwitch() {
       </label>
       {/* No aria-live: the words here never change, only which one is marked, and the
           checkbox announces its own state. A live region that can never fire is noise. */}
-      <p className="run-label">
+      <p
+        className="run-label"
+        ref={labelRef}
+        data-has-mark={mark ? "" : undefined}
+        style={mark ? ({ "--mark-x": `${mark.x}px`, "--mark-w": `${mark.w}px` } as React.CSSProperties) : undefined}
+      >
+        <span className="run-mark" aria-hidden="true" />
         <span className={alt ? "" : "is-on"}>Name</span>
         <span aria-hidden="true"> / </span>
         <span className={alt ? "is-on" : ""}>Method</span>

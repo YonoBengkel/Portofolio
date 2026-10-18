@@ -43,10 +43,12 @@ import { openTo, profile } from "@/content/site";
       0.3% of the screen, against 3.9% and 5.4% for the other two crossings;
     - the words run along the band, and the direction alternates, so the lattice reads as
       several lines of tape moving past each other rather than one sheet scrolling;
-    - pad is the band's own thickness, in rem of padding around the same type. No two
-      are equal and the spread is small on purpose: 210 to 226px, a seventh between the
-      thinnest and the thickest, which reads as tape cut by hand rather than as a set of
-      deliberately different widths.
+    - pad is the band's own thickness, in rem of padding between the type and the hazard
+      stripe along each edge. No two are equal and the spread is small on purpose: the
+      bands land between 238 and 257px, a thirteenth between the thinnest and the
+      thickest, which reads as tape cut by hand rather than as a set of deliberately
+      different widths. The values dropped when the stripes arrived, since the stripe
+      takes its own room at both edges.
 
   side is which edge a band comes in from, +1 for the left and -1 for the right. It is
   not a shared direction: the bands arrive from both sides at once, which is what stops
@@ -56,12 +58,12 @@ import { openTo, profile } from "@/content/site";
   depends on its angle and CSS has no trigonometry.
 */
 const BANDS = [
-  { word: "Process", tilt: -13, y: 0.1, side: 1, reverse: false, z: 5, pad: 1.35 },
-  { word: "Data", tilt: 6, y: 0.26, side: -1, reverse: true, z: 6, pad: 1.7 },
-  { word: "Decisions", tilt: -5, y: 0.42, side: 1, reverse: false, z: 4, pad: 1.45 },
-  { word: "Evidence", tilt: 16, y: 0.57, side: -1, reverse: true, z: 3, pad: 1.85 },
-  { word: "Process", tilt: -9, y: 0.74, side: 1, reverse: false, z: 2, pad: 1.55 },
-  { word: "Decisions", tilt: 4, y: 0.9, side: -1, reverse: true, z: 1, pad: 1.75 },
+  { word: "Process", tilt: -13, y: 0.1, side: 1, reverse: false, z: 5, pad: 0.6 },
+  { word: "Data", tilt: 6, y: 0.26, side: -1, reverse: true, z: 6, pad: 1.05 },
+  { word: "Decisions", tilt: -5, y: 0.42, side: 1, reverse: false, z: 4, pad: 0.72 },
+  { word: "Evidence", tilt: 16, y: 0.57, side: -1, reverse: true, z: 3, pad: 1.2 },
+  { word: "Process", tilt: -9, y: 0.74, side: 1, reverse: false, z: 2, pad: 0.85 },
+  { word: "Decisions", tilt: 4, y: 0.9, side: -1, reverse: true, z: 1, pad: 0.95 },
 ].map((b) => ({ ...b, cos: Math.cos((b.tilt * Math.PI) / 180) }));
 
 // Enough repeats that half a track is wider than any window, since the keyframe moves
