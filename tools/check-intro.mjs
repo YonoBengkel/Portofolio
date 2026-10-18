@@ -239,14 +239,14 @@ const state = (page) =>
   await page.close();
 }
 {
-  // The exit is a curtain: the paper's bottom edge travels to the top of the screen and
+  // The other exit, by name. The paper's bottom edge travels to the top of the screen and
   // the composition fades out ahead of it. Two things to hold. The cue has to fade WITH
   // the rest rather than blink out under it - its own rule stops matching the moment the
   // state leaves "ready", which on its own dropped it to opacity 0 in a single frame. And
   // the panel itself must not fade: a clip that is also a fade is just a fade with extra
   // steps, and the edge stops being an edge.
   const page = await fresh();
-  await page.goto(base + "/?intro", { waitUntil: "domcontentloaded" });
+  await page.goto(base + "/?intro=paper", { waitUntil: "domcontentloaded" });
   await wait(4200);
   const mid = await page.evaluate(async () => {
     document.documentElement.dataset.intro = "out";
@@ -365,31 +365,43 @@ const state = (page) =>
   const order = await page.evaluate(async () => {
     document.documentElement.dataset.intro = "out";
     await new Promise((r) => requestAnimationFrame(r));
-    const cs = getComputedStyle(document.querySelector(".intro"));
-    return { overflow: getComputedStyle(document.documentElement).overflowY, clip: cs.clipPath };
+    const at = document.elementFromPoint(innerWidth / 2, innerHeight / 2);
+    return {
+      overflow: getComputedStyle(document.documentElement).overflowY,
+      hit: at ? at.tagName + "." + String(at.className || "").split(" ")[0] : null,
+      covered: !!at?.closest(".intro"),
+    };
   });
-  // With a wipe the panel never goes transparent, so what says it is still covering the
-  // page is the clip: on the first frame it is the whole screen.
-  // The bottom inset is the one that matters and Chrome serialises it however it likes -
-  // "inset(0px 0px 0%)" for an uncut panel, "inset(0px 0px 2.29%)" once it is moving - so
-  // the number is read rather than the string matched.
-  const cut = parseFloat((order.clip.match(/inset\(\S+ \S+ (\S+)/) ?? [])[1] ?? "100");
+  // Neither exit ever goes transparent, so what says the page is still covered is the hit
+  // test rather than an opacity or a clip - and the hit test has the same answer in both
+  // styles, which reading an inset did not.
   check(
-    order.overflow === "visible" && cut === 0,
+    order.overflow === "visible" && order.covered,
     "scroll is given back while the overlay still covers the page",
-    `html overflow-y=${order.overflow} clip-path=${order.clip}`,
+    `html overflow-y=${order.overflow} centre=${order.hit}`,
   );
   await page.close();
 }
 
 {
-  // The other exit, asked for by name. Two assertions rather than a second suite: that
-  // the query selects it at all, and that the ink actually covers before it clears - a
-  // sweep that cleared without covering would uncover the paper again and read as a flash.
+  // The ink is what an ordinary visit gets, so that is what is asserted - a default that
+  // only holds when it is named is not a default. Then that the ink actually covers before
+  // it clears: a sweep that cleared without covering would uncover the paper again and
+  // read as a flash.
+  const plain = await fresh();
+  await plain.goto(base + "/", { waitUntil: "domcontentloaded" });
+  const byDefault = await plain.evaluate(() => document.documentElement.dataset.introStyle);
+  check(byDefault === "ink", "a first visit gets the ink curtain", `style=${byDefault}`);
+  await plain.close();
+
+  const other = await fresh();
+  await other.goto(base + "/?intro=paper", { waitUntil: "domcontentloaded" });
+  const named = await other.evaluate(() => document.documentElement.dataset.introStyle);
+  check(named === "paper", "?intro=paper asks for the other one", `style=${named}`);
+  await other.close();
+
   const page = await fresh();
-  await page.goto(base + "/?intro=ink", { waitUntil: "domcontentloaded" });
-  const style = await page.evaluate(() => document.documentElement.dataset.introStyle);
-  check(style === "ink", "?intro=ink selects the ink curtain", `style=${style}`);
+  await page.goto(base + "/?intro", { waitUntil: "domcontentloaded" });
 
   await wait(4000);
   const sweep = await page.evaluate(async () => {

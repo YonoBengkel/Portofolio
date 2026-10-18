@@ -29,10 +29,10 @@ import { Logo } from "./logo";
  * A visitor never meets a door that cannot be opened.
  *
  * ?intro replays the whole thing on demand, which is what the old skip gesture was
- * actually being used for. ?intro=ink replays it with the other exit: an ink panel that
- * sweeps over the composition and carries on off the top, which is the move the site
- * already makes between pages. The paper one is the default - .intro-sweep is simply
- * never animated unless the style attribute asks for it.
+ * actually being used for. It leaves by the ink panel that sweeps over the composition
+ * and carries on off the top, which is the move the site already makes between pages;
+ * ?intro=paper replays it with the other exit, where the sheet peels itself off the hero
+ * instead and .intro-sweep is simply never animated.
  *
  * Hidden from the accessibility tree. Everything it says - the name, the three words -
  * is in the hero behind it, in text, and a screen reader should be reading that. Enter
