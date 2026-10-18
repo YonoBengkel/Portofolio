@@ -1,6 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
-import portrait from "@/assets/images/portrait-bw.webp";
+import { AsciiPortrait } from "./ascii-portrait";
 import { atAGlance, profile } from "@/content/site";
 import { SocialIcon } from "./social-icons";
 
@@ -26,6 +25,10 @@ import { SocialIcon } from "./social-icons";
  * borders are 2px rather than 4px, the emphasised nouns are set in mono rather than
  * uppercase-bold-black, and the one filled button is the accent. Those four changes are
  * what keep this his page rather than a copy of a classmate's.
+ *
+ * The photograph is not a photograph. See ascii-portrait.tsx; the frame grew from 17rem
+ * to 27rem to carry it, because a hundred characters across a 248px frame renders them
+ * at four pixels and the portrait stops being made of anything legible.
  */
 export function AboutCard() {
   return (
@@ -60,7 +63,7 @@ export function AboutCard() {
 
               <div className="about-photo">
                 <div className="about-photo-in">
-                  <Image src={portrait} alt={profile.name} sizes="(min-width: 768px) 15rem, 60vw" placeholder="blur" />
+                  <AsciiPortrait alt={profile.name} />
                 </div>
               </div>
 
