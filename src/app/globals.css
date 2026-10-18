@@ -1774,10 +1774,9 @@
     padding-block: 6px;
     /*
       Not optional: content-visibility brings size containment with it, and without a
-      remembered height the row collapses while it is skipped. 95px is the measured row:
-      an 83px tile - a 60px box, a 10px gap, the name - plus the padding above and below.
+      remembered height the row collapses while it is skipped. Measured below.
     */
-    contain-intrinsic-size: auto 95px;
+    contain-intrinsic-size: auto 130px;
   }
   .belt::before,
   .belt::after {
@@ -1813,11 +1812,14 @@
     per tile to work out how long one cycle takes, so a mismatch does not look wrong, it
     silently runs the row at the wrong speed. Measured with the two out of step: the
     formula read 877px against a real 763px set, which would have run the belt 15% slow.
+
+    30px rather than 22: the box casts a 6px shadow to its right, so that much of the gap
+    is spent before the next tile begins.
   */
   .belt-set {
     display: flex;
-    gap: 22px;
-    padding-right: 22px;
+    gap: 30px;
+    padding-right: 30px;
   }
   /*
     A tile: the box carries the mark, the name sits under it.
@@ -1834,41 +1836,40 @@
     display: inline-flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 14px;
     flex: none;
   }
+  /*
+    The box is the reference's: square corners, a hairline rule, and a hard offset shadow
+    rather than a blur - the same device the site's own buttons already use, so the row
+    sits inside the page's language instead of beside it. The shadow is drawn, not cast,
+    which is why it stays crisp at any size and costs nothing to paint.
+  */
   .chip-box {
     display: grid;
     place-items: center;
-    width: 60px;
-    height: 60px;
+    width: 86px;
+    height: 86px;
     flex: none;
     background: var(--paper-2);
-    border: 1px solid var(--line-strong);
-    border-radius: 14px;
-  }
-  .chip-name {
-    font-family: var(--font-mono);
-    font-size: 0.7rem;
-    line-height: 1.2;
-    letter-spacing: 0.04em;
-    color: var(--ink-2);
-    white-space: nowrap;
+    border: 1.5px solid var(--ink);
+    border-radius: 3px;
+    box-shadow: 6px 6px 0 var(--ink);
   }
   /*
-    The fallback for a tool with no freely-licensed mark. Inside the box it is just the
-    letter at the size of a logo - the hairline circle it used to wear made sense when
-    the chip was an oval and the badge had to read as its own object, but a circle drawn
-    inside a square box is only a box inside a box.
+    The caption is set in the page's sans at semibold, not in mono. Mono said "code" when
+    half of what these name is not software; the reference sets its captions in the same
+    face as the rest of its page and they read as labels rather than as tokens.
   */
-  .chip-badge {
-    display: grid;
-    place-items: center;
-    font-family: var(--font-display);
-    font-size: 1.5rem;
-    line-height: 1;
+  .chip-name {
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
     color: var(--ink);
+    white-space: nowrap;
   }
+
 
   /* ========================================================== projects */
 

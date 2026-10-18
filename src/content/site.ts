@@ -325,11 +325,17 @@ export const education = {
     "Business analytics, data warehousing, databases, data management, data visualization, applied statistics, data mining, and machine learning.",
 };
 
+/*
+  Short names. These are captions under an icon, not CV lines - "Python (pandas,
+  scikit-learn)" set under a 86px box is three times the width of the thing it labels,
+  and a row of tiles where every caption is a different length reads as a list rather
+  than as a set. The longest here is now "Machine learning".
+*/
 export const toolbox = [
-  { group: "Data & analytics", items: ["SQL", "Python (pandas, scikit-learn)", "Excel", "Statistical testing"] },
+  { group: "Data & analytics", items: ["SQL", "Python", "Excel", "Statistics"] },
   { group: "BI & visualization", items: ["Power BI", "Tableau", "Looker Studio", "Streamlit"] },
-  { group: "Data engineering", items: ["Star schema modelling", "ETL", "Apache Airflow", "Docker"] },
-  { group: "AI & development", items: ["Machine learning", "LLM agents", "FastAPI", "React & TypeScript"] },
+  { group: "Data engineering", items: ["Star schema", "ETL", "Airflow", "Docker"] },
+  { group: "AI & development", items: ["Machine learning", "LLM agents", "FastAPI", "ReactJS"] },
 ];
 
 // One line, used on the contact page and in the CV page's header.
