@@ -974,74 +974,95 @@
     width: 100vw;
     z-index: 0;
     overflow: clip;
-    display: grid;
-    align-content: center;
-    /*
-      No gap, and no overlap either. A `gap: -38px` used to sit here with a comment
-      claiming it pulled the bands together over the cream wedges that open between
-      strips at opposing tilts. It never did anything: `gap` does not take a negative
-      length, so the declaration was dropped at parse time and the computed value was
-      `normal` the whole time. Removed rather than left in place looking load-bearing.
-
-      The wedges are therefore still there, and at the moment they are the look: two
-      adjacent bands at +4 and -5 degrees diverge by nine degrees, which across the
-      viewport is more than a band's own thickness. Closing them means either a margin
-      pulling the rows together or fewer opposing tilts - both change the resting
-      composition, so neither is done here without being asked for.
-    */
     pointer-events: none;
+    /*
+      The height of one band, rebuilt from the rule that produces it: the marquee's own
+      font-size, times its line-height, plus the strip's padding. Everything about the
+      two sets - the gap inside them, where each one sits, how far they overlap - is a
+      multiple of this, so the composition holds its proportions from 375px to 1920px
+      instead of being a set of pixel offsets tuned at one width. Measured against the
+      rendered result: 181px at 1440, 63px at 375, both exact.
+
+      It has to be kept in step with .hero-band-run b by hand. CSS cannot read an
+      element's used height back out, and the alternative - measuring in JS and writing
+      a custom property - would put the hero's layout behind hydration.
+    */
+    --bh: calc(clamp(2.6rem, 12vw, 9.5rem) * 1.1 + 0.84rem);
+    --band-gap: calc(var(--bh) * 0.166);
+  }
+
+  /*
+    A set is a stack of parallel bands, rotated as one piece.
+
+    Rotating the group rather than each band is the whole trick. Two strips only hold an
+    even gap between them if they are parallel; tilt them against each other and the gap
+    becomes a wedge, 138px at one end of the screen and shut at the other, which is what
+    this hero used to show. Inside a set every band carries the same angle, so the cream
+    between them is the same width at every point across the window. The two directions
+    come from the two sets crossing, and ink over ink opens nothing.
+
+    The sets are positioned rather than stacked, so they overlap instead of meeting at a
+    seam. A seam between sets at 13 degrees apart cannot be closed: it would need the two
+    bands to overlap by more than a band's own thickness. Crossing them sidesteps the
+    question entirely, and it is what the reference does with its own two strips.
+  */
+  .hero-set {
+    position: absolute;
+    left: 50%;
+    top: calc(50% + var(--set-y));
+    /*
+      Wide enough that a band still reaches past both edges of the window at its worst
+      moment: tilted, and shoved sideways by up to 0.7 of its vertical travel on the way
+      in. At 1440 that leaves about 970px of band beyond a 720px half-window.
+    */
+    width: 255%;
+    translate: -50% 0;
+    rotate: var(--tilt);
+    display: grid;
+    gap: var(--band-gap);
   }
   /*
-    One tilt for all seven, and that is arithmetic rather than taste.
+    Where the two sets sit, and how deeply they cross.
 
-    Two neighbouring strips at opposing tilts diverge, and across the viewport that
-    divergence opens a cream wedge between them. Measured at 1440px on the old
-    alternating tilts, the worst pair (-6 and 5) opened a 138px wedge - most of a band's
-    own 181px thickness, which is why the hero read as torn rather than layered. Closing
-    that by overlap alone needs the row pitch down at 43px, so seven bands would stand
-    300px tall in total: a sliver, not a ground.
+    Set B starts 3.398 band-heights below set A's top, which is set A's own height
+    (4 bands and 3 gaps) less 1.1 of a band. That remainder is the overlap, and it is the
+    number that decides whether the junction between the sets stays shut. Two sets 10
+    degrees apart separate by half-window times the difference of their tangents: 126px
+    at 1440 and 168px at 1920, against an overlap of 199px. Both hold closed. At 2560 it
+    opens about 25px at one end, narrower than the 30px gaps it sits among, so even there
+    it reads as one more gap rather than as a tear.
 
-    Give every band the same tilt and the divergence term goes to zero, so the distance
-    between two bands is the same at every point across the screen. Set the pitch to
-    h / cos(tilt) and they meet exactly, with no wedge anywhere and no overlap deep
-    enough to cut into a letter.
+    Overlapping by more than a whole band is the part worth keeping. Anything less leaves
+    a strip of set A's last band uncovered all the way across - 18px at 0.9 of a band,
+    which is a row of letter tops peeping out from behind the band in front and reads as
+    a rendering fault. Past a full band it is covered in the middle of the screen and
+    emerges on one side instead, widening to about 108px by the edge, which is a band
+    passing underneath and is the thing the crossing is for.
 
-    The variety this gives up is bought back on the way in: --skew below is per band, so
-    the entry angles still spread while the resting composition stays flat. Tilt governs
-    where the bands sit; skew governs how they arrive.
+    The reference does not go this far: its two strips fall 28px short of closing. This
+    is the same device, measured rather than eyeballed.
+
+    The reference does the same thing and does not quite close it: its two strips are
+    132px short of parallel across their own width and overlap by 104, a ratio of 0.79.
+    Ours is 1.0 at 1440. The crossing is the device; the arithmetic only decides how
+    tidy it is.
+  */
+  .hero-set-a {
+    --tilt: -4deg;
+    --set-y: calc(var(--bh) * -3.2);
+  }
+  .hero-set-b {
+    --tilt: 6deg;
+    --set-y: calc(var(--bh) * 0.198);
+  }
+  /*
+    The band is only a row in its set now. Width, tilt and spacing all belong to the set,
+    because they are what has to agree between neighbours; --i and --skew stay here,
+    because they are what has to differ.
   */
   .hero-band {
-    --tilt: -4deg;
-    width: 150%;
-    margin-inline: -25%;
-    rotate: var(--tilt);
-    /*
-      h/cos(4deg) is 181.4px against a band 181px tall, so -2px leaves the strips
-      overlapping by about 2.4px - under the 6.7px of padding each one carries, so the
-      seam never reaches a glyph. Erring towards overlap rather than a gap: a hairline
-      of cream between two ink bands is more visible than a few pixels of ink on ink.
-    */
-    margin-block: -2px;
+    min-width: 0;
   }
-  .hero-band:nth-child(2) .hero-band-in {
-    --skew: -0.62;
-  }
-  .hero-band:nth-child(3) .hero-band-in {
-    --skew: -0.42;
-  }
-  .hero-band:nth-child(4) .hero-band-in {
-    --skew: -0.7;
-  }
-  .hero-band:nth-child(5) .hero-band-in {
-    --skew: -0.38;
-  }
-  .hero-band:nth-child(6) .hero-band-in {
-    --skew: -0.66;
-  }
-  .hero-band:nth-child(7) .hero-band-in {
-    --skew: -0.46;
-  }
-
   /* The strip itself: much taller than it was, because thin reads as limp. */
   .hero-band-in {
     overflow: hidden;
@@ -1057,13 +1078,11 @@
   */
   .hero-alt .hero-band-in {
     /*
-      Negative, so the bands start down and to the left and arrive moving up to the
-      right. The screen angle lands at roughly atan(skew) plus the tilt, so these seven
-      values put the bands between about 15 and 31 degrees off vertical. They are not a
-      ramp: a monotonic sequence reads as a wave, and the point here is seven strips that
-      happen to be falling rather than a single hinged sheet.
+      --skew comes in per band from the component, negative, so each one starts down and
+      to the left and arrives moving up to the right. The screen angle lands at roughly
+      atan(skew) plus the set's tilt, which puts the seven between about 15 and 31
+      degrees off vertical.
     */
-    --skew: -0.34;
     --travel: calc(100svh + 340px + var(--i) * 40px);
     translate: calc(var(--travel) * var(--skew)) var(--travel);
     transition: translate 820ms cubic-bezier(0.22, 1, 0.3, 1);

@@ -1,14 +1,18 @@
-// Fail if a cream wedge opens between the hero's ink bands.
+// Check the hero's ink bands: every cream run between them is either one of the even
+// gaps inside a set, or nothing.
 //
 // Usage: node tools/check-hero-bands.mjs http://localhost:3000
 //
-// Two strips at opposing tilts diverge across the screen, and the cream page shows
-// through the triangle between them. The hero has carried that bug twice: once with
-// alternating tilts of up to eleven degrees apart, and once behind a `gap: -38px` that
-// looked like it closed them but was invalid CSS and never applied. Geometry alone did
-// not catch either, so this measures the painted pixels.
+// The bands are two sets of parallel strips that cross. Inside a set the gap is the same
+// at every point across the window, because the strips share a tilt; between the sets
+// there is no gap at all, because they overlap rather than meet. Anything else is a
+// wedge: two strips at different angles diverging, cream showing through wide at one end
+// and shut at the other. This hero has carried that bug twice - once with alternating
+// tilts up to eleven degrees apart, and once behind a `gap: -38px` that read like it
+// closed them but was invalid CSS and never applied. Geometry caught neither, so this
+// measures the painted pixels.
 //
-// Three things here were each a wrong answer first:
+// Four things here were each a wrong answer first:
 //
 //   - The band text is cream on ink, so a letter at the edge of a column reads exactly
 //     like a wedge. The run is hidden before measuring; without that, the "DATA" on the
@@ -18,6 +22,9 @@
 //     walking the DOM instead.
 //   - Column x=0 sits on the clip boundary of .hero-alt and antialiases towards the
 //     page, which trips the threshold at a 4x zoom that shows solid ink. It is skipped.
+//   - The first version failed any cream at all, which was right only while the bands
+//     were one solid field. The gaps are deliberate now, so the test is that a run is
+//     either the set's own gap or small, not that there are no runs.
 import puppeteer from "puppeteer-core";
 import { PNG } from "pngjs";
 import fs from "node:fs";
@@ -27,7 +34,7 @@ import path from "node:path";
 const EDGE = String.raw`C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe`;
 const base = process.argv[2] ?? "http://localhost:3000";
 const out = fs.mkdtempSync(path.join(os.tmpdir(), "hero-bands-"));
-const TOLERANCE = 4; // px, for edge antialiasing
+const SLACK = 6; // px, for edge antialiasing and sub-pixel gap rounding
 
 const browser = await puppeteer.launch({ executablePath: EDGE, headless: "new", args: ["--hide-scrollbars"] });
 let failures = 0;
@@ -63,6 +70,11 @@ for (const vw of [1440, 1920, 375]) {
     return png.data[i] < 120 && png.data[i + 1] < 100;
   };
 
+  // The gap the sets are built to hold, read from the page rather than hard-coded, so
+  // the check follows the stylesheet instead of drifting from it.
+  const gap = await page.evaluate(() => parseFloat(getComputedStyle(document.querySelector(".hero-set")).rowGap));
+  const limit = gap + SLACK;
+
   let worst = 0;
   let worstX = -1;
   let columns = 0;
@@ -81,12 +93,12 @@ for (const vw of [1440, 1920, 375]) {
     if (longest > worst) { worst = longest; worstX = x; }
   }
 
-  const ok = worst <= TOLERANCE;
+  const ok = worst <= limit;
   if (!ok) failures++;
   console.log(
-    `${ok ? "ok  " : "FAIL"} ${vw}px  widest cream run inside the band field = ${worst}px` +
-      (ok ? "" : ` at x=${worstX}; see ${file}`) +
-      `  (${columns} columns sampled)`,
+    `${ok ? "ok  " : "FAIL"} ${vw}px  gap ${gap.toFixed(0)}px, widest cream run ${worst}px` +
+      (ok ? "" : ` at x=${worstX} - ${(worst - gap).toFixed(0)}px wider than the gap; see ${file}`) +
+      `  (${columns} columns)`,
   );
   await page.close();
 }
