@@ -1007,14 +1007,24 @@
     running up to the right. Without it the crossings would be decided by document order,
     and every one of them would lean a different way.
 
-    255% wide so a band still reaches past both edges of the window at its worst moment -
-    tilted hard, and shoved sideways by up to 0.6 of its vertical travel on the way in.
+    125% wide, and the width is what decides which way a band can leave.
+
+    It was 255%, chosen when the bands dropped out of the bottom: a strip that wide can
+    fall out cheaply because it only has to clear its own height. Leaving sideways is a
+    different bill - a band has to slide half its own length plus half the window - and
+    at 255% that is 3447px against 1300px to fall, so the same 820ms would have run it
+    2.6 times faster. The exit was down because the band was too wide to leave any other
+    way. At 125% the sideways distance is 2199px, which is why this number changed and
+    not the duration.
+
+    It cannot go much below 110%: a band tilted 16 degrees only spans a 1920px window if
+    it is at least 1920/cos(16) long.
   */
   .hero-band {
     position: absolute;
     left: 50%;
     top: var(--y);
-    width: 255%;
+    width: 125%;
     translate: -50% -50%;
     rotate: var(--tilt);
     z-index: var(--z, 1);
@@ -1028,21 +1038,24 @@
     color: var(--paper);
   }
   /*
-    How far a band has to go to be gone, derived per band rather than shared.
+    How far a band has to go to be gone, and which way it goes.
 
-    A shared constant was wrong twice. It was `100svh + 340px`, which only held while the
-    bands sat near the middle of the hero; once they moved, that distance stopped reaching
-    and a band landed 87px inside the window at 1920 with the switch off - the dark strip
-    that used to sit under the buttons.
+    The translate sits on the element inside the band while the rotate sits on the band,
+    so this runs in the band's own rotated frame: moving it on X slides it along its own
+    length rather than across the screen. That is the whole of the side entry - a band
+    comes in along itself, the way tape is pulled off a roll, instead of being flown in
+    from off-stage.
 
-    Now each band is asked how far it is from the bottom of the window, and how far it
-    reaches above its own middle. A tilted band is a long strip, so its topmost point
-    inside the window is half a band above its centre plus half a window-width times the
-    tangent of its tilt: at 24 degrees and 1920 that second term alone is 427px. --tan is
-    precomputed in the component because CSS has no trigonometry, and 0.7 covers half a
-    band divided by cos(tilt) for anything up to 45 degrees. --pad is added because --bh
-    is built from the default padding, and a band that carries more of it is taller than
-    --bh says.
+    Three earlier versions of this got the direction wrong in instructive ways. The first
+    put translate and rotate on the same element, and since CSS applies translate before
+    rotate, every band slid straight down whatever angle it was set to. The second split
+    them but moved on Y, which in a rotated frame is perpendicular to the band, so each
+    one arrived at its own tilt angle off vertical - a fall, not a diagonal. The third
+    added an X share of a Y travel, which measured 55 to 79 degrees off horizontal: still
+    mostly falling. Only X alone is sideways.
+
+    The distance is half the band plus half the window measured along the band, which is
+    where cos comes in: a tilted band has to cross more than the window's own width.
   */
   .hero-alt .hero-band-in {
     /*
@@ -1051,9 +1064,15 @@
       atan(skew) plus the set's tilt, which puts the seven between about 15 and 31
       degrees off vertical.
     */
-    --travel: calc(100svh - var(--y) + var(--bh) * 0.7 + var(--pad) + 50vw * var(--tan) + 70px);
-    translate: calc(var(--travel) * var(--skew)) var(--travel);
-    transition: translate 820ms cubic-bezier(0.22, 1, 0.3, 1);
+    --travel: calc(62.5vw + 50vw / var(--cos) + 40px);
+    translate: calc(var(--travel) * var(--side)) 0;
+    /*
+      980ms, not the 820 it was. The sideways exit is 2199px where the old fall was
+      1300, so holding the duration would have run the same gesture 1.7 times faster.
+      This keeps it at about 2.2px per millisecond, close to the 1.8 the quickest band
+      moved at before.
+    */
+    transition: translate 980ms cubic-bezier(0.22, 1, 0.3, 1);
     transition-delay: calc(var(--i) * 50ms);
   }
   html[data-run="1"] .hero-alt .hero-band-in {
