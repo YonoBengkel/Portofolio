@@ -1772,7 +1772,12 @@
     width: 100%;
     overflow: hidden;
     padding-block: 6px;
-    contain-intrinsic-size: auto 44px;
+    /*
+      Not optional: content-visibility brings size containment with it, and without a
+      remembered height the row collapses while it is skipped. 95px is the measured row:
+      an 83px tile - a 60px box, a 10px gap, the name - plus the padding above and below.
+    */
+    contain-intrinsic-size: auto 95px;
   }
   .belt::before,
   .belt::after {
@@ -1803,39 +1808,66 @@
     animation-iteration-count: infinite;
     will-change: transform;
   }
+  /*
+    22px, and it has to agree with GAP in toolbelt.tsx - that file adds the same number
+    per tile to work out how long one cycle takes, so a mismatch does not look wrong, it
+    silently runs the row at the wrong speed. Measured with the two out of step: the
+    formula read 877px against a real 763px set, which would have run the belt 15% slow.
+  */
   .belt-set {
     display: flex;
-    gap: 8px;
-    padding-right: 8px;
+    gap: 22px;
+    padding-right: 22px;
   }
+  /*
+    A tile: the box carries the mark, the name sits under it.
+
+    It used to be one oval holding both. On a single line a logo and a word have to share
+    a baseline, so the mark reads as a bullet beside the text rather than as the thing
+    being named; stacked, the box is the object and the word is its caption.
+
+    The tile has no width of its own - it is as wide as the box or as the name, whichever
+    is wider, which is the same rule toolbelt.tsx uses to work out how long one cycle of
+    the row takes.
+  */
   .chip-tool {
     display: inline-flex;
+    flex-direction: column;
     align-items: center;
-    gap: 7px;
+    gap: 10px;
     flex: none;
-    min-height: 30px;
-    padding: 4px 10px;
+  }
+  .chip-box {
+    display: grid;
+    place-items: center;
+    width: 60px;
+    height: 60px;
+    flex: none;
     background: var(--paper-2);
     border: 1px solid var(--line-strong);
-    border-radius: 999px;
+    border-radius: 14px;
+  }
+  .chip-name {
     font-family: var(--font-mono);
-    font-size: 0.75rem;
-    line-height: 1.6;
+    font-size: 0.7rem;
+    line-height: 1.2;
     letter-spacing: 0.04em;
-    color: var(--ink);
+    color: var(--ink-2);
     white-space: nowrap;
   }
+  /*
+    The fallback for a tool with no freely-licensed mark. Inside the box it is just the
+    letter at the size of a logo - the hairline circle it used to wear made sense when
+    the chip was an oval and the badge had to read as its own object, but a circle drawn
+    inside a square box is only a box inside a box.
+  */
   .chip-badge {
     display: grid;
     place-items: center;
-    width: 16px;
-    height: 16px;
-    flex: none;
-    border: 1px solid var(--line-strong);
-    border-radius: 50%;
-    background: var(--paper);
-    font-size: 0.58rem;
+    font-family: var(--font-display);
+    font-size: 1.5rem;
     line-height: 1;
+    color: var(--ink);
   }
 
   /* ========================================================== projects */

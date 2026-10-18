@@ -10,10 +10,12 @@ import { ToolMark } from "./tool-marks";
  * the rows dissolve into the page instead of being cut off. 50 px/s is slow on purpose;
  * it was measured, not guessed, and it reads as drift rather than as a ticker.
  *
- * The object is Toriq's - a pill chip, one hairline rule, mono at 12px, brand casing
- * kept, with a small mark on the left. His chips carry a brand glyph where one exists and
- * fall back to a circled first letter where it does not; both happen here, for the same
- * reason (see tool-marks.tsx).
+ * The object is a tile: a square box holding the mark, with the name set underneath it.
+ * It was a pill carrying both on one line, and the split is Ilham's - a logo and a word
+ * inside one oval have to share a baseline, which makes the mark read as a bullet point
+ * rather than as the thing being named. Stacked, the box is the object and the word is
+ * its caption. Marks that exist render inside the box; the rest fall back to their first
+ * letter at the same size (see tool-marks.tsx).
  *
  * The rows are not labelled. Ilham asked for one set rather than two named groups, so the
  * sixteen tools are dealt into two rows of eight and the heading above speaks for all of
@@ -26,13 +28,17 @@ import { ToolMark } from "./tool-marks";
  * however many tools end up in them.
  */
 
-// Toriq's measured width formula for a 12px IBM Plex Mono chip carrying a letter badge:
-// 45px of box (padding, border, badge, gap) plus 7.68px per character. It matched every
-// one of his own chips to within 0.01px, and this section uses the same type at the same
-// size, so it is the right estimate to set the duration from.
-const CHIP_BASE = 45;
-const CHAR_W = 7.68;
-const GAP = 8;
+/*
+  A tile is as wide as whichever is wider: its box, or the name under it. The duration of
+  each row is computed from the total, so the belt holds its measured 50 px/s however the
+  list in site.ts grows - a fixed duration would drift the moment a tool is added.
+
+  TILE and CHAR_W are checked against the rendered width rather than assumed; see the
+  note on setWidth.
+*/
+const TILE = 60; // the box, and the floor on a tile's width
+const CHAR_W = 7.2; // one character of the name, mono at 0.7rem with its letter-spacing
+const GAP = 22; // tiles need more air between them than pills did
 const SPEED = 50; // px per second, measured
 
 /*
@@ -45,14 +51,16 @@ const SPEED = 50; // px per second, measured
 const COPIES = 4;
 
 function setWidth(items: string[]) {
-  return items.reduce((w, item) => w + CHIP_BASE + CHAR_W * item.length + GAP, 0);
+  return items.reduce((w, item) => w + Math.max(TILE, CHAR_W * item.length) + GAP, 0);
 }
 
 function Chip({ label }: { label: string }) {
   return (
     <span className="chip-tool">
-      <ToolMark tool={label} />
-      {label}
+      <span className="chip-box">
+        <ToolMark tool={label} size={26} />
+      </span>
+      <span className="chip-name">{label}</span>
     </span>
   );
 }
