@@ -1067,12 +1067,18 @@
     --travel: calc(62.5vw + 50vw / var(--cos) + 40px);
     translate: calc(var(--travel) * var(--side)) 0;
     /*
-      980ms, not the 820 it was. The sideways exit is 2199px where the old fall was
-      1300, so holding the duration would have run the same gesture 1.7 times faster.
-      This keeps it at about 2.2px per millisecond, close to the 1.8 the quickest band
-      moved at before.
+      1150ms. It was 820 while the bands fell out of the bottom, then 980 when the exit
+      became sideways and the distance went from 1300px to 2199 - holding the duration
+      there would have run the same gesture 1.7 times faster.
+
+      The last step up is about the name rather than the bands. The easing is a hard
+      ease-out: at 45% of the clock a band has already covered about 90% of its distance,
+      so it lands by eye around 470ms of a 980ms transition. The name was still sinking
+      until 992ms, which left half a second of it drawn on top of a floor that had
+      already arrived. Slowing the bands buys part of that margin; the rest comes from
+      the sink below, which was the heavier half of the problem.
     */
-    transition: translate 980ms cubic-bezier(0.22, 1, 0.3, 1);
+    transition: translate 1150ms cubic-bezier(0.22, 1, 0.3, 1);
     transition-delay: calc(var(--i) * 50ms);
   }
   html[data-run="1"] .hero-alt .hero-band-in {
@@ -1157,15 +1163,25 @@
     margin-bottom: -0.1em;
     vertical-align: bottom;
   }
+  /*
+    380ms and 13ms a letter, down from 560 and 24.
+
+    The whole sink used to finish at 992ms: 432ms of stagger across eighteen letters,
+    then a 560ms move. That is longer than the floor takes to arrive, so the name stayed
+    drawn over bands that had already landed. The stagger was the heavier half of it, and
+    halving the per-letter step is what shortens the thing without making any single
+    letter move at a different speed than reads well - the queue gets tighter, the
+    letters do not get whipped. The end lands at 614ms, just under the bands.
+  */
   .sink > span {
     display: inline-block;
     translate: 0 0;
-    transition: translate 560ms cubic-bezier(0.76, 0, 0.24, 1);
-    transition-delay: calc((var(--n, 10) - var(--i, 0)) * 18ms);
+    transition: translate 380ms cubic-bezier(0.76, 0, 0.24, 1);
+    transition-delay: calc((var(--n, 10) - var(--i, 0)) * 13ms);
   }
   html[data-run="1"] .sink > span {
     translate: 0 118%;
-    transition-delay: calc(var(--i, 0) * 24ms);
+    transition-delay: calc(var(--i, 0) * 13ms);
   }
   /* The highlighter is carried by the slots, so the plate goes down with the letters. */
   .marker-split {
@@ -1183,7 +1199,7 @@
     overflow: clip;
   }
   .sink-block > * {
-    transition: translate 560ms cubic-bezier(0.76, 0, 0.24, 1);
+    transition: translate 380ms cubic-bezier(0.76, 0, 0.24, 1);
     transition-delay: 120ms;
   }
   html[data-run="1"] .sink-block > * {
