@@ -1189,17 +1189,28 @@
     Coming back, the wait is the whole point.
 
     Going down, the letters have to be gone before the tape arrives. Coming up they have
-    to stay away until it has left, and that is not the same instant: measured at
-    1920x1042, the box the name sits in is still 91% covered at 200ms after the switch,
-    27% at 300 and clear at about 500. Without a wait the letters started at 0ms and 53
-    of 64 were already standing by 300ms - the name assembled itself underneath tape
-    that was still crossing it.
+    to stay away until it has left, and that is not the same instant.
 
-    --rise-wait holds the queue until the floor is out of the way. 360ms is where the
-    name's box is down to 8% covered; the last letter then lands at 696ms.
+    The first attempt put the wait at 360ms, which is when the box the name sits in is
+    down to 8% covered. That was the wrong test: the name's own box being clear is not
+    the tape being gone, and at 360ms there were still 21,000 ink pixels on the screen -
+    bands crossing everywhere else. Counting painted pixels rather than checking one
+    rectangle gives the real curve after the switch:
+
+        311ms  55,802 ink pixels
+        470ms  21,254
+        612ms   7,036
+        761ms     690
+        906ms       3
+       1107ms       0
+
+    So 900ms, which is where the floor has actually gone. The last letter lands at
+    1243ms. That is slower than it was, and it is the point: the rule here is the one
+    Ilham asked for - the tape leaves, then the name arrives, with nothing shared
+    between them.
   */
   .sink > span {
-    --rise-wait: 360ms;
+    --rise-wait: 900ms;
     display: inline-block;
     translate: 0 0;
     transition: translate 210ms cubic-bezier(0.76, 0, 0.24, 1);
@@ -1248,8 +1259,8 @@
   }
   .sink-block > * {
     transition: translate 210ms cubic-bezier(0.76, 0, 0.24, 1);
-    /* Same wait as the letters: these sit lower, where the tape clears at the same time. */
-    transition-delay: 360ms;
+    /* Same wait as the letters: nothing in the block comes back before the tape is gone. */
+    transition-delay: 900ms;
   }
   html[data-run="1"] .sink-block > * {
     translate: 0 140%;
