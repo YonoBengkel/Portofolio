@@ -23,8 +23,8 @@
 //   - Column x=0 sits on the clip boundary of .hero-alt and antialiases towards the
 //     page, which trips the threshold at a 4x zoom that shows solid ink. It is skipped.
 //   - The first version failed any cream at all, which was right only while the bands
-//     were one solid field. The gaps are deliberate now, so the test is that a run is
-//     either the set's own gap or small, not that there are no runs.
+//     were one solid field. The gaps are deliberate now, so the test is that a run fits
+//     the budget the page's own angles imply, not that there are no runs.
 import puppeteer from "puppeteer-core";
 import { PNG } from "pngjs";
 import fs from "node:fs";
@@ -70,10 +70,39 @@ for (const vw of [1440, 1920, 375]) {
     return png.data[i] < 120 && png.data[i + 1] < 100;
   };
 
-  // The gap the sets are built to hold, read from the page rather than hard-coded, so
+  // What the gaps are allowed to be, derived from the page rather than hard-coded, so
   // the check follows the stylesheet instead of drifting from it.
-  const gap = await page.evaluate(() => parseFloat(getComputedStyle(document.querySelector(".hero-set")).rowGap));
-  const limit = gap + SLACK;
+  //
+  // The bands inside a set are not exactly parallel: each carries a fraction of a degree
+  // of wobble so no two sit at the same angle. A pair that differs by d degrees holds its
+  // gap only in the middle of the window and opens by half-window times tan(d) towards
+  // one edge, so the honest ceiling is the gap plus that. Taking the largest adjacent
+  // difference in either set makes this the real budget rather than a guess, and keeps
+  // the test tight when the wobble is small instead of silently allowing a wedge.
+  const { gap, limit, worstPair } = await page.evaluate(() => {
+    const gap = parseFloat(getComputedStyle(document.querySelector(".hero-set")).rowGap);
+    // Read the `rotate` property, not `transform`. These elements use the individual
+    // transform properties, so their computed `transform` is "none" and a DOMMatrix
+    // built from it is the identity - which silently reported a wobble budget of zero.
+    const deg = (el) => {
+      const r = getComputedStyle(el).rotate;
+      if (!r || r === "none") return 0;
+      const m = r.match(/(-?[\d.]+)deg/); // "-3deg" or "0 0 1 -3deg"
+      return m ? parseFloat(m[1]) : 0;
+    };
+    let worst = 0;
+    let worstPair = "";
+    document.querySelectorAll(".hero-set").forEach((set) => {
+      const setDeg = deg(set);
+      // the band's own wobble composes with its set's tilt
+      const bands = [...set.querySelectorAll(".hero-band")].map((el) => Math.tan(((setDeg + deg(el)) * Math.PI) / 180));
+      for (let i = 1; i < bands.length; i++) {
+        const d = Math.abs(bands[i] - bands[i - 1]);
+        if (d > worst) { worst = d; worstPair = `${set.className.split(" ").pop()} ${i}/${i + 1}`; }
+      }
+    });
+    return { gap, limit: gap + (window.innerWidth / 2) * worst, worstPair };
+  });
 
   let worst = 0;
   let worstX = -1;
@@ -93,11 +122,12 @@ for (const vw of [1440, 1920, 375]) {
     if (longest > worst) { worst = longest; worstX = x; }
   }
 
-  const ok = worst <= limit;
+  const ok = worst <= limit + SLACK;
   if (!ok) failures++;
   console.log(
-    `${ok ? "ok  " : "FAIL"} ${vw}px  gap ${gap.toFixed(0)}px, widest cream run ${worst}px` +
-      (ok ? "" : ` at x=${worstX} - ${(worst - gap).toFixed(0)}px wider than the gap; see ${file}`) +
+    `${ok ? "ok  " : "FAIL"} ${vw}px  gap ${gap.toFixed(0)}px, wobble allows up to ${limit.toFixed(0)}px ` +
+      `(worst pair ${worstPair}), widest cream run ${worst}px` +
+      (ok ? "" : ` at x=${worstX} - ${(worst - limit).toFixed(0)}px over budget; see ${file}`) +
       `  (${columns} columns)`,
   );
   await page.close();

@@ -1009,7 +1009,23 @@
   .hero-set {
     position: absolute;
     left: 50%;
-    top: calc(50% + var(--set-y));
+    /*
+      Where the pair of sets sits in the hero, measured up from its bottom edge.
+
+      Centred, the pair overflows at both ends on a desktop window - 1300px of bands
+      against a 913px hero - and the overflow at the bottom took the third band of set B
+      below the fold, so two of its three showed without scrolling. Anchoring to the
+      bottom spends the whole overflow at the top instead, where it is set A's first band
+      running off an edge the field already runs past on both sides.
+
+      But the bands scale with the viewport, and on a phone the pair is shorter than the
+      hero rather than taller. Pinned to the bottom there, it leaves the top third of the
+      screen empty. So the anchor is whichever sits lower: the fixed offset, or the one
+      that centres the pair. max() picks the bottom anchor exactly while the pair
+      overflows and hands back to centring once it fits.
+    */
+    --anchor: max(calc(var(--bh) * 0.2), calc(50% - var(--bh) * 3.611));
+    bottom: calc(var(--anchor) + var(--set-y));
     /*
       Wide enough that a band still reaches past both edges of the window at its worst
       moment: tilted, and shoved sideways by up to 0.7 of its vertical travel on the way
@@ -1024,23 +1040,22 @@
   /*
     Where the two sets sit, and how deeply they cross.
 
-    Set B starts 3.398 band-heights below set A's top, which is set A's own height
-    (4 bands and 3 gaps) less 1.1 of a band. That remainder is the overlap, and it is the
-    number that decides whether the junction between the sets stays shut. Two sets 10
-    degrees apart separate by half-window times the difference of their tangents: 126px
-    at 1440 and 168px at 1920, against an overlap of 199px. Both hold closed. At 2560 it
-    opens about 25px at one end, narrower than the 30px gaps it sits among, so even there
-    it reads as one more gap rather than as a tear.
+    Set A sits 2.724 band-heights above set B, which is set B's own height (3 bands and
+    2 gaps) less the 0.608-band overlap.
 
-    Overlapping by more than a whole band is the part worth keeping. Anything less leaves
-    a strip of set A's last band uncovered all the way across - 18px at 0.9 of a band,
-    which is a row of letter tops peeping out from behind the band in front and reads as
-    a rendering fault. Past a full band it is covered in the middle of the screen and
-    emerges on one side instead, widening to about 108px by the edge, which is a band
-    passing underneath and is the thing the crossing is for.
+    That overlap is where two requirements pull against each other. The junction only
+    stays shut if the overlap covers how far the two sets separate across the window -
+    half-window times the difference of their tangents. But whatever the overlap covers
+    is taken out of set A's last band, and that band still has to read: the reference
+    leaves about half of its covered strip showing, and at much less than that the band
+    stops looking like a band passing underneath and starts looking like a row of letters
+    with their tops sliced off.
 
-    The reference does not go this far: its two strips fall 28px short of closing. This
-    is the same device, measured rather than eyeballed.
+    Both can be had, and the lever is the angle between the sets rather than the overlap.
+    Closing the junction at 1440 leaves 30% of the covered band at 10 degrees apart, 44%
+    at 8, 58% at 6. At 8 degrees, with an overlap of 0.608 of a band: the junction is shut
+    at 1440, opens 24px at 1920 - still narrower than the 30px gaps around it - and 71px
+    of the covered band stays out in the open, widening to 172px towards one edge.
 
     The reference does the same thing and does not quite close it: its two strips are
     132px short of parallel across their own width and overlap by 104, a ratio of 0.79.
@@ -1048,20 +1063,26 @@
     tidy it is.
   */
   .hero-set-a {
-    --tilt: -4deg;
-    --set-y: calc(var(--bh) * -3.2);
+    --tilt: -3deg;
+    --set-y: calc(var(--bh) * 2.724);
   }
   .hero-set-b {
-    --tilt: 6deg;
-    --set-y: calc(var(--bh) * 0.198);
+    --tilt: 5deg;
+    --set-y: 0px;
   }
   /*
-    The band is only a row in its set now. Width, tilt and spacing all belong to the set,
-    because they are what has to agree between neighbours; --i and --skew stay here,
-    because they are what has to differ.
+    The band is a row in its set. Width and spacing belong to the set, because they are
+    what has to agree between neighbours; --i, --skew and --wobble come in per band from
+    the component, because they are what has to differ.
+
+    --wobble is a fraction of a degree on top of the set's tilt, so no two bands in the
+    hero stand at the same angle. It is bounded, and the bound is in the component beside
+    the numbers: past about a degree between neighbours the even gap turns back into the
+    wedge these sets exist to remove.
   */
   .hero-band {
     min-width: 0;
+    rotate: var(--wobble, 0deg);
   }
   /* The strip itself: much taller than it was, because thin reads as limp. */
   .hero-band-in {

@@ -51,6 +51,25 @@ const SET_B = ["Process", "Decisions", "Data"];
 */
 const SKEW = [-0.34, -0.62, -0.42, -0.7, -0.38, -0.66, -0.46];
 
+/*
+  A wobble on each band's own tilt, in degrees, on top of its set's. No two bands sit at
+  the same angle, which is what keeps a set from reading as a printed grid.
+
+  The size of it is not a taste decision. Two neighbours whose tilts differ by d degrees
+  no longer hold an even gap: the gap is 30px between their middles and opens or shuts by
+  half-window times tan(d) towards the edges. Measured at 1440 that is 24-36px at half a
+  degree, 17-43px at one, and 5-55px at two - by which point it is a wedge again, which is
+  the thing the sets were built to get rid of. So no neighbouring pair differs by more
+  than 0.65 degrees.
+
+  Only neighbours share a gap, though, so bands further apart in a set are free to differ
+  more, and the sequence is picked to use that: it zigzags rather than ramping, which
+  spreads the angles about a degree while keeping every step inside the budget. The seven
+  land on -3.65, -3.00, -3.30, -2.70, 5.55, 4.90 and 4.35 - no two alike, and the closest
+  pair within a set is 0.3 apart rather than the 0.05 an alternating pattern produces.
+*/
+const WOBBLE = [-0.65, 0, -0.3, 0.3, 0.55, -0.1, -0.65];
+
 // Enough repeats that half a track is wider than any window, since the keyframe moves
 // each band by half its own width - the same arithmetic as every other marquee here.
 const PER_BAND = 8;
@@ -66,7 +85,10 @@ const LIT = new Set([2, 6, 9, 15, 19]);
 
 function Band({ word, i, className = "" }: { word: string; i: number; className?: string }) {
   return (
-    <div className={`hero-band ${className}`} style={{ "--i": i, "--skew": SKEW[i] } as React.CSSProperties}>
+    <div
+      className={`hero-band ${className}`}
+      style={{ "--i": i, "--skew": SKEW[i], "--wobble": `${WOBBLE[i]}deg` } as React.CSSProperties}
+    >
       <div className="hero-band-in">
         <div className="hero-band-run">
           {[0, 1].map((copy) => (
