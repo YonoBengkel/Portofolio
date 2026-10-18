@@ -269,7 +269,9 @@ const state = (page) =>
     "<head>",
     `<head><base href="${base}/"><meta http-equiv="Content-Security-Policy" content="script-src 'none'">`,
   );
-  await page.setContent(html, { waitUntil: "networkidle0" });
+  // domcontentloaded, not networkidle0: over HTTPS something always keeps a connection
+  // open and the idle never arrives. The 5200ms wait below covers the stylesheet.
+  await page.setContent(html, { waitUntil: "domcontentloaded" });
   await wait(5200);
   const released = await page.evaluate(() => {
     const el = document.querySelector(".intro");
@@ -335,7 +337,7 @@ const state = (page) =>
   // opaque. An equality test would pass vacuously here, because this browser runs with
   // --hide-scrollbars and has nothing to give back.
   const page = await fresh();
-  await page.goto(base + "/?intro", { waitUntil: "networkidle0" });
+  await page.goto(base + "/?intro", { waitUntil: "domcontentloaded" });
   await wait(4000);
   const order = await page.evaluate(async () => {
     document.documentElement.dataset.intro = "out";
