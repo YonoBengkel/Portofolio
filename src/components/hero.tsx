@@ -48,17 +48,21 @@ import { openTo, profile } from "@/content/site";
       thinnest and the thickest, which reads as tape cut by hand rather than as a set of
       deliberately different widths.
 
-  tan is |tan(tilt)| precomputed, because the travel out of the window depends on how far
-  a tilted band reaches vertically across the viewport and CSS has no trigonometry.
+  side is which edge a band comes in from, +1 for the left and -1 for the right. It is
+  not a shared direction: the bands arrive from both sides at once, which is what stops
+  the entry reading as one sheet being dragged on.
+
+  cos is cos(tilt) precomputed, because how far a band must slide to leave the window
+  depends on its angle and CSS has no trigonometry.
 */
 const BANDS = [
-  { word: "Process", tilt: -13, y: 0.1, skew: -0.45, reverse: false, z: 5, pad: 1.35 },
-  { word: "Data", tilt: 6, y: 0.26, skew: -0.55, reverse: true, z: 6, pad: 1.7 },
-  { word: "Decisions", tilt: -5, y: 0.42, skew: -0.4, reverse: false, z: 4, pad: 1.45 },
-  { word: "Evidence", tilt: 16, y: 0.57, skew: -0.35, reverse: true, z: 3, pad: 1.85 },
-  { word: "Process", tilt: -9, y: 0.74, skew: -0.5, reverse: false, z: 2, pad: 1.55 },
-  { word: "Decisions", tilt: 4, y: 0.9, skew: -0.45, reverse: true, z: 1, pad: 1.75 },
-].map((b) => ({ ...b, tan: Math.abs(Math.tan((b.tilt * Math.PI) / 180)) }));
+  { word: "Process", tilt: -13, y: 0.1, side: 1, reverse: false, z: 5, pad: 1.35 },
+  { word: "Data", tilt: 6, y: 0.26, side: -1, reverse: true, z: 6, pad: 1.7 },
+  { word: "Decisions", tilt: -5, y: 0.42, side: 1, reverse: false, z: 4, pad: 1.45 },
+  { word: "Evidence", tilt: 16, y: 0.57, side: -1, reverse: true, z: 3, pad: 1.85 },
+  { word: "Process", tilt: -9, y: 0.74, side: 1, reverse: false, z: 2, pad: 1.55 },
+  { word: "Decisions", tilt: 4, y: 0.9, side: -1, reverse: true, z: 1, pad: 1.75 },
+].map((b) => ({ ...b, cos: Math.cos((b.tilt * Math.PI) / 180) }));
 
 // Enough repeats that half a track is wider than any window, since the keyframe moves
 // each band by half its own width - the same arithmetic as every other marquee here.
@@ -74,7 +78,7 @@ const PER_BAND = 8;
 const LIT = new Set([2, 6, 9, 15, 19]);
 
 function Band({ band, i }: { band: (typeof BANDS)[number]; i: number }) {
-  const { word, tilt, y, skew, reverse, tan, z, pad } = band;
+  const { word, tilt, y, side, reverse, cos, z, pad } = band;
   return (
     <div
       className="hero-band"
@@ -83,8 +87,8 @@ function Band({ band, i }: { band: (typeof BANDS)[number]; i: number }) {
           "--i": i,
           "--tilt": `${tilt}deg`,
           "--y": `${y * 100}svh`,
-          "--skew": skew,
-          "--tan": tan.toFixed(4),
+          "--side": side,
+          "--cos": cos.toFixed(4),
           "--z": z,
           "--pad": `${pad}rem`,
           "--dir": reverse ? "reverse" : "normal",
