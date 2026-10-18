@@ -1206,18 +1206,18 @@
     that is nowhere near the words. 500ms was the middle column: nothing covering the
     ground the copy is about to stand on.
 
-    250ms is Ilham's, settled on after trying 50 and 150 against the page. It is still
-    earlier than any of those columns - at 250 the centre is around a third covered, so
-    the first letters start while tape is still crossing them. That is a choice, not an
-    oversight: the two motions overlap on purpose, which reads as one gesture rather than
-    two taking turns. The measurements above are kept because they say what the number is
-    trading away, and because the thresholds are what to come back to if the overlap ever
-    turns out to be too much.
+    300ms is Ilham's, settled on after trying 50, 150 and 250 against the page. It is
+    still earlier than any of those columns - at 300 the centre is about a quarter
+    covered, so the first letters start while tape is still crossing them. That is a
+    choice, not an oversight: the two motions overlap on purpose, which reads as one
+    gesture rather than two taking turns. The measurements above are kept because they
+    say what the number is trading away, and because the thresholds are what to come back
+    to if the overlap ever turns out to be too much.
 
-    The last letter lands at 903ms.
+    The last letter lands at 953ms.
   */
   .sink > span {
-    --rise-wait: 250ms;
+    --rise-wait: 300ms;
     display: inline-block;
     translate: 0 0;
     /*
@@ -1281,7 +1281,7 @@
     /* Same split as the letters: unhurried coming back, quick going down. */
     transition: translate 520ms cubic-bezier(0.33, 1, 0.68, 1);
     /* Same wait as the letters. */
-    transition-delay: 250ms;
+    transition-delay: 300ms;
   }
   html[data-run="1"] .sink-block > * {
     translate: 0 140%;
