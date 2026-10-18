@@ -1545,7 +1545,15 @@
   }
   @media (min-width: 860px) {
     .about-card {
-      grid-template-columns: 17rem minmax(0, 1fr);
+      /*
+        27rem, from 17. The column is what actually sets the portrait's width - the
+        photo's own min(27rem, 100%) resolves to 100% of whatever this gives it, so
+        widening the photo alone changed nothing. It has to be the track.
+
+        The text column keeps minmax(0, 1fr), so the extra 160px comes out of the prose
+        rather than out of the card: measured at 1440 the card is 1160 either way.
+      */
+      grid-template-columns: 27rem minmax(0, 1fr);
       align-items: center;
       gap: 52px;
       padding: 44px 44px 0;
@@ -1584,10 +1592,20 @@
   }
 
   .about-photo {
-    /* A flat 15rem is a 240px min-content floor, which at 320px pushed the whole stack
-       16px wider than the window and threw the card and the social row off centre. */
-    width: min(17rem, 100%);
-    aspect-ratio: 250 / 300;
+    /*
+      27rem, up from 17. The portrait inside is a hundred characters across, and at the
+      old 248px that put each one at four pixels - the face resolved but the characters
+      did not, which is half the point of it being characters at all. At 432px they are
+      seven, which was the narrowest size where both held in a side-by-side render.
+
+      min() rather than a flat width: a fixed 27rem is a 432px min-content floor, which
+      on a 375px phone pushes the whole stack past the window and throws the card and
+      the social row off centre. The older 15rem had the same bug at 320px.
+    */
+    width: min(27rem, 100%);
+    /* The ascii grid is 100 x 61 cells at 0.6 x 1.197em, which is this ratio exactly;
+       any other and the characters letterbox inside their own frame. */
+    aspect-ratio: 420 / 511;
     padding: 10px;
     background: var(--paper-2);
     border: 2px solid var(--ink);
@@ -1607,16 +1625,61 @@
     height: 100%;
     overflow: clip;
     border: 1px solid var(--ink);
-    background: var(--ink);
+    /* Paper, not ink: what sits here now is text, and it is drawn in the page's ink. */
+    background: var(--paper-2);
+    container-type: inline-size;
   }
   .about-photo-in img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: scale 500ms ease;
   }
-  .about-card:hover .about-photo-in img {
-    scale: 1.1;
+
+  /*
+    The portrait: characters by default, the photograph under the cursor.
+
+    Every frame is stacked in one grid cell so they can crossfade. The size is in
+    container units rather than pixels because the relationship that has to hold is
+    between the frame and the grid, not between the frame and a number: a hundred cells
+    at 0.6em fill the frame exactly when the font is a sixtieth of its width, whatever
+    that width turns out to be.
+  */
+  .ascii-shot {
+    display: grid;
+    height: 100%;
+  }
+  .ascii-shot > * {
+    grid-area: 1 / 1;
+  }
+  .ascii-frame {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 7px; /* for anything without container queries */
+    font-size: 1.6667cqw;
+    line-height: 1.197;
+    letter-spacing: 0;
+    color: var(--ink);
+    white-space: pre;
+    opacity: 0;
+    transition: opacity 900ms ease;
+  }
+  .ascii-frame[data-on] {
+    opacity: 1;
+  }
+  .ascii-photo {
+    opacity: 0;
+    transition: opacity 420ms ease;
+  }
+  /*
+    Both hover rules name the attribute as well as the class. They override rules of the
+    same specificity, and this file has shipped two bugs already where a bare class lost
+    to something longer and the thing simply did not move.
+  */
+  .about-photo:hover .ascii-photo[data-on] {
+    opacity: 1;
+  }
+  .about-photo:hover .ascii-frame[data-on] {
+    opacity: 0;
   }
 
   /* Bigger. The card read soft because its loudest thing was barely louder than its
@@ -2766,6 +2829,8 @@
       same specificity as the rule it overrides and later in the layer.
     */
     .hero-alt .hero-band-in,
+    .ascii-frame,
+    .ascii-photo,
     .sink > span,
     html[data-run="1"] .sink > span,
     .sink-block > *,

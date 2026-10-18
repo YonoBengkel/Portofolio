@@ -48,3 +48,7 @@ next-env.d.ts
 /AGENTS.md
 /CLAUDE.md
 /.claude/
+
+# Potret sumber: 7MB JPEG ponsel, dan tidak ada yang disajikan dari sini.
+# tools/portraits-to-ascii.py membacanya dan hanya menulis hasilnya ke src/.
+/photos/
