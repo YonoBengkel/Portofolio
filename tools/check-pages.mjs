@@ -17,7 +17,10 @@
 // window.scrollX after a scrollTo is the only honest answer.
 import puppeteer from "puppeteer-core";
 
-const EDGE = String.raw`C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe`;
+// Edge by default, because that is what is on this machine. BROWSER overrides it:
+// the binary moves, Edge sometimes refuses to launch under automation after an
+// update, and a checker that can only run in one browser stops being run.
+const EDGE = process.env.BROWSER || String.raw`C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe`;
 const base = process.argv[2] ?? "http://localhost:3000";
 const paths = [
   "/",

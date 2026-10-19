@@ -2956,6 +2956,7 @@
     rule removes the overlay but the attribute is still absent, and locking the page then
     would leave a scrollless site with nothing covering it.
   */
+  html[data-intro="wait"],
   html[data-intro="on"],
   html[data-intro="ready"] {
     overflow: hidden;
@@ -3074,6 +3075,27 @@
   }
   .intro-stage > * {
     grid-area: 1 / 1;
+  }
+
+  /*
+    The holding state. The overlay is up and covering, but every part of the sequence is
+    paused on its own first frame - and every first frame is empty, so what is on screen
+    is a blank sheet of paper, which is what the opening 500ms look like regardless.
+
+    This exists because the animations used to start when the stylesheet applied, which
+    has nothing to do with when anyone is looking. Open the site in a background tab,
+    switch to it two seconds later, and the mark had already finished spinning: measured
+    at 1336ms and 1076 degrees after 1200ms of being hidden. The script releases this on
+    the first painted frame instead.
+
+    display: none would have done the same thing to the animations, but it would also
+    have uncovered the page for a frame, and a flash of the site before the door closes
+    is worse than no door at all.
+  */
+  html[data-intro="wait"] .intro-mark,
+  html[data-intro="wait"] .intro-words,
+  html[data-intro="wait"] .intro-ring {
+    animation-play-state: paused;
   }
 
   /*

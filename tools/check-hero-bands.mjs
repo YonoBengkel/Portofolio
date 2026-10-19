@@ -27,7 +27,10 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-const EDGE = String.raw`C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe`;
+// Edge by default, because that is what is on this machine. BROWSER overrides it:
+// the binary moves, Edge sometimes refuses to launch under automation after an
+// update, and a checker that can only run in one browser stops being run.
+const EDGE = process.env.BROWSER || String.raw`C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe`;
 const base = process.argv[2] ?? "http://localhost:3000";
 const out = fs.mkdtempSync(path.join(os.tmpdir(), "hero-bands-"));
 const MIN_VISIBLE = 1.0; // % of the window a band must paint to count as present
