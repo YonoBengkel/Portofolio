@@ -22,7 +22,10 @@
 import puppeteer from "puppeteer-core";
 import { PNG } from "pngjs";
 
-const EDGE = String.raw`C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe`;
+// Edge by default, because that is what is on this machine. BROWSER overrides it:
+// the binary moves, Edge sometimes refuses to launch under automation after an
+// update, and a checker that can only run in one browser stops being run.
+const EDGE = process.env.BROWSER || String.raw`C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe`;
 const base = process.argv[2] ?? "http://localhost:3000";
 
 const browser = await puppeteer.launch({
@@ -39,6 +42,10 @@ const bad = (name, detail = "") => {
 };
 const check = (cond, name, detail) => (cond ? ok(name, detail) : bad(name, detail));
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+// "wait" is the state the sequence is held in until the first painted frame releases it,
+// so at load time either value means it is playing - which one you catch is a race with
+// requestAnimationFrame, not a difference anyone can see.
+const playing = (flag) => flag === "wait" || flag === "on";
 
 // A page per case. sessionStorage is per tab, so every case that has to look like a first
 // visit needs its own one - a reused page is already carrying the flag.
@@ -67,7 +74,7 @@ const state = (page) =>
   const page = await fresh();
   await page.goto(base + "/", { waitUntil: "domcontentloaded" });
   const first = await state(page);
-  check(first.flag === "on" && first.display !== "none", "first visit plays", `flag=${first.flag} display=${first.display}`);
+  check(playing(first.flag) && first.display !== "none", "first visit plays", `flag=${first.flag} display=${first.display}`);
 
   // Same tab, so the session flag is already set.
   await page.goto(base + "/work", { waitUntil: "domcontentloaded" });
@@ -96,7 +103,7 @@ const state = (page) =>
   const a = await state(page);
   await page.goto(base + "/?intro", { waitUntil: "domcontentloaded" });
   const b = await state(page);
-  check(a.flag === "on" && b.flag === "on", "?intro replays on demand", `first=${a.flag} again=${b.flag}`);
+  check(playing(a.flag) && playing(b.flag), "?intro replays on demand", `first=${a.flag} again=${b.flag}`);
   await page.close();
 }
 
@@ -420,6 +427,134 @@ const state = (page) =>
     sweep.covering.cut < 15 && sweep.clearing.cut > 25 && sweep.clearing.paper === "hidden",
     "the ink covers before it clears",
     `covered to ${(100 - sweep.covering.cut).toFixed(0)}%, then cleared ${sweep.clearing.cut.toFixed(0)}%, paper=${sweep.clearing.paper}`,
+  );
+  await page.close();
+}
+
+{
+  // The sequence has to start when the page is looked at, not when it loads. Ilham kept
+  // arriving to a logo that had already spun: the animations began the moment the
+  // stylesheet applied, and opening the site in a background tab and switching to it two
+  // seconds later put you two seconds in - measured at 1336ms and 1076 degrees after
+  // 1200ms hidden.
+  //
+  // A headless page that is not fronted still reports visibilityState "visible", so the
+  // browser's own throttling cannot be relied on to prove this here. What is asserted
+  // instead is the mechanism: that the attribute passes through a holding state on its
+  // way to "on", and that nothing moves while it is there.
+  const page = await fresh();
+  await page.evaluateOnNewDocument(() => {
+    // Observed on the document with subtree, not on documentElement: this runs before
+    // the page's own scripts and <html> is not always there to be handed over yet.
+    window.__steps = [];
+    new MutationObserver((recs) => {
+      for (const r of recs) if (r.target === document.documentElement) window.__steps.push(document.documentElement.dataset.intro);
+    }).observe(document, { attributes: true, subtree: true, attributeFilter: ["data-intro"] });
+  });
+  await page.goto(base + "/?intro", { waitUntil: "domcontentloaded" });
+  await wait(400);
+  const seq = await page.evaluate(() => ({ steps: window.__steps, now: document.documentElement.dataset.intro }));
+  check(
+    seq.steps[0] === "wait" && seq.steps[1] === "on",
+    "the sequence is held until a frame is painted",
+    `${seq.steps.join(" -> ")} (now ${seq.now})`,
+  );
+
+  const held = await page.evaluate(() => {
+    document.documentElement.dataset.intro = "wait";
+    const g = (sel) => {
+      const cs = getComputedStyle(document.querySelector(sel));
+      return { play: cs.animationPlayState, op: Number(cs.opacity) };
+    };
+    return {
+      mark: g(".intro-mark"),
+      words: g(".intro-words"),
+      ring: g(".intro-ring"),
+      covered: !!document.elementFromPoint(innerWidth / 2, innerHeight / 2)?.closest(".intro"),
+      lock: getComputedStyle(document.documentElement).overflowY,
+    };
+  });
+  check(
+    [held.mark, held.words, held.ring].every((x) => x.play === "paused") &&
+      held.mark.op === 0 &&
+      held.words.op === 0 &&
+      held.ring.op === 0,
+    "nothing moves and nothing shows while it is held",
+    `play=${held.mark.play}/${held.words.play}/${held.ring.play} opacity=${held.mark.op}/${held.words.op}/${held.ring.op}`,
+  );
+  check(
+    held.covered && held.lock === "hidden",
+    "the held state still covers the page and holds the scroll",
+    `covered=${held.covered} overflow-y=${held.lock}`,
+  );
+  await page.close();
+}
+{
+  // The hidden-tab branch, tested by making the page hidden rather than by hiding it.
+  // A headless page that is not fronted still reports visibilityState "visible" and still
+  // gets frames, so backgrounding it here proves nothing; overriding the property before
+  // the inline script runs puts the script down the exact branch a real background tab
+  // would take, and the dispatched event is the one the browser would fire.
+  const page = await fresh();
+  await page.evaluateOnNewDocument(() => {
+    let hidden = true;
+    Object.defineProperty(document, "visibilityState", { get: () => (hidden ? "hidden" : "visible"), configurable: true });
+    Object.defineProperty(document, "hidden", { get: () => hidden, configurable: true });
+    window.__show = () => {
+      hidden = false;
+      document.dispatchEvent(new Event("visibilitychange"));
+    };
+  });
+  await page.goto(base + "/?intro", { waitUntil: "domcontentloaded" });
+  await wait(2200);
+  const whileHidden = await page.evaluate(() => {
+    const a = document.querySelector(".intro-mark").getAnimations()[0];
+    return { flag: document.documentElement.dataset.intro, at: Math.round(Number(a.currentTime)) };
+  });
+  check(
+    whileHidden.flag === "wait" && whileHidden.at === 0,
+    "a tab nobody is looking at does not spend the sequence",
+    `after 2200ms hidden: flag=${whileHidden.flag} at=${whileHidden.at}ms`,
+  );
+
+  await page.evaluate(() => window.__show());
+  await wait(260);
+  const onShow = await page.evaluate(() => {
+    const a = document.querySelector(".intro-mark").getAnimations()[0];
+    return { flag: document.documentElement.dataset.intro, at: Math.round(Number(a.currentTime)) };
+  });
+  check(
+    onShow.flag === "on" && onShow.at < 500,
+    "it starts from the beginning when the tab is looked at",
+    `flag=${onShow.flag} at=${onShow.at}ms`,
+  );
+  await page.close();
+}
+{
+  // Back does not re-run the script, so the page returns from the back/forward cache with
+  // its animations exactly where they were - which landed on a frozen final frame with
+  // the cue still up, measured at currentTime 3500. pageshow is the only notice of it.
+  const page = await fresh();
+  await page.goto(base + "/?intro", { waitUntil: "domcontentloaded" });
+  await wait(1200);
+  await page.goto(base + "/work", { waitUntil: "domcontentloaded" });
+  await wait(400);
+  await page.goBack({ waitUntil: "domcontentloaded" });
+  await wait(400);
+  const back = await page.evaluate(() => {
+    const el = document.querySelector(".intro");
+    const at = document.elementFromPoint(innerWidth / 2, innerHeight / 2);
+    return {
+      flag: document.documentElement.dataset.intro ?? null,
+      display: el ? getComputedStyle(el).display : null,
+      covered: !!at?.closest(".intro"),
+      lock: getComputedStyle(document.documentElement).overflowY,
+    };
+  });
+  check(
+    back.flag === "off" && back.display === "none" && !back.covered && back.lock !== "hidden",
+    "Back does not land on a half-played sequence",
+    `flag=${back.flag} display=${back.display} covered=${back.covered} overflow-y=${back.lock}`,
   );
   await page.close();
 }

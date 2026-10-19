@@ -74,7 +74,29 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           - and 3500ms later the first Space or Enter was silently eaten. It is now
           anchored to a whole parameter name and only ever reached on the home page.
 
-          Four deliberate details in the handlers:
+          The sequence starts on a painted frame, not on the load, and that is the fix for
+          the thing Ilham kept catching: a logo that was already half spun by the time he
+          looked at it. The animations used to begin the moment the stylesheet applied,
+          which has nothing to do with when anyone is watching - open the site in a
+          background tab and switch to it two seconds later and you arrive two seconds in.
+          Measured: hidden for 1200ms, the mark read 1336ms and 1076 degrees.
+
+          So it is held at "wait", where the overlay covers the screen but every animation
+          is paused on its first frame - which is a blank sheet of paper, exactly what the
+          first 500ms look like anyway. requestAnimationFrame does not run in a hidden
+          tab, so it releases on the first frame that is actually painted. The
+          visibilitychange arm is a second lock for browsers that run rAF in the
+          background anyway - on document, which is where that event is dispatched. It
+          does bubble to window, but relying on that is how the listener came to be in
+          the wrong place for a while, and nothing about it is worth a second look later.
+
+          And a page restored from the back/forward cache does not re-run this script -
+          it comes back with its animations where they were, which is how Back landed on
+          a frozen final frame with the cue still up. pageshow with persisted is the only
+          notice of that, and it simply ends the sequence: the visitor pressed Back to get
+          into the site, not to watch the door open again.
+
+          Five deliberate details in the handlers:
 
           The listeners are attached immediately but out() returns unless the state is
           already "ready", so the first 3500ms cannot be clicked away. Gating on the
@@ -116,13 +138,20 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               'function out(){if(d.dataset.intro!=="ready"||!up())return;' +
               'd.dataset.intro="out";setTimeout(off,1200)}' +
               'function key(e){var s=d.dataset.intro;' +
-              'if((s!=="on"&&s!=="ready")||!up())return;' +
+              'if((s!=="wait"&&s!=="on"&&s!=="ready")||!up())return;' +
               'if(e.key==="Tab"){e.preventDefault();return}' +
               'if(s==="ready"&&(e.key==="Enter"||e.key===" ")){e.preventDefault();out()}}' +
-              'function on(s){d.dataset.introStyle=s==="paper"?"paper":"ink";' +
-              'd.dataset.intro="on";addEventListener("pointerdown",out);' +
-              'addEventListener("keydown",key);' +
+              'function start(){if(d.dataset.intro!=="wait")return;d.dataset.intro="on";' +
               'setTimeout(function(){if(d.dataset.intro==="on")d.dataset.intro=up()?"ready":"off"},3500)}' +
+              'function arm(){if(document.visibilityState==="hidden"){' +
+              'document.addEventListener("visibilitychange",function h(){' +
+              'if(document.visibilityState!=="hidden"){' +
+              'document.removeEventListener("visibilitychange",h);arm()}});' +
+              'return}requestAnimationFrame(start)}' +
+              'function on(s){d.dataset.introStyle=s==="paper"?"paper":"ink";' +
+              'd.dataset.intro="wait";addEventListener("pointerdown",out);' +
+              'addEventListener("keydown",key);arm()}' +
+              'addEventListener("pageshow",function(e){if(e.persisted)off()});' +
               'if(location.pathname!=="/"){off();return}' +
               'var m=/[?&]intro(?:=([a-z]+))?(?:&|$)/.exec(location.search);' +
               'if(m){on(m[1]);return}' +
