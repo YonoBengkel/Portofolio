@@ -84,11 +84,36 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           So it is held at "wait", where the overlay covers the screen but every animation
           is paused on its first frame - which is a blank sheet of paper, exactly what the
           first 500ms look like anyway. requestAnimationFrame does not run in a hidden
-          tab, so it releases on the first frame that is actually painted. The
-          visibilitychange arm is a second lock for browsers that run rAF in the
-          background anyway - on document, which is where that event is dispatched. It
-          does bubble to window, but relying on that is how the listener came to be in
-          the wrong place for a while, and nothing about it is worth a second look later.
+          tab, so it releases on the first frame that is actually painted.
+
+          "wait" is not only a starting gate. The first version of this checked visibility
+          once, at load, and that fixed only half of it: a page that loads in front and is
+          then switched away from goes on spending its sequence regardless. Measured in a
+          real browser rather than a headless one, which is the only place a tab can
+          actually be hidden - loaded visible, hidden for 1500ms, the mark came back at
+          1567ms and 1080 degrees, fully spun. So visibilitychange moves it back to "wait"
+          whenever the page is hidden, and coming back resumes it where it stopped. The
+          sequence can only ever be spent in front of someone.
+
+          The attribute alone does not do that, and this is the part worth remembering: a
+          hidden tab does not recalculate style. Setting data-intro="wait" there changes
+          nothing until the tab is looked at again, so the CSS pause arrived too late and
+          the animation had already run on - measured at currentTime 2834 after 2500ms
+          hidden, with the attribute correctly reading "wait" the whole time. The pause is
+          therefore taken on the animation objects themselves, which needs no style pass,
+          and the CSS rule is left to do the one job it can: holding the opening frame
+          before the first paint.
+
+          The listener is on document, which is where that event is dispatched. It does
+          bubble to window, but relying on that is how it came to be in the wrong place
+          for a while, and a test that dispatched a plain non-bubbling Event caught it.
+
+          And "ready" is no longer on a timer. A 3500ms setTimeout keeps running while the
+          animations are paused, so a visitor who looked away would have come back to the
+          cue sitting over a half-spun mark. It hangs off the mark animation's own
+          finished promise instead, which by definition cannot resolve while that
+          animation is paused. The timer survives only as a fallback where getAnimations
+          is missing.
 
           And a page restored from the back/forward cache does not re-run this script -
           it comes back with its animations where they were, which is how Back landed on
@@ -141,16 +166,26 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               'if((s!=="wait"&&s!=="on"&&s!=="ready")||!up())return;' +
               'if(e.key==="Tab"){e.preventDefault();return}' +
               'if(s==="ready"&&(e.key==="Enter"||e.key===" ")){e.preventDefault();out()}}' +
+              'function ready(){if(d.dataset.intro==="on")d.dataset.intro=up()?"ready":"off"}' +
+              'function anims(){var o=[];try{var l=document.getAnimations();' +
+              'for(var i=0;i<l.length;i++){var n=l[i].animationName;' +
+              'if(n==="intro-mark"||n==="intro-words"||n==="intro-ring")o.push(l[i])}}catch(e){}return o}' +
+              'var hooked;' +
               'function start(){if(d.dataset.intro!=="wait")return;d.dataset.intro="on";' +
-              'setTimeout(function(){if(d.dataset.intro==="on")d.dataset.intro=up()?"ready":"off"},3500)}' +
-              'function arm(){if(document.visibilityState==="hidden"){' +
-              'document.addEventListener("visibilitychange",function h(){' +
-              'if(document.visibilityState!=="hidden"){' +
-              'document.removeEventListener("visibilitychange",h);arm()}});' +
-              'return}requestAnimationFrame(start)}' +
+              'var a=anims();for(var i=0;i<a.length;i++)if(a[i].playState==="paused")a[i].play();' +
+              'if(hooked)return;hooked=1;' +
+              'var m=document.querySelector(".intro-mark");' +
+              'var f=m&&m.getAnimations&&m.getAnimations()[0];' +
+              'if(f&&f.finished)f.finished.then(ready,function(){});else setTimeout(ready,3500)}' +
+              'function arm(){if(document.visibilityState!=="hidden")requestAnimationFrame(start)}' +
+              'function vis(){if(document.visibilityState==="hidden"){' +
+              'if(d.dataset.intro==="on"){d.dataset.intro="wait";' +
+              'var a=anims();for(var i=0;i<a.length;i++)a[i].pause()}}' +
+              'else if(d.dataset.intro==="wait")arm()}' +
               'function on(s){d.dataset.introStyle=s==="paper"?"paper":"ink";' +
               'd.dataset.intro="wait";addEventListener("pointerdown",out);' +
-              'addEventListener("keydown",key);arm()}' +
+              'addEventListener("keydown",key);' +
+              'document.addEventListener("visibilitychange",vis);arm()}' +
               'addEventListener("pageshow",function(e){if(e.persisted)off()});' +
               'if(location.pathname!=="/"){off();return}' +
               'var m=/[?&]intro(?:=([a-z]+))?(?:&|$)/.exec(location.search);' +

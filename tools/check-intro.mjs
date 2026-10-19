@@ -500,10 +500,12 @@ const state = (page) =>
     let hidden = true;
     Object.defineProperty(document, "visibilityState", { get: () => (hidden ? "hidden" : "visible"), configurable: true });
     Object.defineProperty(document, "hidden", { get: () => hidden, configurable: true });
-    window.__show = () => {
-      hidden = false;
+    const flip = (v) => {
+      hidden = v;
       document.dispatchEvent(new Event("visibilitychange"));
     };
+    window.__show = () => flip(false);
+    window.__hide = () => flip(true);
   });
   await page.goto(base + "/?intro", { waitUntil: "domcontentloaded" });
   await wait(2200);
@@ -527,6 +529,44 @@ const state = (page) =>
     onShow.flag === "on" && onShow.at < 500,
     "it starts from the beginning when the tab is looked at",
     `flag=${onShow.flag} at=${onShow.at}ms`,
+  );
+
+  // Hiding it again, now that it is running. This is the half that the first fix missed:
+  // checking visibility once at load leaves a page that was loaded in front and then
+  // switched away from spending its sequence to the end regardless.
+  //
+  // And the pause has to be taken on the animation objects, not by the CSS rule. A hidden
+  // tab does not recalculate style, so the attribute lands and nothing happens - measured
+  // in a real browser at currentTime 2834 after 2500ms hidden with the attribute reading
+  // "wait" the whole time. Here the tab is not really hidden, so what that proves is the
+  // other half: that the pause is applied through a path which does not need a style pass.
+  await wait(600);
+  const running = await page.evaluate(() => {
+    const a = document.querySelector(".intro-mark").getAnimations()[0];
+    return { at: Math.round(Number(a.currentTime)), play: a.playState };
+  });
+  await page.evaluate(() => window.__hide());
+  await wait(900);
+  const reHidden = await page.evaluate(() => {
+    const a = document.querySelector(".intro-mark").getAnimations()[0];
+    return { flag: document.documentElement.dataset.intro, at: Math.round(Number(a.currentTime)), play: a.playState };
+  });
+  check(
+    reHidden.play === "paused" && reHidden.at - running.at < 150,
+    "hiding it mid-sequence stops it where it is",
+    `${running.at}ms (${running.play}) -> after 900ms hidden ${reHidden.at}ms (${reHidden.play}), flag=${reHidden.flag}`,
+  );
+
+  await page.evaluate(() => window.__show());
+  await wait(400);
+  const resumed = await page.evaluate(() => {
+    const a = document.querySelector(".intro-mark").getAnimations()[0];
+    return { flag: document.documentElement.dataset.intro, at: Math.round(Number(a.currentTime)), play: a.playState };
+  });
+  check(
+    resumed.play === "running" && resumed.at > reHidden.at,
+    "and it picks up from there rather than starting over",
+    `${reHidden.at}ms -> ${resumed.at}ms (${resumed.play})`,
   );
   await page.close();
 }
