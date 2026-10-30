@@ -26,7 +26,7 @@ import { competitions, education, experience, leadership } from "@/content/site"
   allowed to be a choice.
 */
 const FRONT = [
-  "warungku",
+  "turnify-flow",
   "vault-retrieval",
   "supplier-decision-support",
   "fall-detection",
