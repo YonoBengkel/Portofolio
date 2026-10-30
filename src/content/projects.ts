@@ -10,9 +10,9 @@ import ewsAlert from "@/assets/images/ews-alert.jpg";
 import ewsEvaluation from "@/assets/images/ews-evaluation.jpg";
 import supplierActive from "@/assets/images/supplier-active.jpg";
 import supplierAudit from "@/assets/images/supplier-audit.jpg";
-import warungkuDistributor from "@/assets/images/warungku-distributor-screens.jpg";
+import turnifyDistributor from "@/assets/images/turnify-distributor-screens.jpg";
 import warungkuFlow from "@/assets/images/warungku-flow-b2b.png";
-import warungkuOwner from "@/assets/images/warungku-owner-screens.jpg";
+import turnifyOwner from "@/assets/images/turnify-owner-screens.jpg";
 
 // Case studies. Text follows one rule: explain the problem, the work, and the reasoning; no bragging metrics.
 // Use **double asterisks** for bold text inside any string.
@@ -55,29 +55,30 @@ export type Project = {
 
 export const projects: Project[] = [
   {
-    slug: "warungku",
+    slug: "turnify-flow",
     number: "01",
-    category: "Business process & product design",
-    title: "Warungku: from cashier data to stock and purchasing decisions",
-    cardTitle: "Warungku",
+    category: "Supply-chain analytics",
+    title: "Turnify Flow: from cashier data to stock and purchasing decisions",
+    cardTitle: "Turnify Flow",
     subtitle:
       "A companion app for small food & beverage businesses, built to sit beside the cashier app they already use.",
     summary:
-      "Inventory and purchasing for small food & beverage businesses, designed around their existing cashier app.",
+      "Stock, demand forecasts and distributor choice for small food & beverage businesses, designed around the cashier app they already use.",
     type: "Team",
     teamLabel: "Team of 4",
     status: "Prototype",
     context: "Data Analytics Project course, supply-chain project",
     period: "Sep 2026 – ongoing",
     role: "Our team had no fixed job split; I mainly worked on the logic: the rules that connect sales, stock, forecasts, orders, and goods receipt.",
-    flow: ["Cashier sales", "Stock ledger", "Restock forecast", "Distributor order", "Goods receipt"],
-    tools: ["React", "TypeScript", "Process flowcharts", "SWOT"],
+    flow: ["Cashier receipts", "Stock ledger", "Demand forecast", "Distributor choice", "Goods receipt"],
+    tools: ["FastAPI", "PostgreSQL", "LightGBM", "React", "TypeScript", "Docker"],
+    // The repository kept the project's first name when the app was renamed on 12 Oct 2026.
     links: [{ label: "GitHub repository", href: "https://github.com/YonoBengkel/Warungku" }],
     cover: {
-      src: warungkuOwner,
-      alt: "Warungku business-owner screens: daily to-do list, stock forecast with reasons, and goods receipt",
+      src: turnifyOwner,
+      alt: "Business-owner screens: the daily home page, a stock forecast with the reasoning behind it, and goods receipt",
       caption:
-        "Business-owner portal from the working prototype: what needs attention today, a forecast that explains itself, and the goods-receipt screen, the only place where stock goes up. (Interface in Indonesian.)",
+        "Business-owner portal: what needs attention today, a forecast that shows its working and names its model, and the goods-receipt screen, the only place where stock goes up. (Interface in Indonesian.)",
     },
     sections: [
       {
@@ -92,18 +93,29 @@ export const projects: Project[] = [
         kind: "text",
         heading: "The idea",
         body: [
-          "Instead of replacing the cashier app, Warungku sits beside it and takes over three jobs nobody was doing: counting stock, estimating next month's needs, and ordering from distributors.",
+          "Instead of replacing the cashier app, Turnify Flow sits beside it. It reads the receipts the cashier app already produces, keeps the storeroom count nobody was keeping, forecasts what the coming weeks will need, and suggests which distributor to order from.",
+          "Businesses that make their own goods, such as a home kitchen selling sambal to shops, record their cooking sessions and shipments in the same app, so the ingredients they use are counted exactly like ingredients sold over a counter.",
         ],
       },
       {
         kind: "steps",
         heading: "How the process works",
         items: [
-          "Sales recorded in the cashier app reduce stock automatically.",
-          "Usage history builds into a forecast for next month, shown together with its reasons.",
-          "The owner adjusts the suggestion and orders from a distributor in the same app.",
+          "Each receipt from the cashier app lowers stock, recorded as a movement in a ledger.",
+          "Daily usage becomes a forecast for the next 30 days, given as a range rather than one number.",
+          "An item is flagged as running low when what is left would not cover the high end of that range for as long as a delivery takes.",
+          "The app suggests how much to buy and from which distributor, weighing how reliable each one has been against its price. The owner adjusts the suggestion and orders in the same app.",
           "The distributor accepts or rejects the order (with a reason), then prepares and ships it.",
-          "The owner confirms what actually arrived; only then does stock go up.",
+          "The owner confirms what actually arrived: on time, the right amount, in good condition. Only then does stock go up, and that check is what the distributor suggestion learns from.",
+        ],
+      },
+      {
+        kind: "text",
+        heading: "Three questions, three engines",
+        body: [
+          "**How much, and when?** The first engine forecasts each item's demand as a low, a middle and a high estimate, with one model shared by every item. The range matters more than the middle: the safety level is set from the high estimate over the delivery time, so the forecast's own uncertainty becomes the size of the buffer instead of being hidden by it. A day the item was sold out is treated as **censored**: zero sales that day says the shelf was empty, not that nobody wanted it.",
+          "**Which distributor?** The second engine keeps a running belief about how reliable each distributor is, updated by every delivery check, and balances trying a less-known distributor against sticking with the one that has proved itself before weighing reliability against price. In the simulation, always picking the cheapest did worse than choosing at random, because the cheapest distributor there was designed to be the least reliable.",
+          "**Which customers are drifting away?** The third engine works for the distributor. It groups their customers by how recently, how often and how much they order, together with the kind of business and what they buy, so a distributor can see which customers are dependable and which are starting to slip.",
         ],
       },
       {
@@ -112,18 +124,21 @@ export const projects: Project[] = [
         items: [
           { title: "Companion, not replacement", body: "Owners keep the cashier app they already know, so adoption does not depend on switching systems." },
           { title: "One gate for stock increases", body: "Stock rises only when goods are confirmed at receipt, and every manual adjustment must carry a reason, so the storeroom and the system stay in sync." },
-          { title: "Forecasts that explain themselves", body: "Each suggestion shows the usage trend and why it was made, so owners can judge it rather than trust a number blindly." },
+          { title: "Forecasts that explain themselves", body: "Each suggestion shows the usage trend and why it was made, and the app names the method behind each engine, so owners can judge a suggestion rather than trust it blindly." },
           { title: "One contract, one item", body: "Monthly quotas, prices, and fulfilment stay traceable item by item." },
-          { title: "Forecasting as a separate service", body: "If the model fails, the rest of the app keeps working." },
+          {
+            title: "Models write, the app reads",
+            body: "The model service writes its results into tables on a schedule (the forecast nightly, the other two engines every four hours), and the app only ever reads those tables. Nothing calls a model while a page is loading, so when the model service is down the portal still opens with the last numbers it has, marked as not fresh.",
+          },
         ],
       },
       {
         kind: "figures",
         figures: [
           {
-            src: warungkuDistributor,
-            alt: "Distributor portal screens: dashboard, accept or reject orders, order tracking, and order map",
-            caption: "Distributor portal: incoming orders, accept or reject with a reason, order tracking, and a map of who is ordering what. (Interface in Indonesian.)",
+            src: turnifyDistributor,
+            alt: "Distributor portal screens: home page, accepting or rejecting orders, delivery tracking, and a map of who is ordering",
+            caption: "Distributor portal: what needs a decision today, incoming orders to accept or reject with a reason, delivery tracking, and a map of who is ordering what. (Interface in Indonesian.)",
           },
         ],
       },
@@ -133,7 +148,7 @@ export const projects: Project[] = [
           {
             src: warungkuFlow,
             alt: "B2B flowchart from distributor sign-up to goods received",
-            caption: "B2B process, from distributor sign-up to goods received, including the rejection and incomplete-documents paths. (In Indonesian.)",
+            caption: "B2B process, from distributor sign-up to goods received, including the rejection and incomplete-documents paths. Drawn before the rename, when the project was still called Warungku. (In Indonesian.)",
             narrow: true,
           },
         ],
@@ -147,6 +162,14 @@ export const projects: Project[] = [
       },
       {
         kind: "text",
+        heading: "What the data can and cannot say",
+        body: [
+          "Every engine was tuned on a simulation the team designed: 400 days of 70 small businesses and one producer. That includes the decision to make the cheapest distributor the least reliable, so the second engine doing well on that data says more about the simulation than about real distributors.",
+          "The first engine's method was also tested on a real bakery's sales, but not yet on a real warung. The course set a 5% error target. It is met for the bakery's revenue, over only six test weeks, and not for weekly units per item, where the error is around 23%.",
+        ],
+      },
+      {
+        kind: "text",
         heading: "Deliberately out of scope",
         body: [
           "Selling prices and profit (they already live in the cashier app), payment processing (settled directly between owner and distributor), and support for more than one cashier app in the first version.",
@@ -156,7 +179,7 @@ export const projects: Project[] = [
         kind: "text",
         heading: "Status and next steps",
         body: [
-          "Both portals are prototyped end to end on realistic sample data, and the process is documented with B2B and B2C flowcharts, a SWOT analysis, and a timeline. Next: the backend, a real forecasting model, and the admin portal, by January 2027.",
+          "The backend, the three engines and both portals run end to end on the simulated data, packaged as Docker images that start with one script. Still open: a connector to a real cashier app (the receipt format is defined and tested), notifications sent by the server rather than worked out in the browser, real delivery tracking instead of an estimate along a straight line, and a test on a real warung's data.",
         ],
       },
     ],

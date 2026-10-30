@@ -26,7 +26,7 @@ const paths = [
   "/",
   "/about",
   "/work",
-  "/work/warungku",
+  "/work/turnify-flow",
   "/work/sales-data-warehouse",
   "/cv",
   "/contact",
