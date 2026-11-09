@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { profile } from "@/content/site";
+import { ContactStamp } from "./contact-stamp";
 import { SocialIcon } from "./social-icons";
 import { Logo } from "./logo";
 
@@ -35,6 +36,7 @@ export function SiteFooter() {
             <p>{profile.intro}</p>
             <p className="mt-4">{profile.location}</p>
           </div>
+          <ContactStamp />
         </div>
 
         <div className="foot-row foot-grid">
@@ -61,11 +63,22 @@ export function SiteFooter() {
                 <SocialIcon name="linkedin" />
                 LinkedIn
               </a>
+              <a
+                href={profile.links.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="foot-link"
+                aria-label="Ilham Bintang Satria on Instagram"
+              >
+                <SocialIcon name="instagram" />
+                Instagram
+              </a>
               <a href={`mailto:${profile.email}`} className="foot-link" aria-label={`Email ${profile.email}`}>
                 <SocialIcon name="email" />
                 Email
               </a>
-              <Link href="/cv" className="foot-link">
+              {/* The CV page was folded into /about on 9 Nov 2026; the footer goes to it there. */}
+              <Link href="/about#cv" className="foot-link">
                 CV
               </Link>
             </nav>
@@ -73,7 +86,7 @@ export function SiteFooter() {
               © {year} {profile.name}
             </p>
           </div>
-          <p className="foot-credit">Built with Next.js. Set in Anton, Archivo and IBM Plex Mono.</p>
+          <p className="foot-credit">Built with Next.js. Set in Anton, Archivo, Instrument Serif and IBM Plex Mono.</p>
         </div>
       </div>
     </footer>

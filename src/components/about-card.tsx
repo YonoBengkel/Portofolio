@@ -4,6 +4,7 @@ import Link from "next/link";
 import { AsciiPortrait } from "./ascii-portrait";
 import { atAGlance, profile } from "@/content/site";
 import { SocialIcon } from "./social-icons";
+import { StickerSheet } from "./sticker-sheet";
 
 /**
  * About me, built to the reference's structure because Ilham asked for it by name.
@@ -59,6 +60,9 @@ export function AboutCard() {
 
         <div className="about-stack">
           <div className="about-zoom">
+            {/* The pin holds the card and the stickers on it (sticker-sheet.tsx), which
+                live outside the card because the card clips its own edges. */}
+            <div className="about-pin">
             <div className="about-card">
               <span className="about-br about-br-a" aria-hidden="true" />
               <span className="about-br about-br-b" aria-hidden="true" />
@@ -93,7 +97,7 @@ export function AboutCard() {
                       Download CV
                     </a>
                   ) : (
-                    <Link href="/cv" className="stamp">
+                    <Link href="/about#cv" className="stamp">
                       Download CV
                     </Link>
                   )}
@@ -115,6 +119,8 @@ export function AboutCard() {
                   </div>
                 ))}
               </dl>
+            </div>
+            <StickerSheet />
             </div>
           </div>
 
@@ -140,9 +146,19 @@ export function AboutCard() {
               <SocialIcon name="linkedin" size={24} />
             </a>
             <a
-              href={`mailto:${profile.email}`}
+              href={profile.links.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
               className="about-tile"
               style={{ "--i": 2 } as React.CSSProperties}
+              aria-label="Ilham Bintang Satria on Instagram"
+            >
+              <SocialIcon name="instagram" size={24} />
+            </a>
+            <a
+              href={`mailto:${profile.email}`}
+              className="about-tile"
+              style={{ "--i": 3 } as React.CSSProperties}
               aria-label={`Email ${profile.email}`}
             >
               <SocialIcon name="email" size={24} />

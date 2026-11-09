@@ -1,20 +1,31 @@
+import fs from "node:fs";
+import path from "node:path";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import portrait from "@/assets/images/portrait-bw.webp";
+import { EntryList } from "@/components/entry-list";
 import { Timeline, buildTimeline } from "@/components/timeline";
 import { HowIWork } from "@/components/how-i-work";
 import { PageHeader } from "@/components/page-header";
 import { PageTransition } from "@/components/page-transition";
-import { education, experience, leadership, profile, toolbox, volunteering } from "@/content/site";
+import { education, experience, leadership, openTo, profile, toolbox, volunteering } from "@/content/site";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/about" },
   title: "About",
-  description: "How I work, where I study, what I use, and what I lead.",
+  description: "How I work, where I study, what I use, what I lead, and the CV.",
 };
 
+/*
+  Since 9 Nov 2026 this page also carries the CV. Ilham merged the CV page into it: the CV
+  page said what this page says, plus a preview of the PDF, so the preview, the download
+  and the short summary moved here (#cv) and /cv redirects to them. The event committees
+  are listed in full here too, rather than behind a "See all" link - this page is the one
+  about him, so it should not hold anything back.
+*/
 export default function AboutPage() {
+  const hasCv = fs.existsSync(path.join(process.cwd(), "public", profile.cvPath));
   return (
     <PageTransition>
       <PageHeader title="About" lede={profile.intro} />
@@ -68,9 +79,20 @@ export default function AboutPage() {
               Jobs for one event, however long the event ran. The seats in an organisation are in the
               list above; these are not the same thing and are not counted as one.
             </p>
+            <div className="mt-12">
+              <EntryList
+                entries={volunteering.map((v) => ({
+                  title: `${v.role}, ${v.event}`,
+                  org: v.org,
+                  period: v.period,
+                  body: v.body,
+                  scan: v.scan,
+                }))}
+              />
+            </div>
             <p className="mt-12">
-              <Link href="/about/activities" className="pill pill-solid">
-                See all {volunteering.length}
+              <Link href="/about/activities" className="pill">
+                With the training courses
               </Link>
             </p>
           </div>
@@ -99,6 +121,78 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+
+      {/* The CV, moved here from its own page. */}
+      <section id="cv" className="band" aria-labelledby="cv-h">
+        <div className="frame">
+          <div className="column">
+            <h2 id="cv-h" className="h-sec reveal">
+              CV
+            </h2>
+            <p className="lede reveal mt-5 max-w-[38rem]">{openTo}</p>
+            <p className="mt-8">
+              {hasCv ? (
+                <a href={profile.cvPath} download className="pill pill-solid">
+                  Download the PDF
+                </a>
+              ) : (
+                <span className="lede">The PDF is not published yet. The summary below says the same thing.</span>
+              )}
+            </p>
+
+            {/* The page still answers the question if the PDF fails to load or is skipped. */}
+            <div className="sticker reveal mt-12 p-7 sm:p-10">
+              <h3 className="h-sec">In short</h3>
+              <dl className="mt-8 grid gap-0">
+                <div className="grid gap-2 pb-6 sm:grid-cols-[10rem_minmax(0,1fr)] sm:items-baseline">
+                  <dt className="meta opacity-70">Studying</dt>
+                  <dd className="leading-snug">
+                    {education.degree}, {education.school}, {education.period}
+                  </dd>
+                </div>
+                {experience.map((e) => (
+                  <div
+                    key={e.role}
+                    className="grid gap-2 border-t-2 border-line py-6 sm:grid-cols-[10rem_minmax(0,1fr)] sm:items-baseline"
+                  >
+                    <dt className="meta opacity-70">{e.period}</dt>
+                    <dd className="leading-snug">
+                      {e.role}, {e.org}
+                    </dd>
+                  </div>
+                ))}
+                <div className="grid gap-2 border-t-2 border-line pt-6 sm:grid-cols-[10rem_minmax(0,1fr)] sm:items-baseline">
+                  <dt className="meta opacity-70">Based in</dt>
+                  <dd className="leading-snug">{profile.location}</dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {hasCv && (
+        <section aria-label="CV preview" className="band band-slate pt-0">
+          <div className="frame">
+            <div className="column">
+              <object
+                data={profile.cvPath}
+                type="application/pdf"
+                className="h-[min(80svh,900px)] w-full border-2 border-ink bg-paper-2"
+                aria-label="CV preview"
+              >
+                <p className="p-6">
+                  Your browser will not show the PDF here.{" "}
+                  <a href={profile.cvPath} className="underline decoration-2 underline-offset-4" download>
+                    Download it instead
+                  </a>
+                  .
+                </p>
+              </object>
+            </div>
+          </div>
+        </section>
+      )}
     </PageTransition>
   );
 }

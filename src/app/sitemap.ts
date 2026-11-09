@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { projects } from "@/content/projects";
 import { siteUrl } from "@/lib/site-url";
 
-const PAGES = ["", "/work", "/about", "/about/competitions", "/about/activities", "/cv", "/contact"];
+const PAGES = ["", "/work", "/about", "/about/competitions", "/about/activities", "/contact"];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [

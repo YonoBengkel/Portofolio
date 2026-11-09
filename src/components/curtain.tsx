@@ -9,7 +9,6 @@ const NAMES: Record<string, string> = {
   "/about": "About",
   "/about/competitions": "Competitions",
   "/about/activities": "Organisations",
-  "/cv": "CV",
   "/contact": "Contact",
 };
 

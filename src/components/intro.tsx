@@ -1,3 +1,4 @@
+import { profile } from "@/content/site";
 import { Logo } from "./logo";
 
 /**
@@ -40,6 +41,16 @@ import { Logo } from "./logo";
  * not using a pointer.
  */
 export function Intro() {
+  /*
+    The full name, which Ilham asked for on 9 Nov 2026 - it was "Ilham Satria" here while
+    the hero behind it said all three. It comes from the profile rather than being typed
+    out, so the two can no longer disagree. Split the way the hero splits it, because on
+    a phone the card stacks and the name goes over two lines: twenty capitals on one line
+    at that size do not fit a 360px screen.
+  */
+  const words = profile.name.split(" ");
+  const first = words.slice(0, 2).join(" ");
+  const last = words.slice(2).join(" ");
   return (
     <>
       <div className="intro" aria-hidden="true">
@@ -52,7 +63,9 @@ export function Intro() {
             <Logo size={112} />
           </span>
           <p className="intro-words">
-            <b>Ilham Satria</b>
+            <b>
+              <span>{first}</span> <span>{last}</span>
+            </b>
             <span>Process &middot; Data &middot; Decisions</span>
           </p>
         </div>

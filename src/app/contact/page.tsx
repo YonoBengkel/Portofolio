@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { CopyButton } from "@/components/copy-button";
+import { MessageBox } from "@/components/message-box";
 import { PageHeader } from "@/components/page-header";
 import { PageTransition } from "@/components/page-transition";
 import { openTo, profile } from "@/content/site";
@@ -7,13 +8,14 @@ import { openTo, profile } from "@/content/site";
 export const metadata: Metadata = {
   alternates: { canonical: "/contact" },
   title: "Contact",
-  description: "Email, LinkedIn and GitHub.",
+  description: "Write a message, or reach me by email, LinkedIn, Instagram or GitHub.",
 };
 
 export default function ContactPage() {
   const rows = [
     { label: "Email", value: profile.email, href: `mailto:${profile.email}`, copy: true },
     { label: "LinkedIn", value: "linkedin.com/in/ilham-bintang-satria", href: profile.links.linkedin },
+    { label: "Instagram", value: "instagram.com/aangonwedhuss_", href: profile.links.instagram },
     { label: "GitHub", value: "github.com/YonoBengkel", href: profile.links.github },
     { label: "Based in", value: profile.location },
   ];
@@ -56,6 +58,20 @@ export default function ContactPage() {
             </div>
 
             <p className="lede reveal mt-10 max-w-[38rem]">{openTo}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* A message written here, handed to the visitor's own email app (message-box.tsx). */}
+      <section className="band band-slate" aria-labelledby="write-h">
+        <div className="frame">
+          <div className="column">
+            <h2 id="write-h" className="h-sec reveal">
+              Write to me
+            </h2>
+            <div className="mt-10">
+              <MessageBox to={profile.email} />
+            </div>
           </div>
         </div>
       </section>
