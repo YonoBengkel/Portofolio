@@ -2750,8 +2750,26 @@
       align-self: start;
       margin-top: 30px;
     }
+    /*
+      The desk covers the screen exactly - the same box the files were placed in before,
+      so their percentages land where they did - and is its own layer, so the spread row
+      can be made smaller as a whole where it does not fit (--file-fit, case-log.tsx).
+    */
     .log.is-pinned .log-desk {
       display: block;
+      position: absolute;
+      inset: 0;
+      transform-origin: 50% 60%;
+      transition:
+        scale 430ms cubic-bezier(0.55, 0, 0.9, 0.45),
+        translate 430ms cubic-bezier(0.55, 0, 0.9, 0.45);
+    }
+    .log.is-pinned[data-spread] .log-desk {
+      translate: 0 var(--file-shift, 0px);
+      scale: var(--file-fit, 1);
+      transition:
+        scale 600ms cubic-bezier(0.22, 1, 0.36, 1),
+        translate 600ms cubic-bezier(0.22, 1, 0.36, 1);
     }
     .log.is-pinned .logflow {
       display: none;
@@ -2862,6 +2880,7 @@
     top: -45%;
     z-index: calc(var(--k, 0) + 1);
     width: min(560px, 44vw);
+    min-height: 0;
     translate: -50% -50%;
     rotate: calc(var(--rot, 0deg) + 9deg);
     scale: 1.1;
@@ -2870,6 +2889,7 @@
       top 430ms cubic-bezier(0.55, 0, 0.9, 0.45),
       left 430ms cubic-bezier(0.55, 0, 0.9, 0.45),
       width 430ms cubic-bezier(0.55, 0, 0.9, 0.45),
+      min-height 430ms cubic-bezier(0.55, 0, 0.9, 0.45),
       rotate 430ms cubic-bezier(0.55, 0, 0.9, 0.45),
       scale 430ms cubic-bezier(0.55, 0, 0.9, 0.45),
       visibility 0s 430ms;
@@ -2887,24 +2907,43 @@
     of the rail, each a quarter of the row. One row rather than two-by-two, because two
     rows of the longer files did not fit under the heading on a 900px-tall screen.
   */
+  /*
+    Every file in the row is as tall as the tallest (--file-h, measured by case-log.tsx,
+    Ilham's request of 9 Nov 2026), and the row under the text takes up the difference,
+    so each stamp sits at the foot of its file, level with the other three.
+  */
   .log[data-spread] .log-desk .logfile[data-landed] {
     left: calc(var(--padx, 80px) + (100% - 2 * var(--padx, 80px)) * (var(--k, 0) + 0.5) / var(--n, 4));
     top: 60%;
     width: calc((100% - 2 * var(--padx, 80px) - (var(--n, 4) - 1) * 22px) / var(--n, 4));
+    min-height: var(--file-h, 0px);
+    grid-template-rows: auto auto auto auto 1fr auto;
     rotate: 0deg;
     transition-duration: 600ms;
     transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
     transition-delay: calc(var(--k, 0) * 60ms);
   }
-  .log[data-spread] .log-desk .logfile-title {
+  .log[data-spread] .log-desk .logfile-title,
+  .log-probe .logfile-title {
     padding-right: 0;
   }
-  .log[data-spread] .log-desk .logfile-stamp {
+  .log[data-spread] .log-desk .logfile-stamp,
+  .log-probe .logfile-stamp {
     position: relative;
     top: auto;
     right: auto;
     justify-self: end;
     margin-top: 8px;
+  }
+  /* The copies case-log.tsx measures the row's height on: laid out, never seen. */
+  .log-probe {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: grid;
+    align-items: start;
+    visibility: hidden;
+    pointer-events: none;
   }
   .logfile {
     display: grid;
@@ -4297,11 +4336,9 @@
   /*
     The exit, and the default: an ink panel that rises over the composition and then
     carries on upward and off, uncovering the hero. This is curtain-up followed by
-    curtain-off - the move this site makes between pages, borrowed rather than imitated,
-    so arriving and moving around speak the same language. It keeps the 520 + 560 ms it
-    was approved at: the page curtain was cut to 600 ms on 9 Nov 2026 because every
-    navigation pays it, and this one is paid once. The paper curtain above it is kept
-    under ?intro=paper.
+    curtain-off at their own durations - literally the move this site makes between
+    pages, borrowed whole rather than imitated, so arriving and moving around speak the
+    same language. The paper curtain above it is kept under ?intro=paper.
 
     It is a sibling of .intro rather than a child, and that is forced: the paper is
     hidden on the frame the ink finishes covering it, and visibility is inherited - as a
@@ -4771,18 +4808,18 @@
   .curtain-clearing {
     pointer-events: auto;
   }
-  /* 250 + 100 + 250 ms, matching COVER, HOLD and CLEAR in curtain.tsx - change both. */
+  /* 520 + 260 + 560 ms, matching COVER, HOLD and CLEAR in curtain.tsx - change both. */
   .curtain-covering {
-    animation: curtain-up 250ms cubic-bezier(0.76, 0, 0.24, 1) both;
+    animation: curtain-up 520ms cubic-bezier(0.76, 0, 0.24, 1) both;
   }
   .curtain-covering span {
-    animation: curtain-word-in 170ms ease 80ms both;
+    animation: curtain-word-in 380ms ease 190ms both;
   }
   .curtain-clearing {
-    animation: curtain-off 250ms cubic-bezier(0.76, 0, 0.24, 1) both;
+    animation: curtain-off 560ms cubic-bezier(0.76, 0, 0.24, 1) both;
   }
   .curtain-clearing span {
-    animation: curtain-word-out 120ms ease both;
+    animation: curtain-word-out 260ms ease both;
   }
   @keyframes curtain-up {
     from {

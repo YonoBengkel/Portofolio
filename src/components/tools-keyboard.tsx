@@ -10,17 +10,24 @@ import { ToolMark } from "./tool-marks";
  *
  * The page always starts with a plain grid of the same keys - the tools as a list,
  * which is what a screen reader reads and what anyone without WebGL, or with reduced
- * motion, keeps. When the section is a screen and a half away the 3D module is fetched
- * (three.js is the heaviest thing on the site, so it is never in the first load), and
- * once the board has drawn, the grid steps back to being a list for assistive technology
- * only and the keyboard takes its place. Ilham was fine with the weight: by the time a
- * visitor scrolls this far there has been plenty of time to load it.
+ * motion, keeps. The 3D module is fetched and built early but never in the first load -
+ * three.js is the heaviest thing on the site - once the intro and the hero's tape are
+ * done and the browser is idle, or when the section is a screen and a half away,
+ * whichever comes first. Once the board has drawn, the grid steps back to being a list
+ * for assistive technology only and the keyboard takes its place.
  *
- * The keys drop into the board the first time it comes into view. After that a key
- * goes down under the pointer, under a finger, or from the real keyboard - the rows are
- * 1-6, Q-Y, A-H and Z-N, only while the section is on screen and never while typing in
- * a field - and the screen says which tool it is. A click, a tap or a real key also
- * clicks; hovering is silent.
+ * Earlier than it used to be, because of what Ilham felt on 9 Nov 2026: on a fresh load,
+ * scrolling into this section stuttered. The module used to be fetched, built and its
+ * shaders compiled in the second and a half before the section arrived - which is
+ * exactly while the visitor is scrolling towards it - and then the keys dropped in while
+ * the page was still moving. Now all of that is done before anyone gets here, and the
+ * keys drop only once the section is on screen and the scrolling has stopped: a visitor
+ * arrives at the empty case with its screen lit, stops, and the keys fall in.
+ *
+ * After that a key goes down under the pointer, under a finger, or from the real
+ * keyboard - the rows are 1-6, Q-Y, A-H and Z-N, only while the section is on screen
+ * and never while typing in a field - and the screen says which tool it is. A click, a
+ * tap or a real key also clicks; hovering is silent.
  *
  * The screen is a strip at the top of the stage. From 760px, once the board has drawn,
  * it moves onto the board - a display standing on the back of the case, drawn by
@@ -108,26 +115,73 @@ export function ToolsKeyboard() {
         press = new Audio("/assets/keyboard/press.mp3");
         release = new Audio("/assets/keyboard/release.mp3");
         setReady(true);
-        if (inView) h.reveal();
+        tryReveal();
       } catch (err) {
         // No WebGL, a lost context, a failed fetch: the grid simply stays.
         console.warn("Tools keyboard unavailable", err);
       }
     };
 
+    // ----- when to build it: early and idle, or when the section is near
+    let started = false;
+    const begin = () => {
+      if (started || cancelled) return;
+      started = true;
+      near.disconnect();
+      start();
+    };
     const near = new IntersectionObserver(
       ([e]) => {
-        if (!e.isIntersecting) return;
-        near.disconnect();
-        start();
+        if (e.isIntersecting) begin();
       },
       { rootMargin: "150% 0px" },
     );
     near.observe(wrap);
+    // After the intro, then the hero's tape (about 2.2s), when the browser has nothing to do.
+    const html = document.documentElement;
+    let idleTimer = 0;
+    let idleId = 0;
+    const whenIdle = () => {
+      idleTimer = window.setTimeout(() => {
+        if (typeof window.requestIdleCallback === "function") idleId = window.requestIdleCallback(begin, { timeout: 2000 });
+        else begin();
+      }, 2500);
+    };
+    let introWatch: MutationObserver | null = null;
+    if (html.dataset.intro && html.dataset.intro !== "off") {
+      introWatch = new MutationObserver(() => {
+        if (html.dataset.intro !== "off") return;
+        introWatch?.disconnect();
+        whenIdle();
+      });
+      introWatch.observe(html, { attributes: true, attributeFilter: ["data-intro"] });
+    } else whenIdle();
+
+    // ----- the keys drop in once the section is on screen and the page has stopped moving
+    const QUIET = 160; // ms without a scroll event
+    let lastScroll = 0;
+    let revealTimer = 0;
+    let revealed = false;
+    const onAnyScroll = () => {
+      lastScroll = performance.now();
+    };
+    addEventListener("scroll", onAnyScroll, { passive: true });
+    function tryReveal() {
+      clearTimeout(revealTimer);
+      if (revealed || cancelled || !inView || !handle.current) return;
+      const quiet = performance.now() - lastScroll;
+      if (quiet < QUIET) {
+        revealTimer = window.setTimeout(tryReveal, QUIET - quiet + 16);
+        return;
+      }
+      revealed = true;
+      handle.current.reveal();
+      removeEventListener("scroll", onAnyScroll);
+    }
     const seen = new IntersectionObserver(
       ([e]) => {
         inView = e.isIntersecting;
-        if (inView) handle.current?.reveal();
+        if (inView) tryReveal();
       },
       { threshold: 0.35 },
     );
@@ -155,6 +209,11 @@ export function ToolsKeyboard() {
       cancelled = true;
       near.disconnect();
       seen.disconnect();
+      introWatch?.disconnect();
+      clearTimeout(idleTimer);
+      if (idleId && typeof window.cancelIdleCallback === "function") window.cancelIdleCallback(idleId);
+      clearTimeout(revealTimer);
+      removeEventListener("scroll", onAnyScroll);
       removeEventListener("keydown", down);
       removeEventListener("keyup", up);
       canvas.removeEventListener("pointerdown", onPointerDown);
