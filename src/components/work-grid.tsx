@@ -20,8 +20,10 @@ import { SocialIcon } from "./social-icons";
  *   - the description is set at normal weight. His runs the whole paragraph at 700,
  *     which is why his cards read as shouting.
  *
- * A project with nothing deployed gets a real disabled button saying so, rather than the
- * reference's red one, which looks like an error rather than an absence.
+ * A missing repository or demo is a quiet line of text in the button's place, not a
+ * disabled button. The disabled stamp still looked pressable, put the emphasis on what
+ * was not there, kept its reason in a title tooltip that never appears on a touch screen,
+ * and could not be reached by keyboard at all, so a screen-reader user never learnt why.
  */
 
 const MAX_CHIPS = 4;
@@ -87,18 +89,14 @@ function Card({ project }: { project: Project }) {
               Code
             </a>
           ) : (
-            <button type="button" className="stamp stamp-sm" disabled aria-disabled="true" title="No public repository">
-              No repo
-            </button>
+            <span className="pcard-absent">No public repo</span>
           )}
           {live ? (
             <a href={live.href} target="_blank" rel="noopener noreferrer" className="stamp stamp-sm stamp-fill">
               Open it
             </a>
           ) : (
-            <button type="button" className="stamp stamp-sm" disabled aria-disabled="true" title="Nothing deployed yet">
-              No demo
-            </button>
+            <span className="pcard-absent">Not deployed</span>
           )}
         </div>
       </div>

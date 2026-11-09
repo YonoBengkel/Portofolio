@@ -1,6 +1,6 @@
-// Check the title sequence: when it plays, when it does not, that the first 3500ms
-// cannot be clicked away, that a click after that ends it, and that the mark comes to
-// rest upright.
+// Check the title sequence: when it plays, when it does not, that it cannot be clicked
+// away before the mark lands at 1500ms, that a click after that ends it, and that the
+// mark comes to rest upright.
 //
 // Usage: node tools/check-intro.mjs http://localhost:3000
 //
@@ -316,6 +316,28 @@ const state = (page) =>
     released.flag === null && released.visibility === "hidden" && released.pointer === "none",
     "a blocked inline script still lets go at 4000ms",
     `flag=${released.flag} visibility=${released.visibility} pointer-events=${released.pointer}`,
+  );
+  await page.close();
+}
+{
+  // The early exit, Ilham's choice on 9 Nov 2026: once the mark has landed - 1500ms on the
+  // mark animation's own clock - a click ends it, without waiting for the cue at 3500ms.
+  // The clock is read from the animation rather than the wall, so the click is aimed at a
+  // moment the sequence has actually shown.
+  const page = await fresh();
+  await page.goto(base + "/?intro", { waitUntil: "domcontentloaded" });
+  const at = await page.evaluate(async () => {
+    const a = () => document.querySelector(".intro-mark")?.getAnimations()[0];
+    for (let i = 0; i < 100 && !(a() && a().currentTime >= 1650); i++) await new Promise((r) => setTimeout(r, 50));
+    return { t: Math.round(a()?.currentTime ?? -1), flag: document.documentElement.dataset.intro };
+  });
+  await page.mouse.click(960, 520);
+  await wait(1500); // the overlay leaves the layer 1200ms after the click
+  const early = await state(page);
+  check(
+    at.flag === "on" && early.flag === "off",
+    "a click once the mark has landed ends it",
+    `clicked at ${at.t}ms in state ${at.flag}, then flag=${early.flag}`,
   );
   await page.close();
 }

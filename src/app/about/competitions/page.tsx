@@ -5,6 +5,7 @@ import { PageTransition } from "@/components/page-transition";
 import { competitions } from "@/content/site";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/about/competitions" },
   title: "Competitions",
   description: "National and inter-university data competitions, all as team entries.",
 };

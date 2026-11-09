@@ -188,9 +188,57 @@
   }
   .meta {
     font-family: var(--font-mono);
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     letter-spacing: 0.14em;
     text-transform: uppercase;
+  }
+  /*
+    The floor is 12px. Labels, chips, tags and the menu used to run from 9.9 to 11.8px in
+    tracked uppercase mono - fine for a two-word label, hard work for anything longer, and
+    it was carrying the facts a reviewer scans for. Buttons and the menu are 13px. The
+    mono and the tracking are the look and they stay; only the size moved. Measured
+    before: 136 pieces of text under 12px on the home page alone.
+
+    A caption is a sentence, so it is set as one: sentence case at 14px. Whole captions in
+    spaced capitals at 11.5px were the hardest text on the site to read, and they sit next
+    to the screenshots, which is exactly where somebody stops to read.
+  */
+  .caption {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.55;
+    letter-spacing: 0.01em;
+  }
+  /* The role line under a case study's subtitle: body size, full strength. */
+  .case-role {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+  .case-role .meta {
+    margin-right: 0.5em;
+  }
+  /*
+    Touch targets, enlarged without being redrawn. The hit area is a transparent
+    pseudo-element around the control, so nothing about the look moves. Measured on a
+    390px phone before: the header mark 18x18 and the Copy button 34x17, both under the
+    24px minimum in WCAG 2.2 (2.5.8); the contact links 25px tall against the 44px that
+    fingers actually need. .hit grows a control on every side, .hit-y only up and down,
+    for links that sit in a row and must not overlap their neighbours.
+  */
+  .hit,
+  .hit-y {
+    position: relative;
+  }
+  .hit::after,
+  .hit-y::after {
+    content: "";
+    position: absolute;
+  }
+  .hit::after {
+    inset: -14px;
+  }
+  .hit-y::after {
+    inset: -10px 0;
   }
   .lede {
     font-size: 1.0625rem;
@@ -254,7 +302,7 @@
     border: 2px solid currentColor;
     border-radius: 999px;
     font-family: var(--font-mono);
-    font-size: 0.74rem;
+    font-size: 0.8125rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     transition:
@@ -419,7 +467,7 @@
     border-radius: 999px;
     background: var(--paper-2);
     font-family: var(--font-mono);
-    font-size: 0.68rem;
+    font-size: 0.8125rem;
     letter-spacing: 0.14em;
     text-transform: uppercase;
   }
@@ -435,6 +483,17 @@
     padding: 7px 13px;
     border-radius: 999px;
     transition: color 220ms ease;
+  }
+  /*
+    The menu links were 30px tall on a phone. The hit area grows 7px up and down - to the
+    pill's own outer edge - and not sideways, so neighbouring links never overlap. It is a
+    pseudo-element rather than padding because the sliding fill measures the live link's
+    box; padding would have grown the fill too.
+  */
+  .nav-pill a::after {
+    content: "";
+    position: absolute;
+    inset: -7px 0;
   }
   .nav-pill a:hover {
     color: color-mix(in srgb, var(--ink) 55%, var(--yellow));
@@ -529,7 +588,7 @@
     border-radius: 4px;
     padding: 3px 8px;
     font-family: var(--font-mono);
-    font-size: 0.64rem;
+    font-size: 0.75rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
@@ -604,7 +663,7 @@
   }
   .tool b {
     font-family: var(--font-mono);
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
   }
@@ -642,7 +701,7 @@
     border-radius: 999px;
     padding: 6px 13px;
     font-family: var(--font-mono);
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
   }
@@ -760,7 +819,7 @@
   }
   .run-label {
     font-family: var(--font-mono);
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--ink-2);
@@ -1390,7 +1449,7 @@
     background: var(--paper-2);
     color: var(--ink);
     font-family: var(--font-mono);
-    font-size: 0.72rem;
+    font-size: 0.8125rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     box-shadow: 6px 6px 0 0 var(--ink);
@@ -1419,20 +1478,25 @@
   }
   .stamp-sm {
     padding: 10px 14px;
-    font-size: 0.66rem;
+    font-size: 0.75rem;
   }
   /*
-    Nothing deployed is an absence, not an error: no red, and it says which. Dimmed with
-    opacity it measured 2.70:1, so it is restated in the secondary ink instead - 7.76:1,
-    and it still reads as switched off.
+    Nothing deployed is an absence, not an error: no red, and it says which. It is a line
+    of text in the button's place now, not a disabled button - the stamp still looked
+    pressable, and its reason lived in a tooltip that touch screens never show. Restated
+    in the secondary ink rather than dimmed: dimmed with opacity it measured 2.70:1, in
+    --ink-2 it is 7.76:1.
   */
-  .stamp:disabled {
-    translate: 0 0;
-    background: var(--paper);
+  .pcard-absent {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 6px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     color: var(--ink-2);
-    border-color: var(--line-strong);
-    box-shadow: 3px 3px 0 0 var(--line-strong);
-    cursor: not-allowed;
   }
 
   /* ========================================================== about me */
@@ -1756,7 +1820,7 @@
   }
   .about-facts dt {
     font-family: var(--font-mono);
-    font-size: 0.62rem;
+    font-size: 0.75rem;
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: color-mix(in srgb, var(--paper) 70%, transparent);
@@ -1968,7 +2032,7 @@
     padding-bottom: 6px;
     border-bottom: 2px solid var(--yellow);
     font-family: var(--font-mono);
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     letter-spacing: 0.16em;
     text-transform: uppercase;
   }
@@ -2063,7 +2127,7 @@
     border: 2px solid var(--ink);
     border-radius: 4px;
     font-family: var(--font-mono);
-    font-size: 0.62rem;
+    font-size: 0.75rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
   }
@@ -2115,7 +2179,7 @@
   }
   .pcard-meta dt {
     font-family: var(--font-mono);
-    font-size: 0.62rem;
+    font-size: 0.75rem;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--ink-2);
@@ -2123,7 +2187,7 @@
   .pcard-meta dd {
     margin-top: 3px;
     font-family: var(--font-mono);
-    font-size: 0.74rem;
+    font-size: 0.8125rem;
   }
   /* Normal weight. The reference runs its whole paragraph at 700, which reads as shouting. */
   .pcard-say {
@@ -2141,7 +2205,7 @@
     border: 1px solid var(--line-strong);
     border-radius: 999px;
     font-family: var(--font-mono);
-    font-size: 0.64rem;
+    font-size: 0.75rem;
     letter-spacing: 0.04em;
   }
   .pcard-chip-more {
@@ -2379,7 +2443,7 @@
     border: 2px solid var(--paper);
     border-radius: 4px;
     font-family: var(--font-mono);
-    font-size: 0.72rem;
+    font-size: 0.8125rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     box-shadow: 6px 6px 0 0 var(--yellow);
@@ -2398,7 +2462,7 @@
   }
   .foot-fine {
     font-family: var(--font-mono);
-    font-size: 0.68rem;
+    font-size: 0.75rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: color-mix(in srgb, var(--paper) 70%, transparent);
@@ -2578,7 +2642,7 @@
   .windex-note {
     grid-column: 2;
     font-family: var(--font-mono);
-    font-size: 0.68rem;
+    font-size: 0.75rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--ink-2);
@@ -2682,7 +2746,7 @@
     border: 2px solid var(--ink);
     border-radius: 999px;
     font-family: var(--font-mono);
-    font-size: 0.68rem;
+    font-size: 0.75rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     box-shadow: 4px 4px 0 0 var(--ink);
@@ -2855,9 +2919,11 @@
   /*
     The exit, and the default: an ink panel that rises over the composition and then
     carries on upward and off, uncovering the hero. This is curtain-up followed by
-    curtain-off at their own durations - literally the move this site makes between
-    pages, borrowed whole rather than imitated, so arriving and moving around speak the
-    same language. The paper curtain above it is kept under ?intro=paper.
+    curtain-off - the move this site makes between pages, borrowed rather than imitated,
+    so arriving and moving around speak the same language. It keeps the 520 + 560 ms it
+    was approved at: the page curtain was cut to 600 ms on 9 Nov 2026 because every
+    navigation pays it, and this one is paid once. The paper curtain above it is kept
+    under ?intro=paper.
 
     It is a sibling of .intro rather than a child, and that is forced: the paper is
     hidden on the frame the ink finishes covering it, and visibility is inherited - as a
@@ -3305,17 +3371,18 @@
   .curtain-clearing {
     pointer-events: auto;
   }
+  /* 250 + 100 + 250 ms, matching COVER, HOLD and CLEAR in curtain.tsx - change both. */
   .curtain-covering {
-    animation: curtain-up 520ms cubic-bezier(0.76, 0, 0.24, 1) both;
+    animation: curtain-up 250ms cubic-bezier(0.76, 0, 0.24, 1) both;
   }
   .curtain-covering span {
-    animation: curtain-word-in 380ms ease 190ms both;
+    animation: curtain-word-in 170ms ease 80ms both;
   }
   .curtain-clearing {
-    animation: curtain-off 560ms cubic-bezier(0.76, 0, 0.24, 1) both;
+    animation: curtain-off 250ms cubic-bezier(0.76, 0, 0.24, 1) both;
   }
   .curtain-clearing span {
-    animation: curtain-word-out 260ms ease both;
+    animation: curtain-word-out 120ms ease both;
   }
   @keyframes curtain-up {
     from {

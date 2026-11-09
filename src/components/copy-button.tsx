@@ -17,7 +17,7 @@ export function CopyButton({ value }: { value: string }) {
   }
 
   return (
-    <button type="button" onClick={copy} className="meta link-quiet hover:text-bone">
+    <button type="button" onClick={copy} className="hit meta link-quiet hover:text-bone">
       {copied ? "Copied" : "Copy"}
     </button>
   );

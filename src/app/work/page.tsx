@@ -8,6 +8,7 @@ import { projects } from "@/content/projects";
 import { otherWork } from "@/content/site";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/work" },
   title: "Work",
   description: "Every project in one list, with the case studies behind them.",
 };

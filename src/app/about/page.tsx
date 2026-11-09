@@ -9,6 +9,7 @@ import { PageTransition } from "@/components/page-transition";
 import { education, experience, leadership, profile, toolbox, volunteering } from "@/content/site";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/about" },
   title: "About",
   description: "How I work, where I study, what I use, and what I lead.",
 };

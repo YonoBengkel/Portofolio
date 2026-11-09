@@ -6,6 +6,7 @@ import { PageTransition } from "@/components/page-transition";
 import { education, experience, openTo, profile } from "@/content/site";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/cv" },
   title: "CV",
   description: "Read the CV in the page or download the PDF.",
 };

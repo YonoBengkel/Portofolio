@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import path from "node:path";
 import Link from "next/link";
 import { RunSwitch } from "@/components/run-switch";
 import { openTo, profile } from "@/content/site";
@@ -158,6 +160,7 @@ function Sink({
 }
 
 export function Hero() {
+  const hasCv = fs.existsSync(path.join(process.cwd(), "public", profile.cvPath));
   const words = profile.name.split(" ");
   const first = words.slice(0, 2).join(" ");
   const last = words.slice(2).join(" ");
@@ -208,9 +211,18 @@ export function Hero() {
             <Link href="/work" className="pill pill-solid">
               See the work
             </Link>
-            <Link href="/cv" className="pill">
-              Download CV
-            </Link>
+            {/* A button that says Download CV downloads the CV. It used to open the /cv page,
+                one click short of the file, on the action a recruiter takes most. The page
+                stays one tap away in the menu; the fallback only covers a missing file. */}
+            {hasCv ? (
+              <a href={profile.cvPath} download className="pill">
+                Download CV
+              </a>
+            ) : (
+              <Link href="/cv" className="pill">
+                Download CV
+              </Link>
+            )}
           </div>
         </div>
         <div className="sink-block hero-out mt-8">
