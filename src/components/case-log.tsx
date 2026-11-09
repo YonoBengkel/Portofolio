@@ -143,7 +143,6 @@ export function CaseLog({ entries, children }: Props) {
     });
     io.observe(root);
     addEventListener("scroll", onScroll, { passive: true });
-    addEventListener("resize", onScroll);
 
     // ----- flowing: each card lands as it comes into view, once
     const flowIo = new IntersectionObserver(
@@ -159,6 +158,61 @@ export function CaseLog({ entries, children }: Props) {
       { rootMargin: "0px 0px -12% 0px" },
     );
 
+    /*
+      The spread row, every file the same height - Ilham's request, 9 Nov 2026. Each file
+      is placed on its own, absolutely, so nothing in CSS can make them match; instead
+      copies of the four are set at the row's width out of sight, the tallest is measured,
+      and that height goes to all of them as --file-h. The shorter files keep their stamp
+      at the foot, level with the others.
+    */
+    const measure = () => {
+      if (!stage || !root.classList.contains("is-pinned")) {
+        root.style.removeProperty("--file-h");
+        return;
+      }
+      // The spread's own width rule (.log[data-spread] .logfile[data-landed] in globals.css).
+      const padx = parseFloat(getComputedStyle(stage).paddingLeft) || 0;
+      const width = (stage.clientWidth - 2 * padx - (n - 1) * 22) / n;
+      const probe = document.createElement("div");
+      probe.className = "log-probe";
+      probe.setAttribute("aria-hidden", "true");
+      for (const f of files) {
+        const copy = f.cloneNode(true) as HTMLElement;
+        copy.removeAttribute("style");
+        copy.removeAttribute("data-landed");
+        copy.style.width = `${width}px`;
+        probe.appendChild(copy);
+      }
+      stage.appendChild(probe);
+      const tallest = Math.max(...[...probe.children].map((c) => (c as HTMLElement).offsetHeight));
+      probe.remove();
+      root.style.setProperty("--file-h", `${Math.ceil(tallest)}px`);
+      /*
+        Where the row does not fit between the heading and the foot of the screen - a
+        laptop's 720px, say, where four narrow files run taller than the room - it is
+        moved to the middle of that band and made smaller as a whole, just enough. Where it
+        fits it stays as drawn, centred at 60% of the screen (top: 60% on each file).
+      */
+      const head = root.querySelector<HTMLElement>(".log-head");
+      const box = stage.getBoundingClientRect();
+      const H = stage.clientHeight;
+      const headFoot = head ? head.getBoundingClientRect().bottom - box.top + 18 : 0;
+      const foot = H - (parseFloat(getComputedStyle(stage).paddingBottom) || 0) - 8;
+      const centre = 0.6 * H;
+      const fits = 2 * Math.min(centre - headFoot, foot - centre) >= tallest;
+      const fit = fits ? 1 : Math.max(0.5, Math.min(1, (foot - headFoot) / tallest));
+      const shift = fits ? 0 : (headFoot + foot) / 2 - centre;
+      root.style.setProperty("--file-fit", fit.toFixed(3));
+      root.style.setProperty("--file-shift", `${shift.toFixed(1)}px`);
+    };
+    let resizeTimer = 0;
+    const onResize = () => {
+      onScroll();
+      clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(measure, 150);
+    };
+    addEventListener("resize", onResize);
+
     const arrange = () => {
       const pin = pinned.matches;
       root.classList.toggle("is-pinned", pin);
@@ -166,17 +220,25 @@ export function CaseLog({ entries, children }: Props) {
       // reduced motion, they are simply there.
       root.toggleAttribute("data-armed", !pin && !still.matches);
       if (!pin && !still.matches) for (const li of flowItems) if (!li.hasAttribute("data-in")) flowIo.observe(li);
+      measure();
       onScroll();
     };
     arrange();
     pinned.addEventListener("change", arrange);
+    // The page's faces may arrive after the first measurement; measure again when they do.
+    let gone = false;
+    document.fonts?.ready.then(() => {
+      if (!gone) measure();
+    });
 
     return () => {
+      gone = true;
       io.disconnect();
       flowIo.disconnect();
       pinned.removeEventListener("change", arrange);
       removeEventListener("scroll", onScroll);
-      removeEventListener("resize", onScroll);
+      removeEventListener("resize", onResize);
+      clearTimeout(resizeTimer);
       cancelAnimationFrame(raf);
     };
   }, [n]);

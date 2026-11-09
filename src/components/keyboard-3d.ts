@@ -200,6 +200,54 @@ function paintScreen(ctx: CanvasRenderingContext2D, runs: Run[], caret: boolean,
   }
 }
 
+/*
+  The environment light (RoomEnvironment through a PMREMGenerator) compiles its shaders
+  the moment fromScene() draws with them, and waits for each on the main thread: on this
+  site's test machine (Radeon 780M, Direct3D 11) 1.04s, 0.83 of it the GGX convolution.
+  three has no async path for it, but the generator makes its two materials before it
+  draws anything (_allocateTargets), so they - and the room it captures - can be handed
+  to compileAsync first, set up exactly as fromScene will draw them: into a render
+  target, with no tone mapping. fromScene then finds every program ready.
+
+  This reaches into three's internals, which the lockfile pins (0.185). If they move in a
+  later release the fields are simply not there, this does nothing, and fromScene compiles
+  as it always did - slower, never broken.
+*/
+async function precompileEnvironment(renderer: THREE.WebGLRenderer, pmrem: THREE.PMREMGenerator, room: THREE.Scene) {
+  const inner = pmrem as unknown as {
+    _setSize?: (size: number) => void;
+    _allocateTargets?: () => THREE.WebGLRenderTarget;
+    _blurMaterial?: THREE.Material | null;
+    _ggxMaterial?: THREE.Material | null;
+    _lodMeshes?: THREE.Mesh[];
+  };
+  if (typeof inner._setSize !== "function" || typeof inner._allocateTargets !== "function") return;
+  const tone = renderer.toneMapping;
+  const before = renderer.getRenderTarget();
+  let target: THREE.WebGLRenderTarget | null = null;
+  try {
+    inner._setSize(256); // fromScene's default size, so it reuses these materials
+    target = inner._allocateTargets();
+    // On the generator's own geometry: a program's cache key carries which attributes the
+    // geometry has, so compiled on an empty geometry the same shader got a second key
+    // and was compiled all over again inside fromScene.
+    const geometry = inner._lodMeshes?.[0]?.geometry;
+    if (!geometry) return;
+    const holder = new THREE.Scene();
+    for (const m of [inner._blurMaterial, inner._ggxMaterial]) if (m) holder.add(new THREE.Mesh(geometry, m));
+    const lens = new THREE.PerspectiveCamera(90, 1, 0.1, 100);
+    renderer.toneMapping = THREE.NoToneMapping;
+    renderer.setRenderTarget(target);
+    await Promise.all([renderer.compileAsync(holder, lens), renderer.compileAsync(room, lens)]);
+  } catch {
+    // fromScene will compile them itself
+  } finally {
+    renderer.setRenderTarget(before);
+    renderer.toneMapping = tone;
+    target?.dispose();
+  }
+}
+
 /* ------------------------------------------------------------------- easing */
 const easeOutBack = (t: number) => {
   const c1 = 1.4;
@@ -219,14 +267,19 @@ export async function mountKeyboard(o: KeyboardOptions): Promise<KeyboardHandle>
   renderer.toneMapping = THREE.LinearToneMapping;
   renderer.toneMappingExposure = 0.9;
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  // PCF, not PCFSoft: three r18x deprecates PCFSoft and swaps it for PCF on the first
+  // shadow render - after compileAsync has built every lit material for PCFSoft, so that
+  // first frame compiled them all again, on the main thread (0.7s measured). Same look.
+  renderer.shadowMap.type = THREE.PCFShadowMap;
   // Shadows are redrawn only in frames where something moved (see frame and kick): the
   // caret's blink changes the screen and nothing else, so it skips the shadow pass.
   renderer.shadowMap.autoUpdate = false;
 
   const scene = new THREE.Scene();
   const pmrem = new THREE.PMREMGenerator(renderer);
-  const envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  const room = new RoomEnvironment();
+  await precompileEnvironment(renderer, pmrem, room);
+  const envTex = pmrem.fromScene(room, 0.04).texture;
   scene.environment = envTex;
   scene.environmentIntensity = 0.45;
 
@@ -387,7 +440,18 @@ export async function mountKeyboard(o: KeyboardOptions): Promise<KeyboardHandle>
     return { motion, mat, mesh, offset: 0, target: 0, glow: 0, drop: still ? 0 : 3.2, dropAt: row * 110 + col * 45 };
   });
   if (!still) for (const k of keys) k.motion.position.y = k.drop;
-  board.visible = still;
+
+  /*
+    Every shader compiled before the first frame, and in parallel where the browser can
+    (KHR_parallel_shader_compile), with every key showing so none is missed. The first
+    frame used to compile them itself, and on Windows - where ANGLE hands each one to
+    Direct3D - that was the long stall Ilham felt scrolling into this section on a fresh
+    load. Then the keys go out of sight until they drop (frame below); the case and its
+    screen stay, so a visitor arriving sees the empty board waiting for its keys.
+  */
+  for (const k of keys) k.motion.visible = true;
+  await renderer.compileAsync(scene, camera).catch(() => undefined);
+  for (const k of keys) k.motion.visible = still;
 
   /* ------------------------------------------------------------- sizing */
   // The board at rest, as eight corners seen from the camera: the frame is fitted to these,
@@ -462,15 +526,18 @@ export async function mountKeyboard(o: KeyboardOptions): Promise<KeyboardHandle>
       } else k.glow = g;
       k.mat.emissive.copy(k.mat.color);
       k.mat.emissiveIntensity = k.glow;
-      // the entrance: each key falls into its slot, a little late after the one before
+      // the entrance: each key falls into its slot, a little late after the one before,
+      // and is not there at all until its turn comes
       let drop = 0;
       if (k.drop > 0 && revealAt >= 0) {
         const t = (now - revealAt - k.dropAt) / 620;
         if (t >= 1) k.drop = 0;
         else if (t > 0) drop = (1 - easeOutBack(t)) * 3.2;
         else drop = 3.2;
+        k.motion.visible = t > 0;
         moving = moving || k.drop > 0;
       } else if (k.drop > 0) drop = k.drop;
+      else k.motion.visible = true;
       k.motion.position.y = k.offset + drop;
     }
     if (!still) {
@@ -565,7 +632,8 @@ export async function mountKeyboard(o: KeyboardOptions): Promise<KeyboardHandle>
     const r = canvas.getBoundingClientRect();
     ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
     ray.setFromCamera(ndc, camera);
-    const hit = ray.intersectObjects(meshes, false)[0];
+    // A ray finds hidden objects too, and a key that has not dropped in yet is hidden.
+    const hit = ray.intersectObjects(meshes, false).find((h) => h.object.parent?.visible);
     return hit ? (hit.object.userData.index as number) : -1;
   };
   let hovered = -1;
@@ -604,6 +672,17 @@ export async function mountKeyboard(o: KeyboardOptions): Promise<KeyboardHandle>
   const observer = new ResizeObserver(resize);
   observer.observe(canvas);
   resize();
+  /*
+    One frame with every key drawn, before the page can see the canvas (it fades in only
+    once this resolves). compileAsync does the materials, but the keys' shadow pass and
+    their logos' textures are only set up the first time a key is actually drawn - which
+    used to be the first frame of the drop, and measured on this machine's Radeon 780M
+    that frame took half a second. Now it is spent here, while nobody is looking.
+  */
+  for (const k of keys) k.motion.visible = true;
+  renderer.shadowMap.needsUpdate = true;
+  renderer.render(scene, camera);
+  for (const k of keys) k.motion.visible = still;
   // The page's mono is loaded long before this module is, but if it is not, the screen is
   // painted again in it once it is.
   let disposed = false;
@@ -618,10 +697,8 @@ export async function mountKeyboard(o: KeyboardOptions): Promise<KeyboardHandle>
     press,
     reveal: () => {
       if (revealAt >= 0) return;
-      board.visible = true;
       revealAt = performance.now();
       kick();
-      wake();
     },
     dispose: () => {
       disposed = true;

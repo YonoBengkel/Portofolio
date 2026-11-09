@@ -108,7 +108,9 @@ export const leadership = [
     role: "Staff of Legal Affairs",
     org: "Member Representative Council, HIMIT PENS",
     period: "Feb 2026 – present",
-    body: "Monitoring the executive board and its events for compliance with the association's regulations.",
+    // "and auditing" is from his own CVs ("Monitor and audit the executive board..."),
+    // added on 9 Nov 2026; nothing beyond what they say.
+    body: "Monitoring and auditing the executive board and its events for compliance with the association's regulations.",
   },
   {
     role: "General Coordinator, Question Team",
