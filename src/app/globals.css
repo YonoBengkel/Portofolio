@@ -2201,8 +2201,10 @@
     is built to stand on its own: brand-coloured caps on the ink of the case, six to a
     row like the board.
 
-    The screen strip above the keys is this site's own - Naresh's names the key in 3D
-    text on the board - and it reads the same in both.
+    The screen is this site's own - Naresh's names the key in 3D text over the board. It
+    is a strip at the top of the stage; from 760px, once the board has drawn, it stands
+    on the back of the board instead, drawn in the scene at the board's angle (Ilham's
+    request, 9 Nov 2026), and the strip keeps its place but goes invisible.
   */
   .tk {
     display: grid;
@@ -2257,12 +2259,43 @@
       opacity: 0;
     }
   }
+  /*
+    The stage holds the strip and, under it, the board. Its height is the old strip, gap
+    and board added up, so the section is exactly as tall as before, and the strip's
+    place stays taken while the strip is on the board: nothing moves when it goes.
+  */
   .tk-stage {
     position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    width: min(1200px, 100%);
+    height: calc(clamp(330px, 56vw, 700px) + 2.6rem + 14px);
+  }
+  .tk-screen {
+    flex: none;
+  }
+  .tk-pad {
+    position: relative;
+    flex: 1;
+    min-height: 0;
     display: grid;
     place-items: center;
-    width: min(1200px, 100%);
-    height: clamp(330px, 56vw, 700px);
+    width: 100%;
+  }
+  /*
+    The board's canvas fills the pad below the strip; from 760px the pad stops being its
+    containing block, so it fills the whole stage and has the strip's place to stand the
+    screen in. Same query as SCREEN_QUERY in tools-keyboard.tsx.
+  */
+  @media (min-width: 760px) {
+    .tk-pad {
+      position: static;
+    }
+    .tk[data-ready] .tk-screen {
+      visibility: hidden;
+    }
   }
   .tk-canvas {
     position: absolute;

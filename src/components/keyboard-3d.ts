@@ -12,12 +12,21 @@
  * plain three.js, about the smallest thing that draws his keyboard.
  *
  * It draws only when something changes: a key going down or up, the board leaning to
- * the pointer, the keys dropping in the first time it is seen. A keyboard nobody is
- * touching costs no frames.
+ * the pointer, the keys dropping in the first time it is seen, the screen's caret. A
+ * keyboard nobody is touching costs no frames beyond that caret, and the caret stops
+ * when the board is off screen or the tab is hidden.
+ *
+ * The screen that names the key stands on the back rim of the case, behind the top row,
+ * since Ilham asked on 9 Nov 2026 for the strip to sit on the board at the board's own
+ * angle. It is part of the scene rather than an overlay, so it leans with the board, the
+ * top row hides its foot, and its face is lit by nothing: a screen gives its own light.
+ * Only where the text is big enough to read (KeyboardOptions.screen.query); below that
+ * the page keeps its flat strip above the board.
  */
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 
 // Geometry contract of keycaps.glb, in key-width units (Naresh Khatri, scene.ts).
 const KIT = {
@@ -35,6 +44,22 @@ const PRESS = -KIT.keyHeight * 0.6;
 const MODEL_URL = "/assets/keyboard/keycaps.glb";
 const CASE = "#1d120a";
 const PLATE = "#110a05";
+// The screen, in the strip's own colours (.kb-screen in globals.css).
+const SCREEN_BG = "#120802";
+const SCREEN_ON = "#f2b705";
+// The strip dims to 62%; at the slant the screen is seen at, that read as brown, so 74.
+const SCREEN_DIM = "rgba(242, 183, 5, 0.74)";
+
+export type ScreenOptions = {
+  /** What the screen says while each key is down, in key order. */
+  labels: { name: string; group: string }[];
+  /** What it says while none is. */
+  idle: string;
+  /** The strip's computed font-family, so the screen is set in the page's own mono. */
+  font: string;
+  /** Where the screen is on the board; elsewhere the page's flat strip does the job. */
+  query: string;
+};
 
 export type KeyboardOptions = {
   canvas: HTMLCanvasElement;
@@ -44,6 +69,7 @@ export type KeyboardOptions = {
   columns: number;
   still: boolean;
   onSelect: (index: number | null) => void;
+  screen?: ScreenOptions;
 };
 
 export type KeyboardHandle = {
@@ -134,6 +160,46 @@ function svgTexture(svg: string, size = 256): Promise<THREE.Texture> {
   });
 }
 
+/*
+  The screen's text, painted the way the strip sets it: upper case, the page's mono with
+  0.08em of tracking, the prompt and the tool's name in full yellow and the rest dimmed,
+  and a block caret. All of it at 500: at the slant the screen is seen at, the strip's
+  400 for the dimmed part thinned to nothing.
+
+  One size for every line, taken from the longest line there can be, so the text does
+  not grow and shrink from key to key. Mono means every character has the same advance,
+  which makes the longest line's width plain arithmetic.
+*/
+type Run = { text: string; on: boolean };
+const screenPad = (h: number) => h * 0.3;
+function screenSize(ctx: CanvasRenderingContext2D, family: string, longest: number) {
+  const { width: w, height: h } = ctx.canvas;
+  ctx.font = `500 100px ${family}`;
+  const perPx = ctx.measureText("M").width / 100 + 0.08;
+  return Math.min(h * 0.5, (w - screenPad(h) * 2) / (longest * perPx + 0.75));
+}
+function paintScreen(ctx: CanvasRenderingContext2D, runs: Run[], caret: boolean, family: string, size: number) {
+  const { width: w, height: h } = ctx.canvas;
+  ctx.fillStyle = SCREEN_BG;
+  ctx.fillRect(0, 0, w, h);
+  ctx.font = `500 ${size}px ${family}`;
+  const step = ctx.measureText("M").width + size * 0.08;
+  ctx.textBaseline = "middle";
+  const y = h / 2 + size * 0.05;
+  let x = screenPad(h);
+  for (const run of runs) {
+    ctx.fillStyle = run.on ? SCREEN_ON : SCREEN_DIM;
+    for (const ch of run.text.toUpperCase()) {
+      ctx.fillText(ch, x, y);
+      x += step;
+    }
+  }
+  if (caret) {
+    ctx.fillStyle = SCREEN_ON;
+    ctx.fillRect(x + size * 0.12, y - size * 0.56, size * 0.6, size * 1.1);
+  }
+}
+
 /* ------------------------------------------------------------------- easing */
 const easeOutBack = (t: number) => {
   const c1 = 1.4;
@@ -142,7 +208,7 @@ const easeOutBack = (t: number) => {
 };
 
 export async function mountKeyboard(o: KeyboardOptions): Promise<KeyboardHandle> {
-  const { canvas, logos, colors, columns, still, onSelect } = o;
+  const { canvas, logos, colors, columns, still, onSelect, screen: screenOpts } = o;
   const n = colors.length;
   const cols = Math.min(columns, n);
   const rows = Math.ceil(n / cols);
@@ -154,6 +220,9 @@ export async function mountKeyboard(o: KeyboardOptions): Promise<KeyboardHandle>
   renderer.toneMappingExposure = 0.9;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  // Shadows are redrawn only in frames where something moved (see frame and kick): the
+  // caret's blink changes the screen and nothing else, so it skips the shadow pass.
+  renderer.shadowMap.autoUpdate = false;
 
   const scene = new THREE.Scene();
   const pmrem = new THREE.PMREMGenerator(renderer);
@@ -205,6 +274,73 @@ export async function mountKeyboard(o: KeyboardOptions): Promise<KeyboardHandle>
   plate.receiveShadow = true;
   layout.add(shell, plate);
 
+  /* ---------------------------------------------------------- the screen */
+  // On the flat of the back rim, behind the top row. The rim's top is at y 0.77 (keyWell's
+  // profiles) and runs from just outside the opening to just inside the rounded edge. The
+  // face starts 0.45 above it: from this camera, anything on the face above y 1.2 is seen
+  // over the top row's caps, so the text is never behind a key; the bezel below it is.
+  // The face is only as tall as the text needs, so the bar adds as little as it can to
+  // the height the board is framed in.
+  const RIM_Y = 0.77;
+  const rimIn = ((rows - 1) * KIT.pitch + 1) / 2 + 0.07 + 0.025;
+  const rimOut = outerZ - 0.055;
+  const BAR = {
+    w: (cols - 1) * KIT.pitch + 1.08,
+    h: 1.03,
+    d: Math.min(0.24, rimOut - rimIn - 0.06),
+    z: -(rimIn + rimOut) / 2,
+    faceLift: 0.45,
+    faceH: 0.46,
+  };
+  const faceW = BAR.w - 0.3;
+  const screenCanvas = document.createElement("canvas");
+  screenCanvas.width = 2048;
+  screenCanvas.height = Math.round((2048 * BAR.faceH) / faceW);
+  const screenCtx = screenCanvas.getContext("2d");
+  const screenTex = new THREE.CanvasTexture(screenCanvas);
+  screenTex.colorSpace = THREE.SRGBColorSpace;
+  // The face is always seen at a slant, which is what anisotropic filtering is for.
+  screenTex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+  const bezelGeo = new RoundedBoxGeometry(BAR.w, BAR.h, BAR.d, 4, 0.06);
+  const faceGeo = new THREE.PlaneGeometry(faceW, BAR.faceH);
+  const bezel = new THREE.Mesh(bezelGeo, caseMat);
+  bezel.position.set(0, RIM_Y + BAR.h / 2, BAR.z);
+  // It takes the light's shadow but casts none: cast, it lays a dark band across the top
+  // row, which reads as something wrong with those keys rather than as a shadow.
+  bezel.receiveShadow = true;
+  const face = new THREE.Mesh(faceGeo, new THREE.MeshBasicMaterial({ map: screenTex, toneMapped: false }));
+  face.position.set(0, RIM_Y + BAR.faceLift + BAR.faceH / 2, BAR.z + BAR.d / 2 + 0.004);
+  const screenGroup = new THREE.Group();
+  screenGroup.add(bezel, face);
+  layout.add(screenGroup);
+  const wide = screenOpts && screenCtx ? matchMedia(screenOpts.query) : null;
+  screenGroup.visible = !!wide?.matches;
+
+  let shown: number | null = null;
+  let caretOn = true;
+  const runsFor = (i: number | null): Run[] => {
+    const label = i !== null ? screenOpts?.labels[i] : undefined;
+    return label
+      ? [
+          { text: "> ", on: true },
+          { text: label.name, on: true },
+          { text: ` · ${label.group}`, on: false },
+        ]
+      : [
+          { text: "> ", on: true },
+          { text: screenOpts?.idle ?? "", on: false },
+        ];
+  };
+  const lines = [null, ...colors.map((_, i) => i)].map((i) => runsFor(i).reduce((n, r) => n + r.text.length, 0));
+  const longest = Math.max(...lines);
+  let textSize = screenCtx && screenOpts ? screenSize(screenCtx, screenOpts.font, longest) : 0;
+  const repaint = () => {
+    if (!screenCtx || !screenOpts) return;
+    paintScreen(screenCtx, runsFor(shown), caretOn, screenOpts.font, textSize);
+    screenTex.needsUpdate = true;
+  };
+  repaint();
+
   // The keycap model and the logos, in parallel.
   const [gltf, textures] = await Promise.all([
     new GLTFLoader().loadAsync(MODEL_URL),
@@ -255,25 +391,38 @@ export async function mountKeyboard(o: KeyboardOptions): Promise<KeyboardHandle>
 
   /* ------------------------------------------------------------- sizing */
   // The board at rest, as eight corners seen from the camera: the frame is fitted to these,
-  // so the board sits centred and whole in a canvas of any shape.
+  // so the board sits centred and whole in a canvas of any shape. With the screen up, its
+  // own eight corners join them.
   camera.updateMatrixWorld();
-  const view = new THREE.Box2();
-  {
-    const y0 = layout.position.y;
-    const y1 = y0 + (KIT.keyY + KIT.keyTop) * fit;
+  const seenFrom = (box: THREE.Box2, xs: number[], ys: number[], zs: number[]) => {
     const p = new THREE.Vector3();
-    for (const x of [-outerX * fit, outerX * fit])
-      for (const y of [y0, y1])
-        for (const z of [-outerZ * fit, outerZ * fit]) {
+    for (const x of xs)
+      for (const y of ys)
+        for (const z of zs) {
           p.set(x, y, z).applyMatrix4(camera.matrixWorldInverse);
-          view.expandByPoint(new THREE.Vector2(p.x, p.y));
+          box.expandByPoint(new THREE.Vector2(p.x, p.y));
         }
-  }
+    return box;
+  };
+  const y0 = layout.position.y;
+  const boardView = seenFrom(
+    new THREE.Box2(),
+    [-outerX * fit, outerX * fit],
+    [y0, y0 + (KIT.keyY + KIT.keyTop) * fit],
+    [-outerZ * fit, outerZ * fit],
+  );
+  const screenView = seenFrom(
+    boardView.clone(),
+    [(-BAR.w / 2) * fit, (BAR.w / 2) * fit],
+    [y0 + RIM_Y * fit, y0 + (RIM_Y + BAR.h) * fit],
+    [(BAR.z - BAR.d / 2) * fit, (BAR.z + BAR.d / 2) * fit],
+  );
   const resize = () => {
     const w = canvas.clientWidth || 1;
     const h = canvas.clientHeight || 1;
     renderer.setSize(w, h, false);
     const aspect = w / h;
+    const view = screenGroup.visible ? screenView : boardView;
     const c = view.getCenter(new THREE.Vector2());
     const size = view.getSize(new THREE.Vector2());
     // A little air round the board, so a key that leans or drops in never touches the edge.
@@ -291,6 +440,8 @@ export async function mountKeyboard(o: KeyboardOptions): Promise<KeyboardHandle>
   let raf = 0;
   let last = performance.now();
   let revealAt = -1;
+  let shadowsDirty = true;
+  let wasMoving = false;
   const tilt = { x: 0, y: 0, tx: 0, ty: 0 };
   const frame = (now: number) => {
     raf = 0;
@@ -328,10 +479,14 @@ export async function mountKeyboard(o: KeyboardOptions): Promise<KeyboardHandle>
       if (Math.abs(tilt.tx - tilt.x) + Math.abs(tilt.ty - tilt.y) > 0.0005) moving = true;
       board.rotation.set(tilt.x, tilt.y, 0);
     }
+    if (moving || wasMoving || shadowsDirty) renderer.shadowMap.needsUpdate = true;
+    shadowsDirty = false;
+    wasMoving = moving;
     renderer.render(scene, camera);
     if (moving) raf = requestAnimationFrame(frame);
   };
-  function kick() {
+  function kick(shadows = true) {
+    if (shadows) shadowsDirty = true;
     if (!raf) {
       last = performance.now();
       raf = requestAnimationFrame(frame);
@@ -343,7 +498,53 @@ export async function mountKeyboard(o: KeyboardOptions): Promise<KeyboardHandle>
   const ndc = new THREE.Vector2();
   const meshes = keys.map((k) => k.mesh);
   const held: { source: string; index: number }[] = [];
-  const announce = () => onSelect(held.length ? held[held.length - 1].index : null);
+
+  // The caret blinks at the strip's own rate (kb-blink: 1.1s, two steps), which costs a
+  // frame every 550ms - so only while the screen is up, the board is on screen and the
+  // tab is in front. A key going down holds it solid and starts the blink over, as a
+  // terminal's caret does while you type.
+  let blink = 0;
+  let onScreen = false;
+  const awake = () =>
+    screenGroup.visible && board.visible && onScreen && document.visibilityState === "visible";
+  const restartBlink = () => {
+    clearInterval(blink);
+    blink = 0;
+    if (!awake()) return;
+    blink = window.setInterval(() => {
+      caretOn = !caretOn;
+      repaint();
+      kick(false);
+    }, 550);
+  };
+  const wake = () => {
+    if (!awake()) {
+      clearInterval(blink);
+      blink = 0;
+    } else if (!blink) restartBlink();
+  };
+  const seen = new IntersectionObserver(([e]) => {
+    onScreen = e.isIntersecting;
+    wake();
+  });
+  seen.observe(canvas);
+  document.addEventListener("visibilitychange", wake);
+  const onWide = () => {
+    screenGroup.visible = !!wide?.matches;
+    resize();
+    wake();
+  };
+  wide?.addEventListener("change", onWide);
+
+  const announce = () => {
+    const now = held.length ? held[held.length - 1].index : null;
+    onSelect(now);
+    if (now === shown) return;
+    shown = now;
+    caretOn = true;
+    repaint();
+    restartBlink();
+  };
 
   const press = (index: number, down: boolean, source: string) => {
     const was = held.findIndex((h) => h.source === source);
@@ -403,6 +604,15 @@ export async function mountKeyboard(o: KeyboardOptions): Promise<KeyboardHandle>
   const observer = new ResizeObserver(resize);
   observer.observe(canvas);
   resize();
+  // The page's mono is loaded long before this module is, but if it is not, the screen is
+  // painted again in it once it is.
+  let disposed = false;
+  document.fonts?.ready.then(() => {
+    if (disposed) return;
+    if (screenCtx && screenOpts) textSize = screenSize(screenCtx, screenOpts.font, longest);
+    repaint();
+    kick(false);
+  });
 
   return {
     press,
@@ -411,9 +621,18 @@ export async function mountKeyboard(o: KeyboardOptions): Promise<KeyboardHandle>
       board.visible = true;
       revealAt = performance.now();
       kick();
+      wake();
     },
     dispose: () => {
+      disposed = true;
       cancelAnimationFrame(raf);
+      clearInterval(blink);
+      seen.disconnect();
+      document.removeEventListener("visibilitychange", wake);
+      wide?.removeEventListener("change", onWide);
+      bezelGeo.dispose();
+      faceGeo.dispose();
+      screenTex.dispose();
       observer.disconnect();
       canvas.removeEventListener("pointermove", onMove);
       canvas.removeEventListener("pointerleave", onLeave);
