@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { AboutCard } from "@/components/about-card";
 import { Certificates } from "@/components/certificates";
@@ -11,9 +12,18 @@ import { projects } from "@/content/projects";
 import { Timeline, buildTimeline } from "@/components/timeline";
 import { competitions, education, experience, leadership } from "@/content/site";
 
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
+
 /**
- * The order is the reference's, and Ilham asked for it by name: who he is, what he has
- * done and why, what he works with, what he built, then what he has been given.
+ * The order was the reference's, and Ilham first asked for it by name: who he is, what he
+ * has done and why, what he works with, what he built, then what he has been given.
+ *
+ * On 9 Nov 2026 he moved the projects up to sit straight after the name. In the old order
+ * the work began about 6,800px down a laptop screen - behind the four-screen about runway,
+ * the experience and the tools - so a reviewer who scrolled instead of clicking met the
+ * proof last. The runway itself is untouched; only its place in the page changed.
  *
  * Every band is full bleed and alternates paper and ink, so no section ever blurs into
  * the one above it. The projects band is ink rather than the slate it used to be: the
@@ -50,48 +60,9 @@ export default function Home() {
       <Intro />
       <Hero />
 
-      {/* 1 — who he is. Carries its own marquee band, so it needs no divider above it. */}
-      <AboutCard />
-
-      {/* 2 — what he has done, and why it mattered */}
-      <section className="band band-ink" aria-labelledby="exp-h">
-        <div className="frame">
-          <div className="column">
-            <h2 id="exp-h" className="h-sec rise">
-              Experience &amp; education
-            </h2>
-            <div className="draw rule mt-6" />
-            <div className="mt-12">
-              <Timeline entries={timeline} dark />
-            </div>
-            <p className="mt-10">
-              <Link href="/about" className="pill">
-                The rest of it
-              </Link>
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* 3 — what he works with */}
-      <section className="band" aria-labelledby="tools-h">
-        <div className="frame">
-          <div className="column text-center">
-            <h2 id="tools-h" className="h-sec rise">
-              Tools &amp; skills
-            </h2>
-            <div className="draw rule mx-auto mt-6 w-[min(34rem,100%)]" />
-          </div>
-        </div>
-        {/* Full bleed: the rows run past the edge of the page, not inside a column. */}
-        <div className="mt-12">
-          <Toolbelt />
-        </div>
-      </section>
-
       <Tape text="Projects" tilt={1.6} />
 
-      {/* 4 — what he built */}
+      {/* 1 — what he built, straight after the name */}
       <section className="band band-ink" aria-labelledby="work-h">
         <div className="frame">
           <div className="pwide">
@@ -114,6 +85,45 @@ export default function Home() {
               </Link>
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* 2 — who he is. Carries its own marquee band, so it needs no divider above it. */}
+      <AboutCard />
+
+      {/* 3 — what he has done, and why it mattered */}
+      <section className="band band-ink" aria-labelledby="exp-h">
+        <div className="frame">
+          <div className="column">
+            <h2 id="exp-h" className="h-sec rise">
+              Experience &amp; education
+            </h2>
+            <div className="draw rule mt-6" />
+            <div className="mt-12">
+              <Timeline entries={timeline} dark />
+            </div>
+            <p className="mt-10">
+              <Link href="/about" className="pill">
+                The rest of it
+              </Link>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* 4 — what he works with */}
+      <section className="band" aria-labelledby="tools-h">
+        <div className="frame">
+          <div className="column text-center">
+            <h2 id="tools-h" className="h-sec rise">
+              Tools &amp; skills
+            </h2>
+            <div className="draw rule mx-auto mt-6 w-[min(34rem,100%)]" />
+          </div>
+        </div>
+        {/* Full bleed: the rows run past the edge of the page, not inside a column. */}
+        <div className="mt-12">
+          <Toolbelt />
         </div>
       </section>
 

@@ -49,7 +49,8 @@ function Diagram({ kind }: { kind: "pipeline" | "star-schema" }) {
 function Caption({ children }: { children: string }) {
   // Full strength, not dimmed: on the slate band a caption at 70% measures 4.26:1,
   // and a caption is the one piece of text next to a screenshot that has to be read.
-  return <figcaption className="meta mt-4">{children}</figcaption>;
+  // It is a sentence, so it is set like one - see .caption.
+  return <figcaption className="caption mt-4">{children}</figcaption>;
 }
 
 /** The first picture on the page, lit on its own. */
@@ -181,7 +182,11 @@ export function CaseStudyBody({ project }: { project: Project }) {
   );
 }
 
-/** Role, team, timeline and the rest: a quiet grid, read before the pictures start. */
+/**
+ * Status, team, timeline and the rest: a quiet grid after the cover. The role used to
+ * open this card and now opens the page instead, under the subtitle - it was landing on
+ * the third screen of a laptop, and it is the first thing a reviewer looks for.
+ */
 export function ProjectFacts({ project }: { project: Project }) {
   const facts = [
     { label: "Status", value: project.status },
@@ -194,12 +199,8 @@ export function ProjectFacts({ project }: { project: Project }) {
       <div className="frame">
         <div className="column sticker reveal p-7 sm:p-10">
         <dl className="grid gap-x-10 gap-y-6 sm:grid-cols-2">
-          <div className="sm:col-span-2">
-            <dt className="meta opacity-70">My role</dt>
-            <dd className="mt-2 max-w-[36rem] leading-relaxed">{project.role}</dd>
-          </div>
-          {facts.map((f) => (
-            <div key={f.label} className="border-t-2 border-line pt-4">
+          {facts.map((f, i) => (
+            <div key={f.label} className={i > 1 ? "border-t-2 border-line pt-4" : ""}>
               <dt className="meta opacity-70">{f.label}</dt>
               <dd className="mt-2 leading-snug">{f.value}</dd>
             </div>

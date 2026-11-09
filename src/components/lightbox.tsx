@@ -63,7 +63,7 @@ export function Lightbox() {
                 only re-wrap something that is being shown at its natural size. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={shot.src} alt={shot.alt} />
-            {shot.caption && <figcaption className="meta">{shot.caption}</figcaption>}
+            {shot.caption && <figcaption className="caption">{shot.caption}</figcaption>}
           </figure>
           <button type="button" className="zoom-close" onClick={close}>
             Close <span aria-hidden="true">✕</span>

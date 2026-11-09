@@ -16,10 +16,20 @@ export async function generateMetadata(props: PageProps<"/work/[slug]">): Promis
   const { slug } = await props.params;
   const project = getProject(slug);
   if (!project) return {};
+  // The cover goes into openGraph explicitly. Next replaces the root's openGraph object
+  // rather than merging into it, so a case study that set only a title and description
+  // here was shared with no picture at all - every link sent to a recruiter over
+  // WhatsApp or LinkedIn arrived as bare text.
+  const cover = project.cover.src;
   return {
     title: project.title,
     description: project.subtitle,
-    openGraph: { title: project.title, description: project.subtitle },
+    alternates: { canonical: `/work/${project.slug}` },
+    openGraph: {
+      title: project.title,
+      description: project.subtitle,
+      images: [{ url: cover.src, width: cover.width, height: cover.height, alt: project.cover.alt }],
+    },
   };
 }
 
@@ -47,10 +57,20 @@ export default async function CaseStudyPage(props: PageProps<"/work/[slug]">) {
                 ← All work
               </Link>
               <p className="meta mt-8 opacity-70">
-                {project.number} · {project.category}
+                {project.number} · {project.category} · {project.teamLabel}
               </p>
               <h1 className="display mt-4 text-[clamp(2.2rem,6.4vw,5rem)]">{project.title}</h1>
               <p className="lede mt-6 max-w-[38rem] opacity-80">{project.subtitle}</p>
+              {/*
+                The role is the first thing a recruiter looks for, so it is read on the first
+                screen rather than in the facts card two screens down - measured at y = 1815
+                on a laptop, after the title and the whole cover image. Only the role moves:
+                the facts card stays after the picture, because the picture is what keeps
+                the first screen from being a title over empty space.
+              */}
+              <p className="case-role mt-6 max-w-[38rem]">
+                <span className="meta opacity-70">My role</span> {project.role}
+              </p>
               <FlowChain steps={project.flow} />
             </div>
           </div>

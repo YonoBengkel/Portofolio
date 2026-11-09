@@ -29,6 +29,13 @@ import { asciiPortraits } from "@/content/ascii-portraits";
  *
  * The characters are hidden from the accessibility tree: a screen reader given this would
  * read several thousand punctuation marks. The name is carried once, in text, beside it.
+ *
+ * It only runs while somebody can see it. It used to cycle forever, off screen and in
+ * background tabs alike, and because every frame of a throw rewrites the whole block the
+ * home page spent 112 ms of main-thread time a second on a mid-range phone while nobody
+ * touched it, most of it layout. Now an IntersectionObserver and visibilitychange stop it
+ * the moment it leaves view, landing any throw in flight on its destination, and it picks
+ * up from that portrait when it comes back.
  */
 
 // Short enough that a visitor sees two or three, long enough to look at one.
@@ -75,8 +82,11 @@ export function AsciiPortrait({ alt }: { alt: string }) {
     const line: string[] = new Array(COLS);
     const out: string[] = new Array(ROWS);
     let from = 0;
+    let target = 0;
     let timer = 0;
     let raf = 0;
+    let inView = false;
+    let active = false;
 
     /** One frame of the scatter: p is 0 at the start of the throw and 1 at the end. */
     const paint = (to: number, p: number) => {
@@ -100,7 +110,15 @@ export function AsciiPortrait({ alt }: { alt: string }) {
       pre.textContent = out.join("\n");
     };
 
+    /** Put the portrait a throw was heading for on screen at once. */
+    const settle = () => {
+      pre.textContent = asciiPortraits[target].ascii;
+      from = target;
+      setShown(target);
+    };
+
     const run = (to: number) => {
+      target = to;
       const start = performance.now();
       const step = (now: number) => {
         const p = Math.min(1, (now - start) / FLY);
@@ -109,16 +127,42 @@ export function AsciiPortrait({ alt }: { alt: string }) {
           raf = requestAnimationFrame(step);
           return;
         }
-        pre.textContent = asciiPortraits[to].ascii;
-        from = to;
-        setShown(to);
-        timer = window.setTimeout(() => run((to + 1) % asciiPortraits.length), HOLD);
+        raf = 0;
+        settle();
+        if (active) timer = window.setTimeout(() => run((to + 1) % asciiPortraits.length), HOLD);
       };
       raf = requestAnimationFrame(step);
     };
 
-    timer = window.setTimeout(() => run(1 % asciiPortraits.length), HOLD);
+    const resume = () => {
+      if (active) return;
+      active = true;
+      timer = window.setTimeout(() => run((from + 1) % asciiPortraits.length), HOLD);
+    };
+    const pause = () => {
+      if (!active) return;
+      active = false;
+      window.clearTimeout(timer);
+      if (raf) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+        settle();
+      }
+    };
+    const update = () => (inView && document.visibilityState === "visible" ? resume() : pause());
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        inView = entry.isIntersecting;
+        update();
+      },
+      { rootMargin: "120px" },
+    );
+    io.observe(pre);
+    document.addEventListener("visibilitychange", update);
     return () => {
+      io.disconnect();
+      document.removeEventListener("visibilitychange", update);
       window.clearTimeout(timer);
       cancelAnimationFrame(raf);
     };

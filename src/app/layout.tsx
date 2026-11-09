@@ -123,11 +123,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
 
           Five deliberate details in the handlers:
 
-          The listeners are attached immediately but out() returns unless the state is
-          already "ready", so the first 3500ms cannot be clicked away. Gating on the
-          state rather than attaching the listeners on the timer means there is no window
-          where the cue is up and the click has not been wired yet - the cue is drawn by
-          the same attribute that permits the click.
+          The listeners are attached immediately, and a click works from the moment the
+          mark lands - 1500ms into the sequence, read off the mark animation's own clock,
+          so a paused background tab cannot count time it never showed. Ilham chose that on
+          9 Nov 2026: the whole 3500ms was unskippable, and with the curtain on top the
+          page was not usable for 4.6 seconds. The dot and the spin still cannot be
+          clicked away, which is what the screenshot problem was about. The cue keeps its
+          old promise in one direction only: when it is up, the click works - the click
+          simply starts working a little before it is invited.
 
           Everything also checks up(), that an overlay is actually on screen. A client-side
           navigation away from the home page unmounts it while the states live on <html>,
@@ -160,12 +163,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               '(function(){var d=document.documentElement;function off(){d.dataset.intro="off"}' +
               'function up(){var e=document.querySelector(".intro");' +
               'return !!e&&getComputedStyle(e).display!=="none"}' +
-              'function out(){if(d.dataset.intro!=="ready"||!up())return;' +
+              'function landed(){var m=document.querySelector(".intro-mark");' +
+              'var a=m&&m.getAnimations&&m.getAnimations()[0];return !!a&&a.currentTime>=1500}' +
+              'function leavable(){var s=d.dataset.intro;return s==="ready"||(s==="on"&&landed())}' +
+              'function out(){if(!leavable()||!up())return;' +
               'd.dataset.intro="out";setTimeout(off,1200)}' +
               'function key(e){var s=d.dataset.intro;' +
               'if((s!=="wait"&&s!=="on"&&s!=="ready")||!up())return;' +
               'if(e.key==="Tab"){e.preventDefault();return}' +
-              'if(s==="ready"&&(e.key==="Enter"||e.key===" ")){e.preventDefault();out()}}' +
+              'if((e.key==="Enter"||e.key===" ")&&leavable()){e.preventDefault();out()}}' +
               'function ready(){if(d.dataset.intro==="on")d.dataset.intro=up()?"ready":"off"}' +
               'function anims(){var o=[];try{var l=document.getAnimations();' +
               'for(var i=0;i<l.length;i++){var n=l[i].animationName;' +

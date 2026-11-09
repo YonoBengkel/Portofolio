@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import path from "node:path";
 import Link from "next/link";
 import { AsciiPortrait } from "./ascii-portrait";
 import { atAGlance, profile } from "@/content/site";
@@ -85,9 +87,16 @@ export function AboutCard() {
                   <Link href="/contact" className="stamp stamp-fill">
                     Contact me
                   </Link>
-                  <Link href="/cv" className="stamp">
-                    Download CV
-                  </Link>
+                  {/* Same promise as the hero: the label says download, so it downloads. */}
+                  {fs.existsSync(path.join(process.cwd(), "public", profile.cvPath)) ? (
+                    <a href={profile.cvPath} download className="stamp">
+                      Download CV
+                    </a>
+                  ) : (
+                    <Link href="/cv" className="stamp">
+                      Download CV
+                    </Link>
+                  )}
                 </div>
               </div>
 

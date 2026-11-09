@@ -10,7 +10,7 @@ export function SiteHeader() {
   return (
     <header className="site-header">
       <div className="frame flex items-center justify-between gap-4">
-        <Link href="/" className="flex items-center gap-2.5 font-mono text-[0.72rem] uppercase tracking-[0.14em]">
+        <Link href="/" className="hit flex items-center gap-2.5 font-mono text-[0.75rem] uppercase tracking-[0.14em]">
           <Logo size={18} />
           {/* The mark alone is decorative, so below the small breakpoint the link would
               have no accessible name at all; the name is hidden visually, not removed. */}

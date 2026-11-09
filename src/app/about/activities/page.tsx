@@ -6,6 +6,7 @@ import { PageTransition } from "@/components/page-transition";
 import { leadership, training, volunteering } from "@/content/site";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/about/activities" },
   title: "Organisations and committees",
   description: "Seats held in student organisations, and the event committees worked on.",
 };

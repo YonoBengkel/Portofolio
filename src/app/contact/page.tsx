@@ -5,6 +5,7 @@ import { PageTransition } from "@/components/page-transition";
 import { openTo, profile } from "@/content/site";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/contact" },
   title: "Contact",
   description: "Email, LinkedIn and GitHub.",
 };
@@ -40,7 +41,7 @@ export default function ContactPage() {
                           href={row.href}
                           target={row.href.startsWith("mailto:") ? undefined : "_blank"}
                           rel={row.href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
-                          className="underline decoration-2 underline-offset-4 hover:decoration-yellow"
+                          className="hit-y underline decoration-2 underline-offset-4 hover:decoration-yellow"
                         >
                           {row.value}
                         </a>

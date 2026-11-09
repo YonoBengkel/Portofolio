@@ -14,13 +14,16 @@ const NAMES: Record<string, string> = {
 };
 
 /*
-  Slower than it was. The numbers never changed, but the feel did: the header now sits
-  above the panel, so the page no longer disappears completely and the cover stopped
-  reading as a pause. Giving it longer puts the pause back.
+  600 ms in all, by Ilham's choice on 9 Nov 2026. It was 520 + 260 + 560 = 1340 ms, and
+  every navigation paid it: a reviewer who opened three case studies and came back each
+  time spent about eight seconds watching the panel. NN/g puts UI motion at 100-500 ms
+  and calls 500 the point where it starts to drag. The move is unchanged - the panel
+  still rises, names the page and carries on off the top - it is only quicker. The CSS
+  animations in globals.css carry the same numbers and must change with these.
 */
-const COVER = 520; // the panel rises
-const HOLD = 260; // the name sits there while the new page mounts behind it
-const CLEAR = 560; // the panel carries on upward and off
+const COVER = 250; // the panel rises
+const HOLD = 100; // the name sits there while the new page mounts behind it
+const CLEAR = 250; // the panel carries on upward and off
 
 function nameFor(path: string) {
   return NAMES[path] ?? path.split("/").filter(Boolean).pop()?.replace(/-/g, " ") ?? "";
