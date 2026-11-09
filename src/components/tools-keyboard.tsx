@@ -19,9 +19,16 @@ import { ToolMark } from "./tool-marks";
  * The keys drop into the board the first time it comes into view. After that a key
  * goes down under the pointer, under a finger, or from the real keyboard - the rows are
  * 1-6, Q-Y, A-H and Z-N, only while the section is on screen and never while typing in
- * a field - and the strip of screen above says which tool it is. A click, a tap or a
- * real key also clicks; hovering is silent.
+ * a field - and the screen says which tool it is. A click, a tap or a real key also
+ * clicks; hovering is silent.
+ *
+ * The screen is a strip at the top of the stage. From 760px, once the board has drawn,
+ * it moves onto the board - a display standing on the back of the case, drawn by
+ * keyboard-3d.ts at the board's own angle, as Ilham asked on 9 Nov 2026 - and the strip
+ * keeps its place but goes invisible, so nothing on the page moves when it does. Below
+ * 760px the text on the board would be too small to read, so the strip stays.
  */
+const SCREEN_QUERY = "(min-width: 760px)";
 const CODES = [
   ["Digit1", "Digit2", "Digit3", "Digit4", "Digit5", "Digit6"],
   ["KeyQ", "KeyW", "KeyE", "KeyR", "KeyT", "KeyY"],
@@ -45,6 +52,7 @@ export function ToolsKeyboard() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gridRef = useRef<HTMLUListElement>(null);
+  const stripRef = useRef<HTMLParagraphElement>(null);
   const handle = useRef<KeyboardHandle | null>(null);
   const [ready, setReady] = useState(false);
   const [sel, setSel] = useState<number | null>(null);
@@ -88,6 +96,12 @@ export function ToolsKeyboard() {
           columns: KEY_COLUMNS,
           still: false,
           onSelect: (i) => setSel(i),
+          screen: {
+            labels: keyTools.map((t) => ({ name: t.name, group: t.group })),
+            idle: `${keyTools.length} tools · hover, tap, or type a key`,
+            font: stripRef.current ? getComputedStyle(stripRef.current).fontFamily : "monospace",
+            query: SCREEN_QUERY,
+          },
         });
         if (cancelled) return h.dispose();
         handle.current = h;
@@ -153,34 +167,36 @@ export function ToolsKeyboard() {
 
   return (
     <div className="tk" ref={wrapRef} data-ready={ready ? "" : undefined}>
-      <p className="kb-screen tk-screen" aria-hidden="true">
-        <span className="kb-prompt">&gt;</span>{" "}
-        {on ? (
-          <>
-            <b>{on.name}</b> <span className="kb-dim">· {on.group}</span>
-          </>
-        ) : (
-          <span className="kb-dim">{keyTools.length} tools · hover, tap, or type a key</span>
-        )}
-        <span className="kb-caret" />
-      </p>
       <div className="tk-stage">
-        <canvas ref={canvasRef} className="tk-canvas" aria-hidden="true" />
-        <ul className="tk-grid" ref={gridRef} aria-label="Tools">
-          {keyTools.map((t) => (
-            <li
-              key={t.name}
-              className="tk-key"
-              data-light={t.dark || t.official ? "" : undefined}
-              style={{ "--cap": t.hex } as React.CSSProperties}
-            >
-              <span className="tk-mark">
-                <Mark tool={t} size={30} />
-              </span>
-              <span className="tk-name">{t.name}</span>
-            </li>
-          ))}
-        </ul>
+        <p className="kb-screen tk-screen" ref={stripRef} aria-hidden="true">
+          <span className="kb-prompt">&gt;</span>{" "}
+          {on ? (
+            <>
+              <b>{on.name}</b> <span className="kb-dim">· {on.group}</span>
+            </>
+          ) : (
+            <span className="kb-dim">{keyTools.length} tools · hover, tap, or type a key</span>
+          )}
+          <span className="kb-caret" />
+        </p>
+        <div className="tk-pad">
+          <canvas ref={canvasRef} className="tk-canvas" aria-hidden="true" />
+          <ul className="tk-grid" ref={gridRef} aria-label="Tools">
+            {keyTools.map((t) => (
+              <li
+                key={t.name}
+                className="tk-key"
+                data-light={t.dark || t.official ? "" : undefined}
+                style={{ "--cap": t.hex } as React.CSSProperties}
+              >
+                <span className="tk-mark">
+                  <Mark tool={t} size={30} />
+                </span>
+                <span className="tk-name">{t.name}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
       <p className="tk-hint" aria-hidden="true">
         Keys 1–6, Q–Y, A–H and Z–N press the rows.
