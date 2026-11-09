@@ -78,7 +78,18 @@ for (const [vw, vh] of [[1920, 1042], [1440, 900], [375, 812]]) {
   await page.evaluate(isolate);
 
   // 1. nothing painted with the switch off
-  await new Promise((r) => setTimeout(r, 1200));
+  //
+  // Since 9 Nov 2026 the page lays the tape by itself 700ms after it is up, so "off" is
+  // no longer the state it is left in. It is the state Name tidies it back to - the same
+  // guard, reached the way a visitor reaches it: wait for the laying to finish, flip the
+  // switch back, and give the exit its 1150ms plus stagger.
+  await page
+    .waitForFunction(() => document.documentElement.dataset.run === "1" && !document.documentElement.dataset.tape, {
+      timeout: 8000,
+    })
+    .catch(() => {});
+  await page.evaluate(() => document.documentElement.setAttribute("data-run", "0"));
+  await new Promise((r) => setTimeout(r, 1700));
   const offFile = path.join(out, `off-${vw}.png`);
   await page.screenshot({ path: offFile });
   const off = count(offFile, isInk);

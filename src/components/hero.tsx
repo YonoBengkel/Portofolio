@@ -21,6 +21,13 @@ import { openTo, profile } from "@/content/site";
  * The split text is hidden from the accessibility tree and the real string sits beside
  * it, because a screen reader given one letter per element reads out one letter at a
  * time.
+ *
+ * Since 9 Nov 2026 the page lays the tape itself. Ilham chose it from a set of real
+ * references: the name is on screen for a moment, then the strips are laid one at a time
+ * from the foot of the hero up, the copy ducks under each one as it arrives, and the
+ * switch ends up on Method. Flipping it back to Name tidies the scene. The strips could be
+ * dragged about for a day; Ilham took that out again the same evening - the tape is laid,
+ * not played with.
  */
 
 /*
@@ -67,7 +74,18 @@ const BANDS = [
   { word: "Evidence", tilt: 16, y: 0.57, side: 1, reverse: false, z: 3, pad: 1.85 },
   { word: "Process", tilt: -9, y: 0.74, side: 1, reverse: false, z: 2, pad: 1.55 },
   { word: "Decisions", tilt: 4, y: 0.9, side: -1, reverse: true, z: 1, pad: 1.75 },
-].map((b) => ({ ...b, cos: Math.cos((b.tilt * Math.PI) / 180) }));
+].map((b, _, all) => ({
+  ...b,
+  cos: Math.cos((b.tilt * Math.PI) / 180),
+  /*
+    The order the tape is laid in when the page lays it by itself: lowest z first. Each
+    strip then lands on top of the ones already down, which is what tape on a floor does,
+    so the crossings the lattice specifies are also the order they were made in. It
+    happens to run from the foot of the hero upwards, so the strips climb towards the
+    name rather than starting on it.
+  */
+  lay: all.filter((o) => o.z < b.z).length,
+}));
 
 // Enough repeats that half a track is wider than any window, since the keyframe moves
 // each band by half its own width - the same arithmetic as every other marquee here.
@@ -83,7 +101,7 @@ const PER_BAND = 8;
 const LIT = new Set([2, 6, 9, 15, 19]);
 
 function Band({ band, i }: { band: (typeof BANDS)[number]; i: number }) {
-  const { word, tilt, y, side, reverse, cos, z, pad } = band;
+  const { word, tilt, y, side, reverse, cos, z, pad, lay } = band;
   return (
     <div
       className="hero-band"
@@ -95,6 +113,7 @@ function Band({ band, i }: { band: (typeof BANDS)[number]; i: number }) {
           "--side": side,
           "--cos": cos.toFixed(4),
           "--z": z,
+          "--lay": lay,
           "--pad": `${pad}rem`,
           "--dir": reverse ? "reverse" : "normal",
         } as React.CSSProperties
@@ -212,14 +231,14 @@ export function Hero() {
               See the work
             </Link>
             {/* A button that says Download CV downloads the CV. It used to open the /cv page,
-                one click short of the file, on the action a recruiter takes most. The page
-                stays one tap away in the menu; the fallback only covers a missing file. */}
+                one click short of the file, on the action a recruiter takes most. The CV now lives
+                on /about#cv; the fallback only covers a missing file. */}
             {hasCv ? (
               <a href={profile.cvPath} download className="pill">
                 Download CV
               </a>
             ) : (
-              <Link href="/cv" className="pill">
+              <Link href="/about#cv" className="pill">
                 Download CV
               </Link>
             )}

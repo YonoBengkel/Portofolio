@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Project } from "@/content/projects";
 import type { OtherWork } from "@/content/site";
+import { WindexPreview } from "./windex-preview";
 
 /**
  * The contents page for the work: every piece in one numbered list, the way Toriq's own
@@ -13,13 +14,15 @@ import type { OtherWork } from "@/content/site";
  */
 export function WorkIndex({ projects, other }: { projects: Project[]; other: OtherWork[] }) {
   const rows = [
-    ...projects.map((p) => ({
+    ...projects.map((p, i) => ({
       key: p.slug,
       n: p.number,
       title: p.cardTitle,
       meta: p.category,
       note: p.teamLabel,
       href: `/work/${p.slug}`,
+      // Which cover the floating preview shows for this row (windex-preview.tsx).
+      prev: i,
     })),
     ...other.map((o, i) => ({
       key: o.title,
@@ -28,10 +31,12 @@ export function WorkIndex({ projects, other }: { projects: Project[]; other: Oth
       meta: o.meta,
       note: "No case study",
       href: undefined,
+      prev: undefined,
     })),
   ];
 
   return (
+    <WindexPreview items={projects.map((p) => ({ slug: p.slug, src: p.cover.src }))}>
     <ol className="windex">
       {rows.map((row) => {
         const body = (
@@ -43,7 +48,7 @@ export function WorkIndex({ projects, other }: { projects: Project[]; other: Oth
           </>
         );
         return (
-          <li key={row.key} className="windex-row">
+          <li key={row.key} className="windex-row" data-prev={row.prev}>
             {row.href ? (
               <Link href={row.href} className="windex-link">
                 {body}
@@ -58,5 +63,6 @@ export function WorkIndex({ projects, other }: { projects: Project[]; other: Oth
         );
       })}
     </ol>
+    </WindexPreview>
   );
 }

@@ -40,6 +40,8 @@ export const profile = {
   links: {
     linkedin: "https://www.linkedin.com/in/ilham-bintang-satria-100305blltrjttmr/",
     github: "https://github.com/YonoBengkel",
+    // Added 9 Nov 2026 at his request.
+    instagram: "https://www.instagram.com/aangonwedhuss_/",
   },
   // Put your CV at public/cv.pdf and a "Download CV" button appears automatically.
   cvPath: "/cv.pdf",
