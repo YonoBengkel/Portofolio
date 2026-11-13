@@ -28,6 +28,8 @@ const paths = [
   "/work",
   "/work/turnify-flow",
   "/work/sales-data-warehouse",
+  "/work/fall-detection",
+  "/work/con-fore",
   // /cv was folded into /about#cv on 9 Nov 2026 and is now a redirect.
   "/contact",
   "/about/competitions",

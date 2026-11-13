@@ -94,7 +94,7 @@ function Folder({ project }: { project: Project }) {
               {project.status}
             </span>
             <span className="cf-title">{project.cardTitle}</span>
-            <span className="cf-sub">{project.subtitle}</span>
+            <span className="cf-sub">{project.cardSubtitle ?? project.subtitle}</span>
             <span className="cf-meta">
               {project.teamLabel} · {project.period}
             </span>
