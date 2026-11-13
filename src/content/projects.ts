@@ -1,7 +1,15 @@
 import type { StaticImageData } from "next/image";
+import conforeCards from "@/assets/images/confore-cards.webp";
+import conforeData from "@/assets/images/confore-data.webp";
+import conforeForecasts from "@/assets/images/confore-forecasts.webp";
+import conforeTrackRecord from "@/assets/images/confore-track-record.webp";
 import dwTopProducts from "@/assets/images/dw-top-products.png";
 import fallArchitecture from "@/assets/images/fall-architecture.webp";
+import fallIncident from "@/assets/images/fall-incident.webp";
+import fallMonitor from "@/assets/images/fall-monitor.webp";
+import fallSettings from "@/assets/images/fall-settings.webp";
 import fallStateMachine from "@/assets/images/fall-state-machine.webp";
+import fallWall from "@/assets/images/fall-wall.webp";
 import bdcPipeline from "@/assets/images/bdc-pipeline.webp";
 import ispuDashboard from "@/assets/images/ispu-dashboard.webp";
 import agentRetrieval from "@/assets/images/agent-retrieval.webp";
@@ -35,6 +43,12 @@ export type Project = {
   title: string;
   cardTitle: string;
   subtitle: string;
+  /**
+   * The line under the title on the front page's case files, when the subtitle runs past
+   * two lines there. Every file is the same height (Ilham, 13 Nov 2026), so a long line
+   * would only leave the others with an empty strip. The case study keeps the subtitle.
+   */
+  cardSubtitle?: string;
   summary: string;
   type: "Team" | "Individual";
   teamLabel: string;
@@ -62,6 +76,7 @@ export const projects: Project[] = [
     cardTitle: "Turnify Flow",
     subtitle:
       "A companion app for small food & beverage businesses, built to sit beside the cashier app they already use.",
+    cardSubtitle: "A companion app that sits beside the cashier app small food businesses already use.",
     summary:
       "Stock, demand forecasts and distributor choice for small food & beverage businesses, designed around the cashier app they already use.",
     type: "Team",
@@ -191,6 +206,7 @@ export const projects: Project[] = [
     title: "Supplier Decision-Support Dashboard",
     cardTitle: "Supplier Decision-Support Dashboard",
     subtitle: "Helping a procurement team choose suppliers on several criteria at once, not on the lowest unit price alone.",
+    cardSubtitle: "Helping a procurement team choose suppliers on several criteria, not on price alone.",
     summary: "Choosing and reviewing suppliers with weighted criteria instead of the lowest price alone.",
     type: "Team",
     teamLabel: "Team project",
@@ -318,6 +334,7 @@ export const projects: Project[] = [
     title: "Quality Early-Warning System for an Iron-Ore Flotation Plant",
     cardTitle: "Quality Early-Warning System",
     subtitle: "Warning operators about impure output before it reaches the lab, and telling them what to adjust.",
+    cardSubtitle: "Warning operators about impure output early, and telling them what to adjust.",
     summary: "Warning plant operators about impure output before it reaches the lab, with advice on what to adjust.",
     type: "Individual",
     teamLabel: "Individual",
@@ -382,25 +399,26 @@ export const projects: Project[] = [
     title: "Fall detection for a nursing home",
     cardTitle: "Fall Detection for a Nursing Home",
     subtitle:
-      "Four cameras, and a decision about how long someone has been on the floor - which is a harder question than it sounds.",
+      "Cameras that notice when a resident has been on the floor too long, and a dashboard built around what the caregiver has to do next.",
+    cardSubtitle: "Cameras that notice a resident on the floor, and a dashboard for what to do next.",
     summary:
-      "Watching four rooms for a resident who has fallen, and deciding when the silence has gone on long enough to raise an alarm.",
+      "Watching the rooms of a nursing home for a resident who has fallen, raising the alarm once it has gone on long enough, and following that alarm until someone has helped.",
     type: "Team",
     teamLabel: "Team of 4",
     status: "Code only",
     context: "Intelligent Systems Project course",
-    period: "Oct 2026",
-    role: "I built the backend: the per-camera pipeline, the state machine, the database layer, the API and the tests. A teammate trained the model.",
-    flow: ["Camera frame", "Posture per person", "Timer per person", "Alert saved", "Dashboard & Telegram"],
+    period: "Sep 2026 – ongoing",
+    role: "I built the backend: the per-camera pipeline, the state machine, the alarm handling, the database and the API. Teammates built the first dashboard and trained the model; I later reworked the dashboard after a round of UI/UX research, and set it up for the exhibition.",
+    flow: ["Camera frame", "Posture per person", "Timer per person", "Alarm on every screen", "Someone goes", "Closed with a verdict"],
     tools: ["Python", "FastAPI", "YOLO11", "SQLite", "WebSocket", "React"],
     links: [
-      { label: "GitHub repository (integration branch)", href: "https://github.com/0Raja0-RA/nursing-home-fall-detection/tree/integration" },
+      { label: "GitHub repository", href: "https://github.com/0Raja0-RA/nursing-home-fall-detection/tree/frontend" },
     ],
     cover: {
-      src: fallArchitecture,
-      alt: "Diagram of the system: camera to camera service to inference to state machine to alert service, then to database, WebSocket and Telegram",
+      src: fallWall,
+      alt: "Wall display with four camera tiles. Kamar 102 is outlined in red, with a person lying on the floor marked 'berbaring'; the other three rooms show standing people marked 'tegak'. A red banner reads 'Kemungkinan jatuh, Kamar 102'.",
       caption:
-        "The path a frame takes. One alert goes three places, in that order. (Diagram in Indonesian.)",
+        "The wall display for the nurses' station, a few seconds after an alarm: one room in red, three still being watched. Test videos from the UR Fall Detection Dataset. (Interface in Indonesian.)",
     },
     sections: [
       {
@@ -408,7 +426,19 @@ export const projects: Project[] = [
         heading: "The problem",
         body: [
           "A resident who falls can lie on the floor for a long time before anyone walks past. A camera that can tell a standing person from a lying one sounds like enough, and it is not: the useful signal is not the posture in one frame, it is **how long** the posture has lasted, and the frames in between are where it gets difficult.",
-          "So the system watches four rooms, decides per person how long they have been down, and when that crosses a threshold it writes the incident down, pushes a banner to the caregivers' dashboard, and sends a photo to their phones.",
+          "So the system watches the rooms, decides per person how long they have been down, and when that crosses a threshold it writes the incident down, pushes a banner to every caregiver's screen, and sends a photo to their phones.",
+          "And the alarm is only the start. Someone has to go, everyone else has to know that someone went, and afterwards the team has to know whether it was a real fall.",
+        ],
+      },
+      {
+        kind: "figures",
+        figures: [
+          {
+            src: fallArchitecture,
+            alt: "Diagram of the system: camera to camera service to inference to state machine to alert service, then to database, WebSocket and Telegram",
+            caption:
+              "The path a frame takes. One alert goes three places, in that order. (Diagram in Indonesian.)",
+          },
         ],
       },
       {
@@ -432,6 +462,33 @@ export const projects: Project[] = [
         ],
       },
       {
+        kind: "text",
+        heading: "After the alarm",
+        body: [
+          "Detecting the fall is half of the job. The other half is the next minute on the floor of the home, and the first version knew only two states for an alarm: open, or handled.",
+          "Now an alarm has an owner. **\"Saya ke sana\"** (\"I'm going\") puts the caregiver's name on every screen and in the Telegram group, so two people do not run to the same room while another alarm waits. A second claim is refused with the name and the time of the first. If nobody claims the alarm within two minutes, the banner starts counting how long it has waited and the group gets a reminder, at most three times.",
+          "Closing it means answering two questions, not one. **Has someone helped?** closes the alarm. **Was it really a fall?** is the verdict: a real fall, a false alarm with its reason (lying down on purpose, sitting or bending, not a person, someone else on the floor), or not sure yet. An alarm closed without a verdict stays in the queue until someone judges it, because the verdicts are what tell the team whether the threshold is right.",
+          "A fall the system missed can be recorded by hand. False alarms make themselves known, because somebody has to walk to the room. A missed fall leaves no trace in a system that only counts its own alarms, so without this the misses would never be counted at all.",
+        ],
+      },
+      {
+        kind: "figures",
+        figures: [
+          {
+            src: fallMonitor,
+            alt: "The FallDetect dashboard next to a phone, both showing a red banner 'Kemungkinan jatuh, Kamar 102' with the buttons 'Saya ke sana' and 'Lihat kamera', above an enlarged camera tile of a person lying on the floor",
+            caption:
+              "The same alarm on the caregivers' dashboard and on a phone. The room with the alarm moves to the top and grows, and the banner holds the three things a caregiver can do: go, look, or mute it for five minutes. (Interface in Indonesian.)",
+          },
+          {
+            src: fallIncident,
+            alt: "Incident drawer for Kamar 102: a snapshot of the person on the floor with a 20-second clip, and a timeline from the alarm to 'Tim FallDetect menuju lokasi', 'Ditangani' and the verdict 'Jatuh sungguhan'",
+            caption:
+              "One incident, closed. The snapshot opens a clip from before and after the fall, and the timeline records who went, how many seconds after the alarm, and the verdict. (Interface in Indonesian.)",
+          },
+        ],
+      },
+      {
         kind: "decisions",
         heading: "Decisions",
         items: [
@@ -444,16 +501,20 @@ export const projects: Project[] = [
             body: "Database first, then the dashboard, then the phones. A messaging service that is down must not be able to lose an incident, so a failed notification does not cancel the alert it was reporting.",
           },
           {
-            title: "Cameras and thresholds live in the database",
-            body: "Not in memory and not in environment variables. A caregiver who adds a camera or changes a threshold expects it to still be there after the machine restarts.",
+            title: "Settings live in the database, and each alarm keeps a copy",
+            body: "Not in memory and not in environment variables: a caregiver who adds a camera or changes the wait expects it to survive a restart. The wait and the model in force are also stored with every alert, so when someone later asks why an alarm came late, the answer is in the incident rather than in whatever the settings say today.",
           },
           {
-            title: "Marking an incident handled closes it",
-            body: "The banner clears on every screen at once, the camera goes back to monitoring, and the caregiver's note is kept against that incident rather than in a log nobody reads.",
+            title: "Privacy is a setting per camera",
+            body: "Full picture, blurred, or the skeleton only. With a privacy view on, the original video opens for fifteen seconds, only while an unhandled alarm is in that room, only from a team account, and every opening is logged.",
           },
           {
-            title: "The demo button forces the observation, not the alert",
-            body: "There is a simulation button, because a demo cannot wait for someone to lie on the floor. It injects a trigger observation and nothing else: the timer, the cooldown, the save and the notification all run for real, and the alert it produces is labelled as a simulation.",
+            title: "Visitors get a view-only pass",
+            body: "At the exhibition stand a QR code opens the dashboard for visitors. Its token sits after the '#' in the link, so it never reaches a server log; anything a visitor sends that would change something is refused; and each start of the exhibition launcher issues a new token, which retires the old passes.",
+          },
+          {
+            title: "The drill forces the observation, not the alert",
+            body: "There is a drill mode, because a demo cannot wait for someone to lie on the floor. It injects a trigger observation and nothing else: the timer, the cooldown, the save and the notification all run for real, and the alert it produces is marked as a drill and left out of the numbers on the history page.",
           },
         ],
       },
@@ -463,11 +524,23 @@ export const projects: Project[] = [
         body: [
           "The posture model has two modes. One is a custom detector trained on bounding boxes; the other reads posture from the angle of the spine using pose estimation. The second is the default, and the reason is the training set.",
           "The public fall-detection dataset the team used holds about fifteen hundred labelled images, and **twelve** of them are labelled as a person on the ground. A detector trained on that will read a person lying down as something in between, because it has barely seen the thing it is supposed to find. Rather than report a number that the data could not support, the model choice was moved into a setting, the pose route was made the default, and the limit was written down.",
+          "The setting says it in the caregiver's words, not in model names: what each route means in a room, and what it gets wrong. Next to it, moving the wait slider shows how many of the past month's lying-down episodes would have raised an alarm at that value, so a change is judged against the home's own history before it is saved.",
+        ],
+      },
+      {
+        kind: "figures",
+        figures: [
+          {
+            src: fallSettings,
+            alt: "Settings card 'Deteksi': two model options, 'Kerangka tubuh' (recommended) and 'Kotak tubuh', each with a plain-language description, and a slider 'Tunggu sebelum memberi alarm' at 10 seconds with a preview of past lying-down episodes",
+            caption:
+              "The detection settings. The recommended route reads posture from the angle of the spine, shoulders to hips; the other is the team's own detector, and its description says plainly that it has seen very few people lying down. (Interface in Indonesian.)",
+          },
         ],
       },
       {
         kind: "note",
-        body: "The model weights and the database are deliberately not in the repository. The schema is, because it is written as code. The screenshots of the running dashboard are not here yet - they need the system running with its camera set, and this page will carry them rather than describe them.",
+        body: "The model weights and the database are deliberately not in the repository. The schema is, because it is written as code. The screenshots come from a copy of the system running on test videos from the UR Fall Detection Dataset, with Telegram not connected.",
       },
     ],
   },
@@ -547,6 +620,7 @@ export const projects: Project[] = [
     cardTitle: "Day-Ahead Air Quality for East Java",
     subtitle:
       "Turning a government index into something a reader can act on, including the rule that says when a day does not count.",
+    cardSubtitle: "Turning a government air-quality index into something a reader can act on.",
     summary:
       "A dashboard that projects each district's air quality a day ahead, and is honest about the hours it did not get.",
     type: "Team",
@@ -660,6 +734,140 @@ export const projects: Project[] = [
       {
         kind: "note",
         body: "The vault this runs over is private working notes, so the repository holds the tools and not the content. There are no accuracy figures on this page beyond the one that caused a feature to be deleted, which is the only one that decided anything.",
+      },
+    ],
+  },
+  {
+    slug: "con-fore",
+    number: "09",
+    category: "Economic forecasting & public data",
+    title: "Con-Fore: Indonesia's economy in three numbers",
+    cardTitle: "Con-Fore",
+    subtitle:
+      "A public site that explains Indonesia's economy in three numbers, updates itself every day, and publishes how often its forecasts miss.",
+    cardSubtitle: "Indonesia's economy in three numbers, updated daily, and open about how often it misses.",
+    summary:
+      "Growth, inflation and unemployment in everyday Indonesian: official figures with their dates, forecasts with their ranges, and a track record that keeps the model that lost.",
+    type: "Individual",
+    teamLabel: "Individual",
+    status: "Live",
+    context: "Personal project, public website",
+    period: "Oct 2026 – ongoing",
+    role: "All of it: the data pipeline, the database, the models and their backtest, and the website.",
+    flow: ["Five official sources", "Every revision kept", "Models against plain baselines", "Three numbers, one triangle", "Site refreshed daily"],
+    tools: ["Python", "pandas", "statsmodels", "PostgreSQL (Supabase)", "GitHub Actions", "Next.js", "TypeScript"],
+    links: [
+      { label: "Live site", href: "https://con-fore.vercel.app" },
+      { label: "GitHub repository", href: "https://github.com/YonoBengkel/Con-Fore" },
+    ],
+    cover: {
+      src: conforeData,
+      alt: "Con-Fore home page: the headline 'Ekonomi Indonesia, dalam tiga angka.', the latest growth, inflation and unemployment figures with their periods, and a balance triangle for 2025 scoring growth, stable prices and jobs, with a switch between the lenses 'Masa lalu' and 'Target resmi'",
+      caption:
+        "The Data page. The triangle scores the latest full year on growth, stable prices and jobs, a sentence writes itself from the scores, and the reader picks what the scores are measured against. (Interface in Indonesian.)",
+    },
+    sections: [
+      {
+        kind: "text",
+        heading: "The problem",
+        body: [
+          "Indonesia's economic figures are spread across several institutions - Statistics Indonesia (BPS), Bank Indonesia, the IMF, the OECD - published on different calendars, and written for analysts. A general reader cannot easily answer a plain question: how is the economy doing, and where is it heading?",
+          "Con-Fore answers it in everyday Indonesian, with three numbers: growth, inflation and unemployment. Every number carries its period, its release date and the date of the next release, and every forecast comes with its range and a record of how often it has missed.",
+        ],
+      },
+      {
+        kind: "text",
+        heading: "Three numbers, one triangle, two lenses",
+        body: [
+          "The first thing on the page is a triangle with three corners: growth, stable prices and jobs, each scored from 0 to 100. A score means nothing without something to compare it with, so the reader chooses: Indonesia's own record since 2000, or the government's official targets for that year. Switching the lens changes the scores and the sentence, and nothing below them moves.",
+          "Each corner also gets a status, always written as a word - normal, needs watching, or heavy pressure - and the summary sentence uses the same word. There are no alarming headlines, words like \"solid\" or \"collapsing\" never appear, and \"good\" or \"weak\" are only used next to what they are being compared with.",
+          "Under each number is **what it means for you**. Inflation is a shopping basket that cost Rp100,000 a year ago; unemployment is a hundred people working or looking for work; growth is a cake. It explains the number and stops there: no shopping advice, and nothing that asks for the reader's own income.",
+        ],
+      },
+      {
+        kind: "figures",
+        figures: [
+          {
+            src: conforeCards,
+            alt: "Three cards - economic growth 5.5%, inflation 3.2% and unemployment 4.75% - each with its period, the date Con-Fore saw it, the next release, a small chart, the label 'data resmi BPS', and an 'Artinya buatmu' explanation",
+            caption:
+              "The three numbers. Each card says when the figure is from, when it was released and when the next one is due, and ends with what it means for a household. (Interface in Indonesian.)",
+          },
+        ],
+      },
+      {
+        kind: "steps",
+        heading: "How it runs",
+        items: [
+          "Every morning, and twice more on the days BPS usually releases, a scheduled job on GitHub Actions pulls the series it follows from BPS, the IMF, BIS, the OECD and the ECB.",
+          "Each pull is compared with the last one through a hash of the normalised data - series, period, value - so nothing is written when nothing changed.",
+          "A revised figure becomes a new row rather than an overwrite. The site shows the latest value, and the track record judges each forecast against the first release.",
+          "A safety brake: if a source suddenly drops more than five periods, or a tenth of a series, the pull is logged as an error and not written.",
+          "The public tables are replaced in one transaction, and the website is told to refresh. Visitors read pages from cache; their browsers never touch the database.",
+          "The models run last, and only when their inputs have changed, so a model that fails cannot hold back the data or the site. A failed run opens a GitHub issue, and the database is backed up every week.",
+        ],
+      },
+      {
+        kind: "decisions",
+        heading: "Decisions",
+        items: [
+          {
+            title: "No forecast without its range",
+            body: "The range comes from the model's own past errors. The sentence reads \"probably between X and Y\", and the page explains once what that means: in a test on past data, about eight in ten official figures in ordinary times fell inside a range that wide.",
+          },
+          {
+            title: "The headline number is whichever wins",
+            body: "Every model is tested against plain baselines, such as the last official figure carried forward. A model only becomes the headline if it beats all of them, both in normal times and on the data since 2022 - the years set aside to check the model rather than to shape it. Otherwise the best baseline is the headline.",
+          },
+          {
+            title: "A driver has to earn its place",
+            body: "A variable enters a model only if it lowers the backtest error. The \"why this forecast\" text names only drivers that passed, and when none did, it says so instead of inventing one.",
+          },
+          {
+            title: "Dates, not \"real-time\"",
+            body: "The pipeline runs once or twice a day and monthly series arrive about a month late, so the site never calls itself live. Every number shows the period it describes instead.",
+          },
+          {
+            title: "No server waiting for visitors",
+            body: "The data changes a few times a month and the models run in batches, so the work happens in a scheduled job and the site is served from cache. Every piece runs on a free tier.",
+          },
+        ],
+      },
+      {
+        kind: "figures",
+        figures: [
+          {
+            src: conforeForecasts,
+            alt: "Three forecast cards for growth, inflation and unemployment, each with a sentence giving the forecast and its range, a chart with the official line, a dashed forecast and a shaded band, and the label 'perkiraan Con-Fore, bukan angka resmi'",
+            caption:
+              "The forecasts. A solid line for official figures, a dashed one for the forecast, a band for its range, and a label on every chart saying this is a Con-Fore estimate, not an official number. Unemployment has no range one step ahead yet: the backtest still has too few cases at that distance. (Interface in Indonesian.)",
+          },
+        ],
+      },
+      {
+        kind: "text",
+        heading: "What the data could not support",
+        body: [
+          "The plan for growth was a dynamic factor model: a monthly panel of prices, the exchange rate and the policy rate, feeding quarterly GDP. In the backtest it **lost to the simplest forecast there is** - the last figure, carried forward - in normal times. The model leaned on its panel very little, and adding exports, imports, industrial production, tourist arrivals and the money supply did not change that. So the growth forecast on the site is the baseline's, and the track record shows the model that lost beside it.",
+          "Inflation went the other way. What works is seasonal: monthly price changes explained by the calendar month, the share of Ramadan and the month of Lebaran over the last five years, then chained onto the published index. Months far outside their usual pattern, like a fuel price rise, are trimmed automatically, so there is no hand-kept list of policy events. It beats the baselines at every horizon. The exchange rate, oil and palm-oil prices and the policy rate did not help, and were left out.",
+          "Unemployment stays experimental, with the baseline as its headline. Adding growth to it gave a coefficient near zero, which fits how loosely the two have moved together in Indonesia.",
+          "One limit is written on the page itself: revisions have only been stored since October 2026, so the backtest uses today's values rather than first releases and may look slightly better than reality.",
+        ],
+      },
+      {
+        kind: "figures",
+        figures: [
+          {
+            src: conforeTrackRecord,
+            alt: "Track record tables 'Rekam jejak: seberapa sering meleset': average misses by horizon for growth and inflation, outside the COVID period and since 2022. For growth the bold headline row is 'Sama dengan angka terakhir'; for inflation it is 'Pola musiman dan Lebaran'.",
+            caption:
+              "The track record. Average misses in percentage points, by how far ahead; the bold row is the headline. For growth that is \"same as the last figure\", above the factor model. (Interface in Indonesian.)",
+          },
+        ],
+      },
+      {
+        kind: "note",
+        body: "The site is in Indonesian and is not an official site of BPS or any other institution. The data comes from BPS (through its WebAPI), the IMF, BIS, the OECD and the ECB, credited on the site and in every CSV download. Still to come: a seven-day unattended run to prove the automation, reminders for the tables that change once a year, and a comparison with neighbouring countries.",
       },
     ],
   },

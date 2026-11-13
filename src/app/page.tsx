@@ -49,7 +49,7 @@ const serif = Instrument_Serif({ variable: "--font-instrument", subsets: ["latin
 */
 const FRONT = [
   "turnify-flow",
-  "vault-retrieval",
+  "con-fore",
   "supplier-decision-support",
   "fall-detection",
   "quality-early-warning",
